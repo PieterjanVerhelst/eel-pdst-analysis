@@ -37,3 +37,6 @@ pgpass
 additionals/
 .Rproj.user
 
+# ignore folder with raw data (large files)
+data/raw
+
