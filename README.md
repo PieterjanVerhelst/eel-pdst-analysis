@@ -8,4 +8,4 @@
 
 * `/src:`
 
-1.
+1. Processing.R: upload all datafiles, remove redundant rows and combine them into 1 dataset.
