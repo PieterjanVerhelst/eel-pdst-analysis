@@ -5,9 +5,9 @@
 library(tidyverse)
 
 
-rm(list = ls())
+#rm(list = ls())
 
-
+# Upload a single dataset to see structure of the data
 eel1 <- read.csv("./data/raw/A15700_10-01-2019.csv", sep = ' ')
 
 
@@ -20,14 +20,12 @@ file_list <- list.files(path = folder, pattern="*.csv", full.names=TRUE)
 
 
 
+# Use lapply to upload all data in one list
+data <- lapply(file_list, read.csv, sep = ' ', header = TRUE, stringsAsFactors = FALSE)
 
 
 
-data <- lapply(file_list, read.csv, sep = ',', header = TRUE, stringsAsFactors = FALSE)
-
-
-
-# read in each .csv file in file_list and create a data frame with the same name as the .csv file
+# read in each .csv file in file_list
 for (i in 1:length(file_list)){
   
   assign(file_list[i], 
@@ -39,5 +37,3 @@ for (i in 1:length(file_list)){
 
 
 
-filenames <- list.files('./data/raw/', pattern="*.csv", full.names=TRUE)
-la <- lapply(filenames, read.csv)
