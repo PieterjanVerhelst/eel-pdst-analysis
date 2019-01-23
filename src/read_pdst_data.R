@@ -29,8 +29,6 @@ library(stringr)
 library(readr)
 library(tidyr)
 
-filename <- "data/A15716_15-01-2019.csv"
-
 ################################################
 # Reading metadata and info
 ################################################
@@ -60,7 +58,6 @@ pdst_get_data_blocks_info <- function(filename) {
     line <- nextElem(header_it)
     cnt <- cnt + 1
   }
-  print(cnt)
   
   # check for start and length of the Daylog data
   daylog_header_line <- nextElem(header_it)
@@ -134,57 +131,79 @@ pdst_get_data_blocks_info <- function(filename) {
               'temperature' = temperature))
 }
 
-pdst_get_data_blocks_info(filename)
-
 ################################################
 # Reading the data blocks
 ################################################
 
 # daylog_skip ; daylog_length
 
-# Read the daylog data.frame
-if (track_total_days != 0) {  # ! Total Days Alive can be zero as well
+pdst_read_daylog <- function(filename, daylog_skip, daylog_length, 
+                             daylog_col_names) {
+
+  if (track_total_days == 0) {  # ! Total Days Alive can be zero as well
+    stop("File ", filename, " contains no daylog information!")
+  }
+
   col_types <- cols(
     .default = col_character(),
     mission_day = col_integer(),
     date = col_date("%d/%m/%Y")
   )
-  track_day_log_data <- read_csv(filename, skip = daylog_skip, col_names = col_names, 
-                                 n_max = daylog_length, col_types = col_types) # 
-  print(head(track_day_log_data))
+  track_day_log_data <- read_csv(filename, skip = daylog_skip, 
+                                 col_names = daylog_col_names, 
+                                 n_max = daylog_length, 
+                                 col_types = col_types) # 
+  # combine columns and decimal counterpart to number column
+  decimal_values <- track_day_log_data %>% 
+    select(matches("decimal")) %>%
+    gather(key = "variable_name", value = "decimal_value") %>%
+    select(decimal_value)
+  track_daylog_df <- track_day_log_data %>% 
+    select(-matches("decimal"), -mission_day, -date) %>%
+    tibble::rowid_to_column() %>%
+    gather(key = "variable_name", value = "value", -rowid) %>%
+    bind_cols(decimal_values) %>%
+    unite(value, value, decimal_value, sep = '.') %>%
+    mutate(value = parse_number(value)) %>%
+    spread(key = variable_name, value = value) %>%
+    select(-rowid) %>%
+    bind_cols(track_day_log_data %>% select(mission_day, date))
+ 
+  return(track_day_log_data) 
 }
 
-# combine columns and decimal counterpart to number column
-decimal_values <- track_day_log_data %>% 
-  select(matches("decimal")) %>%
-  gather(key = "variable_name", value = "decimal_value") %>%
-  select(decimal_value)
-track_daylog_df <- track_day_log_data %>% 
-  select(-matches("decimal"), -mission_day, -date) %>%
-  tibble::rowid_to_column() %>%
-  gather(key = "variable_name", value = "value", -rowid) %>%
-  bind_cols(decimal_values) %>%
-  unite(value, value, decimal_value, sep = '.') %>%
-  mutate(value = parse_number(value)) %>%
-  spread(key = variable_name, value = value) %>%
-  select(-rowid) %>%
-  bind_cols(track_day_log_data %>% select(mission_day, date))
- 
-# For pressure, read Data Block ----
-pressure_data_sensor <- read_csv(filename, skip = pressure_skip, 
-                              col_names = pressure_col_names,
-                              n_max = pressure_length, col_types = cols())
-pressure_data_sensor <- pressure_data_sensor %>%
-  mutate(pressure_value = parse_number(paste(.$pressure, .$decimal, sep = "."))) %>%
-  rename(datetime = `time stamp`) %>% select(datetime, pressure_value)
+#
+# Generic for sensor data, read Data Block ----
+#
+pdst_read_sensor <- function(filename, line_skip, line_length, 
+                                  variable = "temperature") {
+  col_names <- c("datetime", "variable", "decimal")
+  data_sensor <- read_csv(filename, skip = line_skip, 
+                          col_names = col_names, 
+                          n_max = line_length, col_types = cols())
+  data_sensor <- data_sensor %>%
+    mutate(value = parse_number(paste(.$variable, 
+                                      .$decimal, sep = "."))) %>%
+    select(datetime, value)
+  colnames(data_sensor) <- c("datetime", variable)
+  return(data_sensor)
+}
 
-# For temperature, read Data Block ----
-temp_data_sensor <- read_csv(filename, skip = temp_skip, 
-                             col_names = temp_col_names,
-                             n_max = temp_length, col_types = cols())
-temp_data_sensor <- temp_data_sensor %>%
-  mutate(temp_value = parse_number(paste(.$temp, .$decimal, sep = "."))) %>%
-  rename(datetime = `time stamp`) %>% select(datetime, temp_value)
+
+# Apply functions on case
+
+filename <- "data/A15716_15-01-2019.csv"
+data_info <- pdst_get_data_blocks_info(filename)
+
+pressure_data <- pdst_read_sensor(filename, 
+                   data_info$pressure$pressure_skip,
+                   data_info$pressure$pressure_length,
+                   "pressure")
+temp_data <- pdst_read_sensor(filename, 
+                    data_info$temperature$temp_skip,
+                    data_info$temperature$temp_length,
+                    "temperature")
+
 
 
 
