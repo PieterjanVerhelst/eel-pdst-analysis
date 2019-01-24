@@ -22,17 +22,18 @@ if (!dir.exists(interim_data_dir)) {
 
 # read data from the raw data files and convert to tidy -----
 
-data_files <- data_files[1:2] # TESTPHASE
-
 for (filename in data_files) {
   
   # use custom read functionality
   file_data <- pdst_read_file(filename)
   
   # write the daylog and sensor as tidy data files
-  write_csv(file_data$daylog, 
-            file.path(interim_data_dir, 
-                      paste0("daylog_", basename(filename))))
+  # (only write daylog if present in raw data file)
+  if (!is.na(daylog_data)) {
+    write_csv(file_data$daylog, 
+              file.path(interim_data_dir, 
+                        paste0("daylog_", basename(filename))))    
+  }
   write_csv(file_data$sensor, 
             file.path(interim_data_dir, 
                       paste0("sensor_", basename(filename))))
