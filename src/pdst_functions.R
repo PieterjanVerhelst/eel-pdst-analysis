@@ -230,19 +230,48 @@ pdst_read_sensor <- function(filename, line_skip, line_length,
 }
 
 
-# Apply functions on case
+#' Read pdst sensor data from raw file
+#' 
+#' Wraps the other functions, first scanning the file on different sections,
+#' next load and combine the sensor data
+#' 
+#' @param filename char Filename of a pdst raw data file
+#' 
+#' 
+pdst_read_file <- function(filename) {
+  data_info <- pdst_get_data_blocks_info(filename)
+  
+  # read daylog data
+  if (data_info$daylog$daylog_length == 0) {
+    daylog_data <- NA
+  } else {
+    daylog_data <- pdst_read_daylog(filename,
+                                    data_info$daylog$daylog_skip, 
+                                    data_info$daylog$daylog_length,
+                                    data_info$daylog$daylog_col_names) %>%
+      mutate(track_tag_id = data_info$track_tag_id)    
+  }
 
-filename <- "data/A15700_10-01-2019.csv"
-data_info <- pdst_get_data_blocks_info(filename)
+  # read sensor data
+  pressure_data <- pdst_read_sensor(filename, 
+                                    data_info$pressure$pressure_skip,
+                                    data_info$pressure$pressure_length,
+                                    "pressure")
+  temp_data <- pdst_read_sensor(filename, 
+                                data_info$temperature$temp_skip,
+                                data_info$temperature$temp_length,
+                                "temperature")
+  # combine sensor data
+  sensor_data <- full_join(pressure_data, temp_data, by = "datetime") %>%
+    mutate(track_tag_id = data_info$track_tag_id)
+  
+  return(list("track_tag_id" = data_info$track_tag_id,
+              "daylog" = daylog_data, 
+              "sensor" = sensor_data))
+}
 
-pressure_data <- pdst_read_sensor(filename, 
-                   data_info$pressure$pressure_skip,
-                   data_info$pressure$pressure_length,
-                   "pressure")
-temp_data <- pdst_read_sensor(filename, 
-                    data_info$temperature$temp_skip,
-                    data_info$temperature$temp_length,
-                    "temperature")
+
+
 
 
 
