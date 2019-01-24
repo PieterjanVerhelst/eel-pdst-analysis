@@ -1,6 +1,11 @@
+#
+# pdst sensor read functionalities
+# 
+# Van Hoey S. 2019
+# Lifewatch INBO
+# 
 
-
-### Concept of the raw data file:
+### Concept/structure of the raw data file  -------
 #
 # Header info -> variable amount of lines
 #   * TAG ID
@@ -29,10 +34,20 @@ library(stringr)
 library(readr)
 library(tidyr)
 
-################################################
-# Reading metadata and info
-################################################
-
+#' Read metadata and info from pdst data file
+#' 
+#' Notice: this funnction works with an iterator looping the entire file, which
+#' is not at all efficient. However, as we do not have a more specific format 
+#' definition and the length of the daylog section is not properly defined,
+#  this will extract the required info to load the data sections
+#'
+#' @param filename char Filename of a pdst raw data file
+#'
+#' @return list of lists Daylog, pressure and temperature info, which for each
+#' of the lists 3 elements: xx_skip, i.e. startline of data section;
+#' xx_length, i.e.number of data lines and xx_col_names, i.e. names of the 
+#' columns, taking into account additional decimal column(s).
+#'
 pdst_get_data_blocks_info <- function(filename) {
 
   pdst_con <- file(filename, "r")
@@ -47,14 +62,13 @@ pdst_get_data_blocks_info <- function(filename) {
     if (startsWith(line, "No of sensors")) {
       track_sensors_no <- as.integer(str_split(line, pattern = ",", 
                                                simplify = TRUE)[2])
+      print(paste("The data file contains", 
+                  track_sensors_no, "sensor data series." ))
+      if (track_sensors_no != 2) {
+        stop("Function only supports 2 sensors in data file: ",
+             "pressure and temperature")
+      }
     }
-    if (startsWith(line, "Pressure Range")) {
-      track_pressure_range <- str_split(line, pattern = ",", simplify = TRUE)[2]
-    }
-    if (startsWith(line, "Total Days Alive")) {
-      track_total_days <- as.integer(str_split(line, pattern = "=", 
-                                               simplify = TRUE)[2])
-    }  
     line <- nextElem(header_it)
     cnt <- cnt + 1
   }
@@ -131,12 +145,17 @@ pdst_get_data_blocks_info <- function(filename) {
               'temperature' = temperature))
 }
 
-################################################
-# Reading the data blocks
-################################################
-
-# daylog_skip ; daylog_length
-
+#' Read daylog data section
+#'
+#' @param filename char Filename of a pdst raw data file
+#' @param daylog_skip int
+#' @param daylog_length int
+#' @param daylog_col_names char
+#'
+#' @return
+#' @export
+#'
+#' @examples
 pdst_read_daylog <- function(filename, daylog_skip, daylog_length, 
                              daylog_col_names) {
 
@@ -192,7 +211,7 @@ pdst_read_sensor <- function(filename, line_skip, line_length,
 
 # Apply functions on case
 
-filename <- "data/A15716_15-01-2019.csv"
+filename <- "data/A15700_10-01-2019.csv"
 data_info <- pdst_get_data_blocks_info(filename)
 
 pressure_data <- pdst_read_sensor(filename, 
