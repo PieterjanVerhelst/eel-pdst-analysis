@@ -33,6 +33,7 @@ library(iterators)
 library(stringr)
 library(readr)
 library(tidyr)
+library(dplyr)
 
 #' Read metadata and info from pdst data file
 #' 
@@ -44,10 +45,15 @@ library(tidyr)
 #' @param filename char Filename of a pdst raw data file
 #'
 #' @return list of lists Daylog, pressure and temperature info, which for each
-#' of the lists 3 elements: xx_skip, i.e. startline of data section;
-#' xx_length, i.e.number of data lines and xx_col_names, i.e. names of the 
-#' columns, taking into account additional decimal column(s).
-#'
+#' of the lists 3 elements: 
+#' the first two elements are the same for daylog and sensor:
+#'     * xx_skip, i.e. startline of data section;
+#'     * xx_length, i.e.number of data lines 
+#' The last on is:
+#'     * xx_col_names for daylog, i.e. names of the columns, taking into account 
+#'       additional decimal column(s).
+#'     * xx_name for the sensor data, i.e. name of the variable
+#'     
 pdst_get_data_blocks_info <- function(filename) {
 
   pdst_con <- file(filename, "r")
@@ -62,11 +68,18 @@ pdst_get_data_blocks_info <- function(filename) {
     if (startsWith(line, "No of sensors")) {
       track_sensors_no <- as.integer(str_split(line, pattern = ",", 
                                                simplify = TRUE)[2])
-      print(paste("The data file contains", 
+      print(paste("The data file", filename, "contains", 
                   track_sensors_no, "sensor data series." ))
       if (track_sensors_no != 2) {
         stop("Function only supports 2 sensors in data file: ",
              "pressure and temperature")
+      }
+    }
+    if (startsWith(line, "Total Days Alive")) {
+      track_total_days <- as.integer(str_split(line, pattern = "=", 
+                                               simplify = TRUE)[2])
+      if (track_total_days == 0) {  # ! Total Days Alive can be zero as well
+        warning("File ", filename, " contains no daylog information!")
       }
     }
     line <- nextElem(header_it)
@@ -88,15 +101,20 @@ pdst_get_data_blocks_info <- function(filename) {
   daylog_length <- daylog_length - 1
   
   # prepare col names of daylog data block
-  col_names_original <- str_to_lower(str_split(daylog_header_line, pattern = ",", 
-                                               simplify = TRUE))
-  col_names <- str_replace_all(col_names_original, " ", "_")
-  for (i in seq(3, 11, 2)) {
-    col_names <- append(col_names, paste(col_names[i], "decimal", sep = "_"), 
-                        after = i)  
-  }
-  daylog_col_names <- col_names
   
+  if (daylog_length == 0) {
+    daylog_col_names <- c()
+  } else {
+    col_names_original <- str_to_lower(str_split(daylog_header_line, pattern = ",", 
+                                                 simplify = TRUE))
+    col_names <- str_replace_all(col_names_original, " ", "_")
+    for (i in seq(3, 11, 2)) {
+      col_names <- append(col_names, paste(col_names[i], "decimal", sep = "_"), 
+                          after = i)  
+    }
+    daylog_col_names <- col_names
+  }
+
   daylog <- list('daylog_skip' = daylog_skip, 
                  'daylog_length' = daylog_length,
                  'daylog_col_names' = daylog_col_names)
@@ -111,13 +129,13 @@ pdst_get_data_blocks_info <- function(filename) {
   pressure_header_line <- nextElem(header_it)
   pressure_header <- str_to_lower(str_split(pressure_header_line, 
                                             pattern = ",", simplify = TRUE))
-  pressure_col_names <- append(pressure_header, "decimal")
+  pressure_name <- pressure_header[2]
   cnt <- cnt + 1
   pressure_skip <- cnt # startline for pressure data block
   
   pressure <- list('pressure_skip' = pressure_skip, 
                    'pressure_length' = pressure_length,
-                   'pressure_col_names' = pressure_col_names)
+                   'pressure_name' = pressure_name)
   
   # 2. temperature
   line <- nextElem(header_it) # move beyond Data Block 1
@@ -130,17 +148,18 @@ pdst_get_data_blocks_info <- function(filename) {
   temp_header_line <- nextElem(header_it)
   temp_header <- str_to_lower(str_split(temp_header_line, 
                                         pattern = ",", simplify = TRUE))
-  temp_col_names <- append(temp_header, "decimal")
+  temp_name <- temp_header[2]
   cnt <- cnt + 1
   temp_skip <- cnt # startline for temperature data block
   
   temperature <- list('temp_skip' = temp_skip, 
                       'temp_length' = temp_length,
-                      'temp_col_names' = temp_col_names)
+                      'temp_name' = temp_name)
   
   close(pdst_con)
   
-  return(list('daylog' = daylog, 
+  return(list('track_tag_id' = track_tag_id,
+              'daylog' = daylog, 
               'pressure' = pressure, 
               'temperature' = temperature))
 }
@@ -152,16 +171,11 @@ pdst_get_data_blocks_info <- function(filename) {
 #' @param daylog_length int
 #' @param daylog_col_names char
 #'
-#' @return
-#' @export
+#' @return data.frame | tibble
 #'
 #' @examples
 pdst_read_daylog <- function(filename, daylog_skip, daylog_length, 
                              daylog_col_names) {
-
-  if (track_total_days == 0) {  # ! Total Days Alive can be zero as well
-    stop("File ", filename, " contains no daylog information!")
-  }
 
   col_types <- cols(
     .default = col_character(),
@@ -191,11 +205,18 @@ pdst_read_daylog <- function(filename, daylog_skip, daylog_length,
   return(track_day_log_data) 
 }
 
-#
-# Generic for sensor data, read Data Block ----
-#
+#' Read single sensor data section
+#'
+#' @param filename char Filename of a pdst raw data file
+#' @param line_skip int first line of the dataset
+#' @param line_length int number of lines of the data set
+#' @param variable char variable i.e. 'temperature' or 'pressure'
+#'
+#' @return data.frame | tibble
+#'
+#' @examples
 pdst_read_sensor <- function(filename, line_skip, line_length, 
-                                  variable = "temperature") {
+                             variable = "temperature") {
   col_names <- c("datetime", "variable", "decimal")
   data_sensor <- read_csv(filename, skip = line_skip, 
                           col_names = col_names, 
