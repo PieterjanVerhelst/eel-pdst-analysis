@@ -29,7 +29,7 @@ for (filename in data_files) {
   
   # write the daylog and sensor as tidy data files
   # (only write daylog if present in raw data file)
-  if (!is.na(file_data$daylog)) {
+  if (is.data.frame(file_data$daylog)) {
     write_csv(file_data$daylog, 
               file.path(interim_data_dir, 
                         paste0("daylog_", basename(filename))))    
