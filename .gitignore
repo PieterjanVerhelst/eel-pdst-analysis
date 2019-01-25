@@ -39,4 +39,5 @@ additionals/
 
 # ignore folder with raw data (large files)
 data/raw
+data/interim
 
