@@ -8,5 +8,5 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 
 * `/src:`
 
-1. pdst_functions.R: Functions to upload and tidy pDST datasets
-2. pdst_raw_to_tidy.R: convert pDST csv files into tidy pDST csv files and store them in \data\interim\
+1. pdst_functions.R: Functions to serialize/read and tidy pDST datasets
+2. pdst_raw_to_tidy.R: convert pDST csv files into tidy pDST csv files and store them in `\data\interim\`
