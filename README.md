@@ -12,3 +12,4 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 2. pdst_raw_to_tidy.R: Convert pDST csv files into tidy pDST csv files and store them in `\data\interim\`
 3. create_temperature_depth_plots.R: Create plots with the logged temperature and depth over time
 4. interpolate_longitude.R: Create input file for model: longitude interpolation
+5. create_t_and_p_files.R: Create input file for model: temperature and pressure files
