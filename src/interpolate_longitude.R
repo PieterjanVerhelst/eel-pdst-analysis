@@ -12,7 +12,7 @@ colnames(input1)[1] <- "Date/Time Stamp"
 input1$Long <- seq(2.76, -2.23, length.out = 106)
 
 # Add quality flag to longitude values
-# First and last line have highest certainty and therefore quality; these are flagged with '0'. Other get '5'
+# First and last line have highest certainty and therefore quality; these are flagged with '0'. Other get '5' (= worse quality)
 input1$Quality <- 5
 input1$Quality[1] <- 0
 input1$Quality[106] <- 0
