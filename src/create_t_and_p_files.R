@@ -10,7 +10,7 @@ library(lubridate)
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensor_A16031_08-11-2019.csv")
+sensordata <- read_csv("./data/interim/sensor_A17443_27-01-2020.csv")
 
 
 # 2. Aggregate data ####
@@ -24,6 +24,9 @@ aggdata$datetime2 <- ymd_hms(aggdata$datetime2)
 # Reverse depth
 #aggdata$pressure <- aggdata$pressure * -1   # Not needed
 
+# Set release and retrieval to create plots
+release <- "2019-11-02 18:15:00"
+retrieval <- "2019-12-06 12:00:00"
 
 # 3. Subset from release to retrieval date ####
 subset <- filter(aggdata, datetime2 >= as.Date(release)-1, datetime2 <= as.Date(retrieval))
@@ -49,8 +52,8 @@ lm(subset2$Depth ~ subset2$Date)  # To get coefficient and estimates
 
 
 # 7. Write csv files ####
-write.csv(temp, "./data/interim/input_A16031/EELA16031TEMP.csv", row.names = FALSE)
-write.csv(press, "./data/interim/input_A16031/EELA16031PRES.csv", row.names = FALSE)
+write.csv(temp, "./data/interim/input_A17443/EELA17443TEMP.csv", row.names = FALSE)
+write.csv(press, "./data/interim/input_A17443/EELA17443PRES.csv", row.names = FALSE)
 
 
 
