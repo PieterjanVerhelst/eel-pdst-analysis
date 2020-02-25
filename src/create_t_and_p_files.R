@@ -25,11 +25,11 @@ aggdata$datetime2 <- ymd_hms(aggdata$datetime2)
 #aggdata$pressure <- aggdata$pressure * -1   # Not needed
 
 # Set release and retrieval to create plots
-release <- "2019-11-02 18:15:00"
+release <- "2019-11-02 18:00:00"
 retrieval <- "2019-12-06 12:00:00"
 
 # 3. Subset from release to retrieval date ####
-subset <- filter(aggdata, datetime2 >= as.Date(release)-1, datetime2 <= as.Date(retrieval))
+subset <- filter(aggdata, datetime2 >= release, datetime2 <= retrieval)
 
 # 4. Select temperature data only ####
 temp <- select(subset, datetime2, temperature)
@@ -41,13 +41,34 @@ press <- select(subset, datetime2, pressure)
 colnames(press)[1] <- "Date"
 colnames(press)[2] <- "Depth"
 
+
 # 6. Correct for pressure sensor drift ####
 plot(press$Date, press$Depth)
-subset2 <- filter(press, Date == "2018-12-09 11:00:00" | Date >= "2019-02-18 00:00:00", Date <= "2019-03-04 00:00:00")
+# Select date: moment of release and day of retrieval (midnight)
+subset2 <- filter(press, Date == "2019-11-02 18:00:00" | Date == "2019-12-06 00:00:00")
 plot(subset2$Date, subset2$Depth)
 abline(lm(subset2$Depth ~ subset2$Date))
 lm(subset2$Depth ~ subset2$Date)  # To get coefficient and estimates
-# Depth <- (4.481e-07 * Date)  -6.925e+02
+# depth = (1.923e-06 * date)  -3.024e+03
+
+press$numericdate <- as.numeric(press$Date)
+press$regression <- (1.923e-06*press$numericdate)  -3.024e+03
+press$corrected_depth <- press$Depth-press$regression
+
+# Some check diagnostics
+press$diff <- press$Depth-press$corrected_depth
+plot(press$Date, press$diff)
+plot(press$Date, press$Depth)
+plot(press$Date, press$corrected_depth)
+check <- filter(press, Date >= "2019-11-02 18:15:00", Date <= "2019-11-28 10:00:00")
+summary(check)
+
+
+# rearrange pressure file
+press$Depth <- NULL
+press$numericdate <- NULL
+press$regression <- NULL
+press <- rename(press, Depth = corrected_depth)
 
 
 
