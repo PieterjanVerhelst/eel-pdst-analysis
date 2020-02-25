@@ -9,7 +9,7 @@ library(lubridate)
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensor_A16031_08-11-2019.csv")
+sensordata <- read_csv("./data/interim/sensor_A17443_27-01-2020.csv")
 
 
 # 2. Aggregate data ####
@@ -25,15 +25,15 @@ aggdata$datetime2 <- ymd_hms(aggdata$datetime2)
 
 
 # Set release and retrieval to create plots
-release <- "2018-12-09 19:15:00"
-retrieval <- "2019-03-24 12:00:00"
+release <- "2019-11-02 18:15:00"
+retrieval <- "2019-12-06 12:00:00"
 
 
 # 3. Subset from release to retrieval date ####
 # Note for first day, take only the values since release
-subset <- filter(aggdata, datetime2 >= release, datetime2 <= "2018-12-09 23:55:00")
+subset <- filter(aggdata, datetime2 >= release, datetime2 <= "2019-11-02 23:55:00")
 
-subset <- filter(aggdata, datetime2 >= "2019-03-24 00:00:00", datetime2 <= "2019-03-24 23:55:00")
+subset <- filter(aggdata, datetime2 >= "2019-12-06 00:00:00", datetime2 <= "2019-12-06 23:55:00")
 
 # summary to check max depth
 summary(subset)
@@ -51,7 +51,7 @@ mean(subset_sst$temperature)
 
 
 # 4. Create file and fill in values manually ####
-input_sst <- data.frame(seq(as.Date("2018/12/09"), as.Date("2019/03/24"), "days"))
+input_sst <- data.frame(seq(as.Date("2019/11/02"), as.Date("2019/12/06"), "days"))
 colnames(input_sst)[1] <- "Date/Time Stamp"
 
 input_sst$Temp <- NA
@@ -60,16 +60,16 @@ input_sst$Max_Pressure <- NA
 
 
 # Run in values manually
-i = 106
+i = 35
 
-input_sst$Temp[i] <-   15.51303
+input_sst$Temp[i] <-   15.36719
 input_sst$SST_depth[i] <- 0
-input_sst$Max_Pressure[i] <- 8.145
+input_sst$Max_Pressure[i] <- 8.236667
 
 
 
 # 5. Write csv files ####
-write.csv(input_sst, "./data/interim/input_A16031/EELA16031TEMP_F.csv", row.names = FALSE)
+write.csv(input_sst, "./data/interim/input_A17443/EELA17443TEMP_F.csv", row.names = FALSE)
 
 
 
