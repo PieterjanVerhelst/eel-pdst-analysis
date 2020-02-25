@@ -34,7 +34,7 @@ input_sst$Max_Pressure <- NA
 # Note for first day, take only the values since release
 subset <- filter(temp_press , Date >= release, Date <= "2018-12-04 23:55:00")
 
-subset <- filter(temp_press , Date >= "2019-03-24 00:00:00", Date <= "2019-03-24 23:55:00")
+subset <- filter(temp_press , Date >= "2019-01-22 00:00:00", Date <= "2019-01-22 23:55:00")
 
 # summary to check max depth
 summary(subset)
@@ -52,7 +52,7 @@ mean(subset_sst$Temp)
 
 
 # Run in values manually
-i = 106
+i = 50
 
 input_sst$Temp[i] <-   mean(subset_sst$Temp)
 input_sst$SST_depth[i] <- 0
