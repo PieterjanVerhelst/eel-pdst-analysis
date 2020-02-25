@@ -44,15 +44,15 @@ colnames(press)[2] <- "Depth"
 
 # 6. Correct for pressure sensor drift ####
 plot(press$Date, press$Depth)
-# Select date: moment of release and day of retrieval (midnight)
-subset2 <- filter(press, Date == "2019-11-02 18:00:00" | Date == "2019-12-06 00:00:00")
+# Select date: moment of release and day of popping (midnight)
+subset2 <- filter(press, Date == release | Date == "2019-12-06 00:00:00")
 plot(subset2$Date, subset2$Depth)
 abline(lm(subset2$Depth ~ subset2$Date))
 lm(subset2$Depth ~ subset2$Date)  # To get coefficient and estimates
-# depth = (1.923e-06 * date)  -3.024e+03
+# depth = (1.522e-07 * date)  -2.390e+02
 
 press$numericdate <- as.numeric(press$Date)
-press$regression <- (1.923e-06*press$numericdate)  -3.024e+03
+press$regression <- ( 1.522e-07 *press$numericdate)    -2.390e+02 
 press$corrected_depth <- press$Depth-press$regression
 
 # Some check diagnostics
@@ -68,6 +68,7 @@ summary(check)
 press$Depth <- NULL
 press$numericdate <- NULL
 press$regression <- NULL
+press$diff <- NULL
 press <- rename(press, Depth = corrected_depth)
 
 
