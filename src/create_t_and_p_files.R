@@ -44,7 +44,7 @@ colnames(press)[2] <- "Depth"
 
 # 6. Correct for pressure sensor drift ####
 plot(press$Date, press$Depth)
-# Select date: moment of release and day of popping (midnight)
+# Select date: moment of release and day of retrieval
 subset2 <- filter(press, Date == release | Date == "2019-01-22 00:00:00")
 plot(subset2$Date, subset2$Depth)
 abline(lm(subset2$Depth ~ subset2$Date))
