@@ -16,53 +16,47 @@ press_data <- read_csv("./data/interim/input_A16031/EELA16031PRES.csv")
 temp_press <- merge(temp_data, press_data, by="Date")
 
 
-# Set release and retrieval to create plots
-release <- "2018-12-09 19:15:00"
-retrieval <- "2019-03-24 12:00:00"
+# 2. Calculate mean temperature for top 20 m water layer and total max depth ####
+input_sst <- temp_press %>%
+  group_by(as.Date(Date)) %>%
+  summarize(Max_Pressure = max(Depth),
+            Temp = mean(Temp[Depth<=20]))
 
 
-# 2. Create file to fill in values manually ####
-input_sst <- data.frame(seq(as.Date("2018/12/04"), as.Date("2019/01/22"), "days")) # Take day before retrieval, since exact moment of retrieval is unknown
-colnames(input_sst)[1] <- "Date/Time Stamp"
-
-input_sst$Temp <- NA
+# 3. Add column to flag if an eel swam at the top 20 m water layer (if not, indicate by 'NaN') ####
 input_sst$SST_depth <- NA
-input_sst$Max_Pressure <- NA
+
+for (i in 1:dim(input_sst)[1]){
+  if (input_sst$Temp[i] == 'NaN'){
+    input_sst$SST_depth[i] = NaN
+  } else{
+    input_sst$SST_depth[i] = 0
+  }}
 
 
-# 3. Subset from release to retrieval date ####
-# Note for first day, take only the values since release
-subset <- filter(temp_press , Date >= release, Date <= "2018-12-04 23:55:00")
-
-subset <- filter(temp_press , Date >= "2019-01-22 00:00:00", Date <= "2019-01-22 23:55:00")
-
-# summary to check max depth
-summary(subset)
-
-# max depth
-max(subset$Depth)
-
-# average temp
-mean(subset$Temp)
-
-# In case depth > 20 m, create subset to calculate sea surface temperature
-subset_sst <- filter(subset, Depth <= 20)
-mean(subset_sst$Temp)
-
-
-
-# Run in values manually
-# Note that if the eel remains the whole day < 20 m, Temp and SST_depth get 'NaN' and not 'NA'
-i = 50
-
-input_sst$Temp[i] <-   mean(subset_sst$Temp)
-input_sst$SST_depth[i] <- 0
-input_sst$Max_Pressure[i] <- max(subset$Depth)
-
+# Arrange dataset
+colnames(input_sst)[1] <- "Date/Time Stamp"
+input_sst <- input_sst[,c(1,3,4,2)]
 
 
 # 4. Write csv files ####
-write.csv(input_sst, "./data/interim/input_A15714/EELA15714TEMP_F.csv", row.names = FALSE)
+write.csv(input_sst, "./data/interim/input_A16031/EELA16031TEMP_F.csv", na = "NaN", row.names = FALSE)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
