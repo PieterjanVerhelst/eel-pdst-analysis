@@ -9,16 +9,16 @@ library(lubridate)
 
 
 # 1. Read in temperature and corrected pressure data ####
-temp_data <- read_csv("./data/interim/input_A15714/EELA15714TEMP.csv")
-press_data <- read_csv("./data/interim/input_A15714/EELA15714PRES.csv")
+temp_data <- read_csv("./data/interim/input_A16031/EELA16031TEMP.csv")
+press_data <- read_csv("./data/interim/input_A16031/EELA16031PRES.csv")
 
 # Merge them together
 temp_press <- merge(temp_data, press_data, by="Date")
 
 
 # Set release and retrieval to create plots
-release <- "2018-12-04 14:00:00"
-retrieval <- "2019-01-22 12:00:00"
+release <- "2018-12-09 19:15:00"
+retrieval <- "2019-03-24 12:00:00"
 
 
 # 2. Create file to fill in values manually ####
