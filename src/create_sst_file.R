@@ -52,6 +52,7 @@ mean(subset_sst$Temp)
 
 
 # Run in values manually
+# Note that if the eel remains the whole day < 20 m, Temp and SST_depth get 'NaN' and not 'NA'
 i = 50
 
 input_sst$Temp[i] <-   mean(subset_sst$Temp)
