@@ -4,7 +4,7 @@
 
 # Create dataset with the following columns: Date/Time Stamp,	Long,	Quality
 # Date from eel release until tag retrieval
-input1 <- data.frame(seq(as.Date("2018/12/04"), as.Date("2019/01/22"), "days"))
+input1 <- data.frame(seq(as.Date("2018/12/04"), as.Date("2019/01/22"), "days")) # take day before retrieval, since exact moment of retrieval is unknown
 colnames(input1)[1] <- "Date/Time Stamp"
 
 

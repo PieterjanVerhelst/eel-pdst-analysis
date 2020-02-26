@@ -22,7 +22,7 @@ retrieval <- "2019-01-22 12:00:00"
 
 
 # 2. Create file and fill in values manually ####
-input_sst <- data.frame(seq(as.Date("2018/12/04"), as.Date("2019/01/22"), "days"))
+input_sst <- data.frame(seq(as.Date("2018/12/04"), as.Date("2019/01/22"), "days")) # Take day before retrieval, since exact moment of retrieval is unknown
 colnames(input_sst)[1] <- "Date/Time Stamp"
 
 input_sst$Temp <- NA

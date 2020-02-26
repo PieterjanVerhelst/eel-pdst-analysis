@@ -10,7 +10,7 @@ library(lubridate)
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensor_A15714_13-02-2019.csv")
+sensordata <- read_csv("./data/interim/sensor_A16031_08-11-2019.csv")
 
 
 # 2. Aggregate data ####
@@ -25,8 +25,8 @@ aggdata$datetime2 <- ymd_hms(aggdata$datetime2)
 #aggdata$pressure <- aggdata$pressure * -1   # Not needed
 
 # Set release and retrieval to create plots
-release <- "2018-12-04 13:55:00"
-retrieval <- "2019-01-22 12:00:00"
+release <- "2018-12-09 19:15:00"
+retrieval <- "2019-03-23 23:55:00"  # Take day before retrieval, since exact moment of retrieval is unknown
 
 # 3. Subset from release to retrieval date ####
 subset <- filter(aggdata, datetime2 >= release, datetime2 <= retrieval)
@@ -44,15 +44,15 @@ colnames(press)[2] <- "Depth"
 
 # 6. Correct for pressure sensor drift ####
 plot(press$Date, press$Depth)
-# Select date: moment of release and pop-off moment (moment it was at the surface)
-subset2 <- filter(press, Date == release | Date == "2018-12-25 00:00:00")
-plot(subset2$Date, subset2$Depth)
-abline(lm(subset2$Depth ~ subset2$Date))
-lm(subset2$Depth ~ subset2$Date)  # To get coefficient and estimates
-# depth = (7.628e-07 * date)  -1.177e+03
+# Select date: moment of release - 15 min and pop-off moment (moment it was certainly at the surface)
+subset2 <- filter(aggdata, datetime2 == "2018-12-09 19:00:00" | datetime2 == "2019-02-17 00:00:00")
+plot(subset2$datetime2, subset2$pressure)
+abline(lm(subset2$pressure ~ subset2$datetime2))
+lm(subset2$pressure ~ subset2$datetime2)  # To get coefficient and estimates
+# depth = (2.322e-05 * date)  -3.587e+04
 
 press$numericdate <- as.numeric(press$Date)
-press$regression <- (8.404e-07 *press$numericdate)   -1.297e+03
+press$regression <- (2.787e-07 *press$numericdate)   -4.298e+02
 press$corrected_depth <- press$Depth-press$regression
 
 
