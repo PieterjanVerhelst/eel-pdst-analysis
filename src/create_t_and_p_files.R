@@ -24,9 +24,9 @@ aggdata$datetime2 <- ymd_hms(aggdata$datetime2)
 # Reverse depth
 #aggdata$pressure <- aggdata$pressure * -1   # Not needed
 
-# Set release and retrieval to create plots
+# Set release and retrieval or pop off time (midday following popping event)
 release <- "2018-12-09 19:15:00"
-retrieval <- "2019-03-23 23:55:00"  # Take day before retrieval, since exact moment of retrieval is unknown
+retrieval <- "2019-02-16 12:00:00"  # Take day before retrieval, since exact moment of retrieval is unknown
 
 # 3. Subset from release to retrieval date ####
 subset <- filter(aggdata, datetime2 >= release, datetime2 <= retrieval)
@@ -75,8 +75,8 @@ press <- rename(press, Depth = corrected_depth)
 
 
 # 7. Write csv files ####
-write.csv(temp, "./data/interim/input_A15714/EELA15714TEMP.csv", row.names = FALSE)
-write.csv(press, "./data/interim/input_A15714/EELA15714PRES.csv", row.names = FALSE)
+write.csv(temp, "./data/interim/input_A16031/EELA16031TEMP.csv", row.names = FALSE)
+write.csv(press, "./data/interim/input_A16031/EELA16031PRES.csv", row.names = FALSE)
 
 
 
