@@ -12,6 +12,11 @@ library(lubridate)
 temp_data <- read_csv("./data/interim/input_A16031/EELA16031TEMP.csv")
 press_data <- read_csv("./data/interim/input_A16031/EELA16031PRES.csv")
 
+# Set date as POSIXct
+temp_data$Date <- as.POSIXct(temp_data$Date, format = "%d/%m/%Y %H:%M")
+press_data$Date <- as.POSIXct(press_data$Date, format = "%d/%m/%Y %H:%M")
+
+
 # Merge them together
 temp_press <- merge(temp_data, press_data, by="Date")
 
@@ -32,6 +37,13 @@ for (i in 1:dim(input_sst)[1]){
   } else{
     input_sst$SST_depth[i] = 0
   }}
+
+
+# Arrange dataset
+colnames(input_sst)[1] <- "Date"
+
+# Set in correct date-time format dd/mm/yy HH:MM
+input_sst$Date <- format(as.POSIXct(input_sst$Date, format = "%y%m%d"), "%d/%m/%Y")  # without seconds
 
 
 # Arrange dataset
