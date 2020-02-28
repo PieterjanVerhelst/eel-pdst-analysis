@@ -36,10 +36,20 @@ temp <- select(subset, datetime2, temperature)
 colnames(temp)[1] <- "Date"
 colnames(temp)[2] <- "Temp"
 
+# Set in correct date-time format dd/mm/yy HH:MM
+#temp$Date <- format(as.POSIXct(temp$Date, format = "%y%m%d %H:%M:%S"), "%d/%m/%Y %H:%M:%S")  # with seconds
+temp$Date <- format(as.POSIXct(temp$Date, format = "%y%m%d %H:%M:%S"), "%d/%m/%Y %H:%M")  # without seconds
+
+
 # 5. Select pressure data only ####
 press <- select(subset, datetime2, pressure)
 colnames(press)[1] <- "Date"
 colnames(press)[2] <- "Depth"
+
+# Set in correct date-time format dd/mm/yy HH:MM
+# Note that the correct date time format is stored in a different column. The original column (yyyy-mm-dd hh:mm:ss) is needed for drift correctino (see further)
+#temp$Date2 <- format(as.POSIXct(temp$Date, format = "%y%m%d %H:%M:%S"), "%d/%m/%Y %H:%M:%S")  # with seconds
+press$Date2 <- format(as.POSIXct(press$Date, format = "%y%m%d %H:%M:%S"), "%d/%m/%Y %H:%M")  # without seconds
 
 
 # 6. Correct for pressure sensor drift ####
@@ -66,12 +76,13 @@ summary(check)
 
 
 # rearrange pressure file
+press$Date <- NULL
 press$Depth <- NULL
 press$numericdate <- NULL
 press$regression <- NULL
 press$diff <- NULL
 press <- rename(press, Depth = corrected_depth)
-
+press <- rename(press, Date = Date2)
 
 
 # 7. Write csv files ####
