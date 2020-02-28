@@ -40,6 +40,10 @@ colnames(temp)[2] <- "Temp"
 #temp$Date <- format(as.POSIXct(temp$Date, format = "%y%m%d %H:%M:%S"), "%d/%m/%Y %H:%M:%S")  # with seconds
 temp$Date <- format(as.POSIXct(temp$Date2, format = "%y%m%d %H:%M:%S"), "%d/%m/%Y %H:%M")  # without seconds
 
+# Arrange temp ataset
+temp$Date2 <- NULL
+temp <- select(temp, Date, Temp)
+
 
 # 5. Select pressure data only ####
 press <- select(subset, datetime2, pressure)
@@ -76,6 +80,7 @@ summary(check)
 
 
 # rearrange pressure file
+press$Date2 <- NULL
 press$Depth <- NULL
 press$numericdate <- NULL
 press$regression <- NULL
