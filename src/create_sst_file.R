@@ -52,7 +52,7 @@ input_sst <- input_sst[,c(1,3,4,2)]
 
 
 # 4. Write csv files ####
-write.csv(input_sst, "./data/interim/input_A16031/EELA16031TEMP_F.csv", na = "NaN", row.names = FALSE)
+write.csv(input_sst, "./data/interim/input_A15700/EELA15700TEMP_F.csv", na = "NaN", row.names = FALSE)
 
 
 
