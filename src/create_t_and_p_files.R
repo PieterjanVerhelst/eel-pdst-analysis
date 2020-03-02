@@ -10,7 +10,7 @@ library(lubridate)
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensor_A15736_01-08-2019.csv")
+sensordata <- read_csv("./data/interim/sensor_A15777_12-11-2019.csv")
 
 
 # 2. Aggregate data ####
@@ -25,8 +25,8 @@ aggdata$datetime2 <- ymd_hms(aggdata$datetime2)
 #aggdata$pressure <- aggdata$pressure * -1   # Not needed
 
 # Set release and retrieval or pop off time (midday following popping event)
-release <- "2018-10-31 20:00:00"
-retrieval <- "2019-05-19 23:55:00"  # Take day before retrieval, since exact moment of retrieval is unknown
+release <- "2018-12-09 19:15:00"
+retrieval <- "2019-07-15 23:55:00"  # Take day before retrieval, since exact moment of retrieval is unknown
 
 # 3. Subset from release to retrieval date ####
 subset <- filter(aggdata, datetime2 >= release, datetime2 <= retrieval)
@@ -89,8 +89,8 @@ press <- rename(press, Depth = corrected_depth)
 
 
 # 7. Write csv files ####
-write.csv(temp, "./data/interim/input_A15736/EELA15736TEMP.csv", row.names = FALSE)
-write.csv(press, "./data/interim/input_A15736/EELA15736PRES.csv", row.names = FALSE)
+write.csv(temp, "./data/interim/input_A15777/EELA15777TEMP.csv", row.names = FALSE)
+write.csv(press, "./data/interim/input_A15777/EELA15777PRES.csv", row.names = FALSE)
 
 
 
