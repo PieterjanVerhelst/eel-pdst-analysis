@@ -6,7 +6,7 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 
 ### Data-analysis
 
-! Important note: the clock settings of the pDSTs are the same as Pieterjan's laptop, hence their time setting is UTC+1 !
+! Important note: the clock settings of the pDSTs are the same as Pieterjan's laptop, hence their time setting is UTC+1 (Brussels time zone)!
 
 * `/src:`
 
