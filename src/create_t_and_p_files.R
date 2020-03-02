@@ -30,11 +30,11 @@ aggdata$datetime2 <- as.POSIXct(aggdata$datetime2, "%Y-%m-%d %H:%M:%S", tz = "UT
 #aggdata$pressure <- aggdata$pressure * -1   # Not needed
 
 # Set release and retrieval or pop off time (midday following popping event)
-# !! Give the UTC release time !!
-release <- "2012-09-27 13:40:00"
+release <- "2012-09-27 14:40:00"
 retrieval <- "2012-11-16 23:55:00"  # Take day before retrieval, since exact moment of retrieval is unknown
 
 # 3. Subset from release to retrieval date ####
+# ! Check if release time is correct related to UTC vs UTC+1 !
 subset <- filter(aggdata, datetime2 >= release, datetime2 <= retrieval)
 
 # 4. Select temperature data only ####
@@ -65,14 +65,14 @@ press$Date <- format(as.POSIXct(press$Date2, format = "%y%m%d %H:%M:%S"), "%d/%m
 # 6. Correct for pressure sensor drift ####
 plot(press$Date2, press$Depth)
 # Select date: moment of release - 15 min and pop-off moment (moment it was certainly at the surface)
-subset2 <- filter(aggdata, datetime2 == "2012-09-27 13:30:00" | datetime2 == "2012-11-16 23:55:00")
+subset2 <- filter(aggdata, datetime2 == "2012-09-27 14:30:00" | datetime2 == "2012-11-16 23:55:00")
 plot(subset2$datetime2, subset2$pressure)
 abline(lm(subset2$pressure ~ subset2$datetime2))
 lm(subset2$pressure ~ subset2$datetime2)  # To get coefficient and estimates
 # depth = (2.322e-05 * date)  -3.587e+04
 
 press$numericdate <- as.numeric(press$Date2)
-press$regression <- (-2.144e-07 *press$numericdate)  +   2.872e+02
+press$regression <- (-1.771e-07 *press$numericdate)  +  2.367e+02
 press$corrected_depth <- press$Depth-press$regression
 
 
