@@ -10,7 +10,7 @@ library(lubridate)
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensor_A15777_12-11-2019.csv")
+sensordata <- read_csv("./data/interim/sensor_A15799_23-12-2018.csv")
 
 
 # 2. Aggregate data ####
@@ -25,8 +25,8 @@ aggdata$datetime2 <- ymd_hms(aggdata$datetime2)
 #aggdata$pressure <- aggdata$pressure * -1   # Not needed
 
 # Set release and retrieval or pop off time (midday following popping event)
-release <- "2018-12-09 19:15:00"
-retrieval <- "2019-07-15 23:55:00"  # Take day before retrieval, since exact moment of retrieval is unknown
+release <- "2018-10-31 20:00:00"
+retrieval <- "2018-11-20 23:55:00"  # Take day before retrieval, since exact moment of retrieval is unknown
 
 # 3. Subset from release to retrieval date ####
 subset <- filter(aggdata, datetime2 >= release, datetime2 <= retrieval)
@@ -59,14 +59,14 @@ press$Date <- format(as.POSIXct(press$Date2, format = "%y%m%d %H:%M:%S"), "%d/%m
 # 6. Correct for pressure sensor drift ####
 plot(press$Date2, press$Depth)
 # Select date: moment of release - 15 min and pop-off moment (moment it was certainly at the surface)
-subset2 <- filter(aggdata, datetime2 == "2018-10-31 19:30:00" | datetime2 == "2019-05-19 23:55:00")
+subset2 <- filter(aggdata, datetime2 == "2018-10-31 19:30:00" | datetime2 == "2018-11-20 23:55:00")
 plot(subset2$datetime2, subset2$pressure)
 abline(lm(subset2$pressure ~ subset2$datetime2))
 lm(subset2$pressure ~ subset2$datetime2)  # To get coefficient and estimates
 # depth = (2.322e-05 * date)  -3.587e+04
 
 press$numericdate <- as.numeric(press$Date2)
-press$regression <- (2.960e-07 *press$numericdate)   -4.562e+02
+press$regression <- (2.219e-06 *press$numericdate)   -3.420e+03
 press$corrected_depth <- press$Depth-press$regression
 
 
@@ -89,8 +89,8 @@ press <- rename(press, Depth = corrected_depth)
 
 
 # 7. Write csv files ####
-write.csv(temp, "./data/interim/input_A15777/EELA15777TEMP.csv", row.names = FALSE)
-write.csv(press, "./data/interim/input_A15777/EELA15777PRES.csv", row.names = FALSE)
+write.csv(temp, "./data/interim/input_A15799/EELA15799TEMP.csv", row.names = FALSE)
+write.csv(press, "./data/interim/input_A15799/EELA15799PRES.csv", row.names = FALSE)
 
 
 
