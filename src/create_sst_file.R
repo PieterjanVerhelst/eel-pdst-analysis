@@ -9,8 +9,8 @@ library(lubridate)
 
 
 # 1. Read in temperature and corrected pressure data ####
-temp_data <- read_csv("./data/interim/input_A15706/EELA15706TEMP.csv")
-press_data <- read_csv("./data/interim/input_A15706/EELA15706PRES.csv")
+temp_data <- read_csv("./data/interim/input_A15700/EELA15700TEMP.csv")
+press_data <- read_csv("./data/interim/input_A15700/EELA15700PRES.csv")
 
 
 # Merge them together
@@ -59,9 +59,9 @@ write.csv(input_sst, "./data/interim/input_A17528/EELA17528TEMP_F.csv", na = "Na
 
 
 
-
-
-
+subset <- filter(aggdata, datetime2 >= "2018-11-23 00:00:00", datetime2 <= "2018-11-23 23:55:00")
+max(subset$pressure)
+mean(subset$pressure)
 
 
 
