@@ -9,8 +9,8 @@ library(lubridate)
 
 
 # 1. Read in temperature and corrected pressure data ####
-temp_data <- read_csv("./data/interim/input_A09359/EELA09359TEMP.csv")
-press_data <- read_csv("./data/interim/input_A09359/EELA09359PRES.csv")
+temp_data <- read_csv("./data/interim/input_A15714/EELA15714TEMP.csv")
+press_data <- read_csv("./data/interim/input_A15714/EELA15714PRES.csv")
 
 
 # Merge them together
@@ -18,8 +18,8 @@ temp_press <- merge(temp_data, press_data, by="Date")
 
 
 # Set date as POSIXct
-temp_press$Date <- as.POSIXct(temp_press$Date, format = "%d/%m/%Y %H:%M")
-
+# temp_press$Date <- as.POSIXct(temp_press$Date, format = "%d/%m/%Y %H:%M")
+temp_press$Date <- ymd_hms(temp$Date)
 
 # 2. Calculate mean temperature for top 20 m water layer and total max depth ####
 input_sst <- temp_press %>%
@@ -40,21 +40,13 @@ for (i in 1:dim(input_sst)[1]){
 
 
 
-
-# Arrange dataset
-colnames(input_sst)[1] <- "Date"
-
-# Set in correct date-time format dd/mm/yy HH:MM
-input_sst$Date <- format(as.POSIXct(input_sst$Date, format = "%y%m%d"), "%d/%m/%Y")  # without seconds
-
-
 # Arrange dataset
 colnames(input_sst)[1] <- "Date/Time Stamp"
 input_sst <- input_sst[,c(1,3,4,2)]
 
 
 # 4. Write csv files ####
-write.csv(input_sst, "./data/interim/input_A09359/EELA09359TEMP_F.csv", na = "NaN", row.names = FALSE)
+write.csv(input_sst, "./data/interim/input_A15714/EELA15714TEMP_F.csv", na = "NaN", row.names = FALSE)
 
 
 
