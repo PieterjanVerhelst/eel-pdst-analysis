@@ -9,7 +9,7 @@ library(lubridate)
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensor_A16031_08-11-2019.csv")
+sensordata <- read_csv("./data/interim/sensor_A09359_11-12-2012.csv")
 
 
 # 2. Aggregate data ####
@@ -20,13 +20,19 @@ sensordata$datetime2 <- droplevels(cut(sensordata$datetime, breaks="5 min"))   #
 aggdata <- aggregate(cbind(pressure, temperature) ~ datetime2, data=sensordata, FUN=mean, na.rm=TRUE) 
 aggdata$datetime2 <- ymd_hms(aggdata$datetime2)
 
+# Correct for Brussels Time zone UTC + 1
+aggdata$datetime2 <- aggdata$datetime2 - (60*60)
+aggdata$datetime2 <- as.POSIXct(aggdata$datetime2, "%Y-%m-%d %H:%M:%S", tz = "UTC")
+
 # Reverse depth
 aggdata$pressure <- aggdata$pressure * -1
 
 
 # 3. Set release and retrieval to create plots ####
-release <- "2018-12-09 19:15:00"
-retrieval <- "2019-03-24 12:00:00"
+# For release, take day before retrieval at 23:55
+# Note to put release date in UTC!
+release <- "2012-09-27 13:40:00"
+retrieval <- "2012-11-16 23:55:00"
 
 
 # 4. Create temperature and pressure plot for total dataset ####
@@ -80,7 +86,7 @@ fig_subset
 
 # 6. Create temperature and pressure plot from several days ####
 # Create subsets of several days
-subset <- filter(aggdata, datetime2 >= "2019-01-14 01:00:00", datetime2 <= "2019-01-15 01:00:00")
+subset <- filter(aggdata, datetime2 >= "2012-10-15 01:00:00", datetime2 <= "2012-10-19 01:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime2[1], "day"), to= subset$datetime2[nrow(subset)], by = 86400)
