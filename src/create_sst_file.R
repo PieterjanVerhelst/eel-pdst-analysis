@@ -18,7 +18,7 @@ temp_press <- merge(temp_data, press_data, by="Date")
 
 
 # Set date as POSIXct
-temp_press$Date <- as.POSIXct(temp_press$Date, format = "%d/%m/%Y %h:%m:%s")
+temp_press$Date <- as.POSIXct(temp_press$Date, format = "%d/%m/%Y %H:%M")
 
 
 # 2. Calculate mean temperature for top 20 m water layer and total max depth ####
@@ -54,14 +54,10 @@ input_sst <- input_sst[,c(1,3,4,2)]
 
 
 # 4. Write csv files ####
-write.csv(input_sst, "./data/interim/input_A17528/EELA17528TEMP_F.csv", na = "NaN", row.names = FALSE)
+write.csv(input_sst, "./data/interim/input_A15700/EELA15700TEMP_F.csv", na = "NaN", row.names = FALSE)
 
 
 
-
-subset <- filter(aggdata, datetime2 >= "2018-11-11 00:00:00", datetime2 <= "2018-11-11 23:55:00")
-max(subset$pressure)
-mean(subset$temperature)
 
 
 
