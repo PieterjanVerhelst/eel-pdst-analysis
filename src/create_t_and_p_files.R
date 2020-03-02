@@ -18,14 +18,19 @@ sensordata <- read_csv("./data/interim/sensor_A15706_01-08-2019.csv")
 sensordata$datetime <- dmy_hms(sensordata$datetime)
 sensordata$datetime2 <- droplevels(cut(sensordata$datetime, breaks="5 min"))   # 5 min cut
 
-aggdata <- aggregate(cbind(pressure, temperature) ~ datetime2, data=sensordata, FUN=mean, na.rm=TRUE) 
+aggdata <- aggregate(cbind(pressure, temperature) ~ datetime2, data=sensordata, FUN=mean, na.rm=TRUE)
 aggdata$datetime2 <- ymd_hms(aggdata$datetime2)
+
+aggdata$datetime2 <- aggdata$datetime2 - (60*60)
+aggdata$datetime2 <- as.POSIXct(aggdata$datetime2, "%Y-%m-%d %H:%M:%S", tz = "UTC")
+
 
 # Reverse depth
 #aggdata$pressure <- aggdata$pressure * -1   # Not needed
 
 # Set release and retrieval or pop off time (midday following popping event)
-release <- "2018-12-09 19:15:00"
+# !! Give the UTC release time !!
+release <- "2018-12-09 18:15:00"
 retrieval <- "2019-07-07 23:55:00"  # Take day before retrieval, since exact moment of retrieval is unknown
 
 # 3. Subset from release to retrieval date ####
@@ -59,14 +64,14 @@ press$Date <- format(as.POSIXct(press$Date2, format = "%y%m%d %H:%M:%S"), "%d/%m
 # 6. Correct for pressure sensor drift ####
 plot(press$Date2, press$Depth)
 # Select date: moment of release - 15 min and pop-off moment (moment it was certainly at the surface)
-subset2 <- filter(aggdata, datetime2 == "2019-12-10 13:20:00" | datetime2 == "2020-01-17 23:55:00")
+subset2 <- filter(aggdata, datetime2 == "2018-12-09 18:00:00" | datetime2 == "2019-05-26 23:55:00")
 plot(subset2$datetime2, subset2$pressure)
 abline(lm(subset2$pressure ~ subset2$datetime2))
 lm(subset2$pressure ~ subset2$datetime2)  # To get coefficient and estimates
 # depth = (2.322e-05 * date)  -3.587e+04
 
 press$numericdate <- as.numeric(press$Date2)
-press$regression <- (3.357e-06   *press$numericdate)     -5.290e+03
+press$regression <- (2.328e-07   *press$numericdate)     -3.578e+02 
 press$corrected_depth <- press$Depth-press$regression
 
 

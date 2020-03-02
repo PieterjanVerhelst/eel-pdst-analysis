@@ -9,16 +9,16 @@ library(lubridate)
 
 
 # 1. Read in temperature and corrected pressure data ####
-temp_data <- read_csv("./data/interim/input_A17528/EELA17528TEMP.csv")
-press_data <- read_csv("./data/interim/input_A17528/EELA17528PRES.csv")
-
-# Set date as POSIXct
-temp_data$Date <- as.POSIXct(temp_data$Date, format = "%d/%m/%Y %H:%M")
-press_data$Date <- as.POSIXct(press_data$Date, format = "%d/%m/%Y %H:%M")
+temp_data <- read_csv("./data/interim/input_A15706/EELA15706TEMP.csv")
+press_data <- read_csv("./data/interim/input_A15706/EELA15706PRES.csv")
 
 
 # Merge them together
 temp_press <- merge(temp_data, press_data, by="Date")
+
+
+# Set date as POSIXct
+temp_press$Date <- as.POSIXct(temp_press$Date, format = "%d/%m/%Y %H:%M")
 
 
 # 2. Calculate mean temperature for top 20 m water layer and total max depth ####
@@ -37,6 +37,8 @@ for (i in 1:dim(input_sst)[1]){
   } else{
     input_sst$SST_depth[i] = 0
   }}
+
+
 
 
 # Arrange dataset
