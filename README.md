@@ -4,7 +4,9 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 
 ## Project structure
 
-### Data-analyse
+### Data-analysis
+
+! Important note: the clock settings of the pDSTs are the same as Pieterjan's laptop, hence their time setting is UTC+1 !
 
 * `/src:`
 
