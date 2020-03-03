@@ -9,8 +9,8 @@ library(lubridate)
 
 
 # 1. Read in temperature and corrected pressure data ####
-temp_data <- read_csv("./data/interim/input_A15714/EELA15714TEMP.csv")
-press_data <- read_csv("./data/interim/input_A15714/EELA15714PRES.csv")
+temp_data <- read_csv("./data/interim/input_A17528/EELA17528TEMP.csv")
+press_data <- read_csv("./data/interim/input_A17528/EELA17528PRES.csv")
 
 
 # Merge them together
@@ -46,7 +46,7 @@ input_sst <- input_sst[,c(1,3,4,2)]
 
 
 # 4. Write csv files ####
-write.csv(input_sst, "./data/interim/input_A15714/EELA15714TEMP_F.csv", na = "NaN", row.names = FALSE)
+write.csv(input_sst, "./data/interim/input_A17528/EELA17528TEMP_F.csv", na = "NaN", row.names = FALSE)
 
 
 
