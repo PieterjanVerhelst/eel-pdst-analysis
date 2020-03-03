@@ -13,7 +13,7 @@ Sys.timezone()
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensor_A16031_08-11-2019.csv")
+sensordata <- read_csv("./data/interim/sensor_A09359_11-12-2012.csv")
 
 
 # 2. Aggregate data ####
@@ -25,7 +25,8 @@ aggdata <- aggregate(cbind(pressure, temperature) ~ datetime2, data=sensordata, 
 aggdata$datetime2 <- ymd_hms(aggdata$datetime2)
 
 # Correct for Brussels Time zone UTC + 1
-aggdata$datetime2 <- aggdata$datetime2 - (60*60)
+#aggdata$datetime2 <- aggdata$datetime2 - (60*60)
+aggdata$datetime2 <- aggdata$datetime2 - (2*60*60)  # - 2 hours when UTC+2 (summer daylight saving time)
 aggdata$datetime2 <- as.POSIXct(aggdata$datetime2, "%Y-%m-%d %H:%M:%S", tz = "UTC")
 
 # Reverse depth
@@ -35,9 +36,9 @@ aggdata$pressure <- aggdata$pressure * -1
 # 3. Set release and retrieval to create plots ####
 # For release, take day before retrieval at 23:55
 # Note to put release date in UTC!
-release <- as.POSIXct("2018-12-09 18:15:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
-retrieval <- as.POSIXct("2019-03-23 23:55:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
-pop <- as.POSIXct("2019-02-16 04:20:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
+release <- as.POSIXct("2012-09-27 12:40:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
+retrieval <- as.POSIXct("2012-11-16 23:55:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
+pop <- as.POSIXct("2012-10-18 19:00:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
 
 
 # 4. Create temperature and pressure plot for total dataset ####
@@ -120,7 +121,7 @@ fig_rel_pop
 
 # 7. Create temperature and pressure plot from several days ####
 # Create subsets of several days
-subset <- filter(aggdata, datetime2 >= "2019-01-15 23:00:00", datetime2 <= "2019-01-16 01:00:00")
+subset <- filter(aggdata, datetime2 >= "2012-10-18 17:00:00", datetime2 <= "2012-10-18 21:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime2[1], "day"), to= subset$datetime2[nrow(subset)], by = 86400)
