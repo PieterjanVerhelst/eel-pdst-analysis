@@ -11,8 +11,8 @@ library(lubridate)
 Sys.setenv(TZ='GMT')
 
 # 1. Read in temperature and corrected pressure data ####
-temp_data <- read_csv("./data/interim/input_A15706/EELA15706TEMP.csv")
-press_data <- read_csv("./data/interim/input_A15706/EELA15706PRES.csv")
+temp_data <- read_csv("./data/interim/input_A16031/EELA16031TEMP.csv")
+press_data <- read_csv("./data/interim/input_A16031/EELA16031PRES.csv")
 
 
 # Merge them together
@@ -50,12 +50,12 @@ input_sst <- input_sst[,c(1,3,4,2)]
 
 
 # 4. Write csv files ####
-write.csv(input_sst, "./data/interim/input_A15706/EELA15706TEMP_F.csv", na = "NaN", row.names = FALSE)
+write.csv(input_sst, "./data/interim/input_A16031/EELA16031TEMP_F.csv", na = "NaN", row.names = FALSE)
 
 
 # Check some diagnostics
 
-subset <- filter(temp_press, Date >= "2019-04-05 00:00:00", Date <= "2019-04-05 23:55:00")
+subset <- filter(temp_press, Date >= "2018-12-10 00:00:00", Date <= "2018-12-10 23:55:00")
 max(subset$Depth)
 mean(subset$Temp)
 
