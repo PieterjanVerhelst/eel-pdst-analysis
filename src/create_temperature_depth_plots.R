@@ -13,7 +13,7 @@ Sys.timezone()
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensor_A15700_10-01-2019.csv")
+sensordata <- read_csv("./data/interim/sensor_A16031_08-11-2019.csv")
 
 
 # 2. Aggregate data ####
@@ -35,9 +35,9 @@ aggdata$pressure <- aggdata$pressure * -1
 # 3. Set release and retrieval to create plots ####
 # For release, take day before retrieval at 23:55
 # Note to put release date in UTC!
-release <- as.POSIXct("2018-11-11 11:10:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
-retrieval <- as.POSIXct("2018-11-30 23:55:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
-pop <- as.POSIXct("2018-11-16 13:45:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
+release <- as.POSIXct("2018-12-09 18:15:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
+retrieval <- as.POSIXct("2019-03-23 23:55:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
+pop <- as.POSIXct("2019-02-16 04:20:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
 
 
 # 4. Create temperature and pressure plot for total dataset ####
@@ -111,7 +111,7 @@ fig_rel_pop <- ggplot(subset, aes(x = datetime2,
   geom_vline(xintercept=ymd_hms(release), colour="blue") +  # Release date and time
   geom_vline(xintercept=ymd_hms(pop), colour="green") +  # Retrieval date
   geom_text(aes(x=ymd_hms(release), label="Release", y=18), colour="blue", angle=90, vjust = 1.2, text=element_text(size=11)) + 
-  geom_text(aes(x=ymd_hms(pop), label="Retrieval", y=18), colour="green", angle=90, vjust = 1.2, text=element_text(size=11))
+  geom_text(aes(x=ymd_hms(pop), label="Pop-off", y=18), colour="green", angle=90, vjust = 1.2, text=element_text(size=11))
 
 fig_rel_pop
 
@@ -120,7 +120,7 @@ fig_rel_pop
 
 # 7. Create temperature and pressure plot from several days ####
 # Create subsets of several days
-subset <- filter(aggdata, datetime2 >= "2012-10-15 01:00:00", datetime2 <= "2012-10-19 01:00:00")
+subset <- filter(aggdata, datetime2 >= "2019-01-15 23:00:00", datetime2 <= "2019-01-16 01:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime2[1], "day"), to= subset$datetime2[nrow(subset)], by = 86400)
