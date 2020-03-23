@@ -16,3 +16,4 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 4. interpolate_longitude.R: Create input file for model: longitude interpolation
 5. create_t_and_p_files.R: Create input file for model: temperature and pressure files
 6. create_sst_file.R: Create file with daily sea surface temperatures (first 20 m depth) and max depths
+7. read_trajectory_data.R: Batch read and process trajectory data obtained via matlab toolbox which is stored in ./data/external/trajectory_data
