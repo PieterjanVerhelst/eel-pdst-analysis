@@ -68,11 +68,12 @@ tr_summary2 <- filter(tr_summary, ID == '9349' |
 boxplot(speed ~ Direction, data = tr_summary2)
 tr_summary2 %>%
   group_by(Direction) %>%
-  summarize(mean = mean(speed))
-min(tr_summary2$total_dist)
-max(tr_summary2$total_dist)
-min(tr_summary2$days)
-max(tr_summary2$days)
+  summarize(mean_speed = mean(speed),
+            min_dist = min(total_dist),
+            max_dist = max(total_dist),
+            min_days = min(days),
+            max_days = max(days))
+
 
 
 # 3. Eels with crappy tracks
