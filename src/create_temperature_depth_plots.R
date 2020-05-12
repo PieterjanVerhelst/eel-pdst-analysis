@@ -13,7 +13,7 @@ Sys.timezone()
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensor_A17534_17-03-2020.csv")
+sensordata <- read_csv("./data/interim/sensor_A17537_05-05-2020.csv")
 
 
 # 2. Aggregate data ####
@@ -34,18 +34,18 @@ aggdata$pressure <- aggdata$pressure * -1
 
 
 # 3. Set release and retrieval to create plots ####
-# For release, take day before retrieval at 23:55
+# For retrieval, take day before retrieval at 23:55
 # Note to put release date in UTC!
-release <- as.POSIXct("2019-12-10 12:35:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
-retrieval <- as.POSIXct("2020-02-15 23:55:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
-pop <- as.POSIXct("2020-01-04 08:25:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
+release <- as.POSIXct("2019-12-17 17:10:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
+retrieval <- as.POSIXct("2020-03-10 23:55:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
+pop <- as.POSIXct("2020-01-17 16:35:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
 
 
 # 4. Create temperature and pressure plot for total dataset ####
 fig_t_p <- ggplot(aggdata, aes(x = datetime2,
                                y = temperature)) +
-  geom_point(binaxis='x', dotsize=0.5, binwidth = 1) +
-  geom_point(data = aggdata, aes(x = datetime2, y = pressure/2), dotsize = 0.5, alpha = 0.5, colour = "purple") +
+  geom_line(binaxis='x', size=1.0, binwidth = 1) +
+  geom_line(data = aggdata, aes(x = datetime2, y = pressure/2), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
   theme_minimal() +
@@ -70,8 +70,8 @@ subset <- filter(aggdata, datetime2 >= as.Date(release)-1, datetime2 <= as.Date(
 
 fig_rel_ret <- ggplot(subset, aes(x = datetime2,
                                y = temperature)) +
-  geom_point(binaxis='x', dotsize=0.5, binwidth = 1) +
-  geom_point(data = subset, aes(x = datetime2, y = pressure/2), dotsize = 0.5, alpha = 0.5, colour = "purple") +
+  geom_line(binaxis='x', size=1.0, binwidth = 1) +
+  geom_line(data = subset, aes(x = datetime2, y = pressure/2), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
   theme_minimal() +
@@ -97,8 +97,8 @@ subset <- filter(aggdata, datetime2 >= as.Date(release)-1, datetime2 <= as.Date(
 
 fig_rel_pop <- ggplot(subset, aes(x = datetime2,
                                   y = temperature)) +
-  geom_point(binaxis='x', dotsize=0.5, binwidth = 1) +
-  geom_point(data = subset, aes(x = datetime2, y = pressure/2), dotsize = 0.5, alpha = 0.5, colour = "purple") +
+  geom_line(binaxis='x', size=1.0, binwidth = 1) +
+  geom_line(data = subset, aes(x = datetime2, y = pressure/2), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
   theme_minimal() +
@@ -121,7 +121,7 @@ fig_rel_pop
 
 # 7. Create temperature and pressure plot from several days ####
 # Create subsets of several days
-subset <- filter(aggdata, datetime2 >= "2020-01-04 00:00:00", datetime2 <= "2020-01-05 00:00:00")
+subset <- filter(aggdata, datetime2 >= "2020-01-17 00:00:00", datetime2 <= "2020-01-20 00:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime2[1], "day"), to= subset$datetime2[nrow(subset)], by = 86400)
@@ -130,8 +130,8 @@ class(lubridate::floor_date(subset$datetime2[1], "day"))
 # Create plot
 fig_subset_3days <- ggplot(subset, aes(x = datetime2,
                                    y = temperature)) +
-  geom_point(binaxis='x', dotsize=0.5, binwidth = 1) +
-  geom_point(data = subset, aes(x = datetime2, y = pressure/2), dotsize = 0.5, alpha = 0.5, colour = "purple") +
+  geom_line(binaxis='x', size=1.0, binwidth = 1) +
+  geom_line(data = subset, aes(x = datetime2, y = pressure/2), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
   theme_minimal() +
