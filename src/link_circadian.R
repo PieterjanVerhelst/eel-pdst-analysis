@@ -90,7 +90,14 @@ data_circ$circadian <- ifelse(data_circ$datetime2 > data_circ$sunrise & data_cir
 
 
 
-# 5. Create plot with day night ####
+# 5. write csv ####
+write.csv(data_circ, "./data/interim/data_circadian.csv")
+
+
+
+
+
+# 6. Create plot with day night ####
 # Create subsets of several days
 subset <- filter(data_circ,
                  ID == "16031",

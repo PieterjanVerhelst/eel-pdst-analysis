@@ -44,5 +44,5 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 9. create_sensor_file_all_eels.R: Create sensor log file with all eels for analysis, taking into account time settings (UTC), pressure drift and redundant data (e.g. data when on the shelf and during DVM)
 	+ Generate `all_sensor_eels_processed.csv` in `interim` folder
 10. link_circadian.R: Link circadian phases to the dataset
-
+	+ Generate `data_circadian.csv` in `interim` folder
 
