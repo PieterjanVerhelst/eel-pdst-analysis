@@ -14,14 +14,14 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 
 * `/interim:`
 	+ This folder contains the processed raw data, which has been split into a daylog- and sensor-file. Daylog-files contain daily summaries of temperature and pressure data (min, mean and max). The sensor-files contain the raw temperature and pressure data.
-	+ `/input_tagID:` The 'tag_ID' corresponds to the actual tag ID of a tag. Each folder contains 4 files:
+	+ `/input_tagID:` The 'tag_ID' corresponds to the actual tag ID of a tag. Each folder contains 4 input files for the geolocation model:
 		+ `tagID_LONG.csv`: linear interpolation of longitude between start and end date
 		+ `tagID_PRES.csv`: depth data (corrected for depth drift)
 		+ `tagID_TEMP.csv`: temperature data
 		+ `tagID_TEMP_F.csv`: average temperature at sea surface (first 20 m) and daily max depth
 
 * `/external:`
-	+ `/geolocation_input_files:` input files per eel with lat and lon of release and retrieva or pop-off location
+	+ `/geolocation_input_files:` input files for the geolocation model per eel with lat and lon of release and retrieval or pop-off location
 	+ `/trajectory_data:` output from geolocation model with calculated daily lat and lon, and daily summary on temperature and depth (files obtained by David Righton)
 
 
