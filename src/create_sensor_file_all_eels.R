@@ -18,13 +18,10 @@ library(lubridate)
 # Read in data
 eel_A16031 <- read_csv("./data/interim/sensorlogs/sensor_A16031_08-11-2019.csv")
 
-# Remove temperature data
-eel_A16031$temperature <- NULL
-
 # Aggregate data
 eel_A16031$datetime <- dmy_hms(eel_A16031$datetime)
 eel_A16031$datetime2 <- droplevels(cut(eel_A16031$datetime, breaks="1 min"))   # 1 min cut
-eel_A16031 <- aggregate(cbind(pressure) ~ datetime2, data=eel_A16031, FUN=mean, na.rm=TRUE) 
+eel_A16031 <- aggregate(cbind(pressure, temperature) ~ datetime2, data=eel_A16031, FUN=mean, na.rm=TRUE) 
 eel_A16031$datetime2 <- ymd_hms(eel_A16031$datetime2)
 
 # Correct for Brussels Time zone UTC + 1
@@ -62,13 +59,10 @@ eel_A16031$ID <- 16031
 # Read in data
 eel_A15714 <- read_csv("./data/interim/sensorlogs/sensor_A15714_13-02-2019.csv")
 
-# Remove temperature data
-eel_A15714$temperature <- NULL
-
 # Aggregate data
 eel_A15714$datetime <- dmy_hms(eel_A15714$datetime)
 eel_A15714$datetime2 <- droplevels(cut(eel_A15714$datetime, breaks="1 min"))   # 1 min cut
-eel_A15714 <- aggregate(cbind(pressure) ~ datetime2, data=eel_A15714, FUN=mean, na.rm=TRUE) 
+eel_A15714 <- aggregate(cbind(pressure, temperature) ~ datetime2, data=eel_A15714, FUN=mean, na.rm=TRUE) 
 eel_A15714$datetime2 <- ymd_hms(eel_A15714$datetime2)
 
 # Correct for Brussels Time zone UTC + 1
@@ -108,13 +102,10 @@ eel_A15714$ID <- 15714
 # Read in data
 eel_A15777 <- read_csv("./data/interim/sensorlogs/sensor_A15777_12-11-2019.csv")
 
-# Remove temperature data
-eel_A15777$temperature <- NULL
-
 # Aggregate data
 eel_A15777$datetime <- dmy_hms(eel_A15777$datetime)
 eel_A15777$datetime2 <- droplevels(cut(eel_A15777$datetime, breaks="1 min"))   # 1 min cut
-eel_A15777 <- aggregate(cbind(pressure) ~ datetime2, data=eel_A15777, FUN=mean, na.rm=TRUE) 
+eel_A15777 <- aggregate(cbind(pressure, temperature) ~ datetime2, data=eel_A15777, FUN=mean, na.rm=TRUE) 
 eel_A15777$datetime2 <- ymd_hms(eel_A15777$datetime2)
 
 # Correct for Brussels Time zone UTC + 1
@@ -145,13 +136,15 @@ eel_A15777$ID <- 15777
 # Read in data
 eel_A09359 <- read_csv("./data/interim/sensorlogs/sensor_A09359_11-12-2012.csv")
 
-# Remove temperature data
-eel_A09359$temperature <- NULL
-
 # Aggregate data
 eel_A09359$datetime <- dmy_hms(eel_A09359$datetime)
 eel_A09359$datetime2 <- droplevels(cut(eel_A09359$datetime, breaks="1 min"))   # 1 min cut
-eel_A09359 <- aggregate(cbind(pressure) ~ datetime2, data=eel_A09359, FUN=mean, na.rm=TRUE) 
+
+# Tags from Germany measured temperature every 2 minutes. Hence, when aggregating over 1 min, NA's need to be filled in.
+eel_A09359 <- eel_A09359 %>%
+  fill(temperature)
+
+eel_A09359 <- aggregate(cbind(pressure, temperature) ~ datetime2, data=eel_A09359, FUN=mean, na.rm=TRUE) 
 eel_A09359$datetime2 <- ymd_hms(eel_A09359$datetime2)
 
 # Correct for Time zone UTC + 2
@@ -187,13 +180,13 @@ eel_A09359$ID <- 9359
 
 
 
+# Combine all datasets
+all_eels_processed <- do.call("rbind", list(eel_A09359,
+                                            eel_A15714,
+                                            eel_A15777,
+                                            eel_A16031))
 
-complete <- do.call("rbind", list(eel_A09359,
-                                  eel_A15714,
-                                  eel_A15777,
-                                  eel_A16031))
-
-
+#write.csv(all_sensor_eels_processed, "./interim/all_sensor_eels_processed.csv")
 
 
 
@@ -210,9 +203,9 @@ class(lubridate::floor_date(subset$datetime2[1], "day"))
 
 # Create plot
 fig_subset_3days <- ggplot(subset, aes(x = datetime2,
-                                       y = corrected_depth)) +
+                                       y = temperature)) +
   geom_line(binaxis='x', size=1.0, binwidth = 1) +
-  #geom_line(data = subset, aes(x = datetime2, y = corrected_depth/2), size = 1.0, alpha = 0.5, colour = "purple") +
+  geom_line(data = subset, aes(x = datetime2, y = corrected_depth/2), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
   theme_minimal() +
