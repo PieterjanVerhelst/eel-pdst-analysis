@@ -41,5 +41,6 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 6. create_sst_file.R: Create file with daily sea surface temperatures (first 20 m depth) and max depths
 7. read_trajectory_data.R: Batch read and process trajectory data obtained via matlab toolbox which is stored in `./data/external/trajectory_data`
 8. analyse_migration_speed.R: Calculate and analyse horizontal migration speeds
+9. create_sensor_file_all_eels.R: Create sensor log file with all eels for analysis, taking into account time settings (UTC), time drift and redundant data (e.g. data when on the shelf and during DVM)
 
 
