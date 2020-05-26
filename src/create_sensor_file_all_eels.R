@@ -49,7 +49,8 @@ eel_A16031$corrected_depth <- eel_A16031$corrected_depth * -1
 # Remove data before release and DVM part; hence, select data on continental shelf
 eel_A16031 <- filter(eel_A16031, datetime2 >= "2018-12-09 18:15:00", datetime2 <= "2019-02-13 00:00:00")
 
-
+# Add column with ID
+eel_A16031$ID <- 16031
 
 
 
@@ -89,6 +90,9 @@ eel_A15714$corrected_depth <- eel_A15714$corrected_depth * -1
 # Remove data before release and from 1 hour before predation (2018-12-22 16:10:00) event onwards
 eel_A15714 <- filter(eel_A15714, datetime2 >= "2018-12-04 13:00:00", datetime2 <= "2018-12-22 15:10:00")
 
+# Add column with ID
+eel_A15714$ID <- 15714
+
 
 
 
@@ -120,7 +124,8 @@ eel_A15777$corrected_depth <- eel_A15777$corrected_depth * -1
 # Remove data before release and from 1 hour before predation (2018-12-22 16:10:00) event onwards
 eel_A15777 <- filter(eel_A15777, datetime2 >= "2018-12-09 18:15:00", datetime2 <= "2019-01-15 23:31:00")
 
-
+# Add column with ID
+eel_A15777$ID <- 15777
 
 
 
