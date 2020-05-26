@@ -188,6 +188,16 @@ eel_A09359$ID <- 9359
 
 
 
+complete <- do.call("rbind", list(eel_A09359,
+                                  eel_A15714,
+                                  eel_A15777,
+                                  eel_A16031))
+
+
+
+
+
+
 
 
 # Create temperature and pressure plot from several days ####
