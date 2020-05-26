@@ -13,7 +13,7 @@ Sys.setenv(TZ='GMT')
 Sys.timezone()
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensor_A17537_05-05-2020.csv")
+sensordata <- read_csv("./data/interim/sensorlogs/sensor_A17537_05-05-2020.csv")
 
 
 # 2. Aggregate data ####
@@ -104,8 +104,8 @@ press <- rename(press, Depth = corrected_depth)
 
 
 # 7. Write csv files ####
-write.csv(temp, "./data/interim/input_A17537/EELA17537TEMP.csv", row.names = FALSE)
-write.csv(press, "./data/interim/input_A17537/EELA17537PRES.csv", row.names = FALSE)
+write.csv(temp, "./data/interim/geolocation_input_files/input_A17537/EELA17537TEMP.csv", row.names = FALSE)
+write.csv(press, "./data/interim/geolocation_input_files/input_A17537/EELA17537PRES.csv", row.names = FALSE)
 
 
 

@@ -19,4 +19,4 @@ input1$Quality[85] <- 0
 
 
 # Write csv file
-write.csv(input1, "./data/interim/input_A17537/EELA17537LONG.csv", row.names = FALSE)
+write.csv(input1, "./data/interim/geolocation_input_files/input_A17537/EELA17537LONG.csv", row.names = FALSE)

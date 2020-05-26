@@ -13,7 +13,7 @@ Sys.timezone()
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensor_A17537_05-05-2020.csv")
+sensordata <- read_csv("./data/interim/sensorlogs/sensor_A17537_05-05-2020.csv")
 
 
 # 2. Aggregate data ####
