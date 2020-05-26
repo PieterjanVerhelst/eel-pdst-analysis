@@ -181,7 +181,7 @@ eel_A09359$ID <- 9359
 
 
 # Combine all datasets
-all_eels_processed <- do.call("rbind", list(eel_A09359,
+all_sensor_eels_processed <- do.call("rbind", list(eel_A09359,
                                             eel_A15714,
                                             eel_A15777,
                                             eel_A16031))
