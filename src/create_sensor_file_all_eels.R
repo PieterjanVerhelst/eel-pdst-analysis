@@ -1,4 +1,4 @@
-# Create sensor log file with all eels for analysis, taking into account time settings (UTC), time drift and redundant data (e.g. data when on the shelf and during DVM)
+# Create sensor log file with all eels for analysis, taking into account time settings (UTC), pressure drift and redundant data (e.g. data when on the shelf and during DVM)
 # By Pieterjan Verhelst
 # Pieterjan.Verhelst@UGent.be
 
