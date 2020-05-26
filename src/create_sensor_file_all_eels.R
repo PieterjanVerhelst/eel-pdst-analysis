@@ -53,6 +53,78 @@ eel_A16031 <- filter(eel_A16031, datetime2 >= "2018-12-09 18:15:00", datetime2 <
 
 
 
+# Eel A15714####
 
+# Read in data
+eel_A15714 <- read_csv("./data/interim/sensorlogs/sensor_A15714_13-02-2019.csv")
+
+# Aggregate data
+eel_A15714$datetime <- dmy_hms(eel_A15714$datetime)
+eel_A15714$datetime2 <- droplevels(cut(eel_A15714$datetime, breaks="1 min"))   # 1 min cut
+eel_A15714 <- aggregate(cbind(pressure, temperature) ~ datetime2, data=eel_A15714, FUN=mean, na.rm=TRUE) 
+eel_A15714$datetime2 <- ymd_hms(eel_A15714$datetime2)
+
+# Correct for Brussels Time zone UTC + 1
+eel_A15714$datetime2 <- eel_A15714$datetime2 - (60*60)
+#aggdata$datetime2 <- aggdata$datetime2 - (2*60*60)  # - 2 hours when UTC+2 (summer daylight saving time)
+eel_A15714$datetime2 <- as.POSIXct(eel_A15714$datetime2, "%Y-%m-%d %H:%M:%S", tz = "GMT")
+
+# Correct for depth drift
+plot(eel_A15714$datetime2, eel_A15714$pressure)
+# Select date: moment of release - 15 min and pop-off moment (moment it was certainly at the surface)
+subset <- filter(eel_A15714, 
+                 datetime2 == as.POSIXct("2018-12-04 12:45:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") |
+                   datetime2 == as.POSIXct("2018-12-24 07:15:00", "%Y-%m-%d %H:%M:%S", tz = "GMT"))
+plot(subset$datetime2, subset$pressure)
+abline(lm(subset$pressure ~ subset$datetime2))
+lm(subset$pressure ~ subset$datetime2)  # To get coefficient and estimates
+# depth = (7.318e-07 * date)  -1.130e+03
+eel_A15714$numericdate <- as.numeric(eel_A15714$datetime2)
+eel_A15714$regression <- ( 7.318e-07    * eel_A15714$numericdate)   -1.130e+03
+eel_A15714$corrected_depth <- eel_A15714$pressure - eel_A15714$regression
+
+# Reverse depth
+eel_A15714$corrected_depth <- eel_A15714$corrected_depth * -1
+
+# Remove data before release and from 1 hour before predation (2018-12-22 16:10:00) event onwards
+eel_A15714 <- filter(eel_A15714, datetime2 >= "2018-12-04 13:00:00", datetime2 <= "2018-12-22 15:10:00")
+
+
+
+
+
+
+
+
+
+
+
+
+# Create temperature and pressure plot from several days ####
+# Create subsets of several days
+subset <- filter(eel_A15714, datetime2 >= "2018-12-22 00:00:00", datetime2 <= "2018-12-23 00:00:00")
+
+# Create line every 24 hours
+gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime2[1], "day"), to= subset$datetime2[nrow(subset)], by = 86400)
+class(lubridate::floor_date(subset$datetime2[1], "day"))
+
+# Create plot
+fig_subset_3days <- ggplot(subset, aes(x = datetime2,
+                                       y = temperature)) +
+  geom_line(binaxis='x', size=1.0, binwidth = 1) +
+  geom_line(data = subset, aes(x = datetime2, y = corrected_depth/2), size = 1.0, alpha = 0.5, colour = "purple") +
+  #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
+  scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
+  theme_minimal() +
+  ylab("Temperature (°C)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  ="1 hour") +
+  geom_vline(xintercept=gnu, color = "red", size = 1) 
+
+fig_subset_3days
 
 
