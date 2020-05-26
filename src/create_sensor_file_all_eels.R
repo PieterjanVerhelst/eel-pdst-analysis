@@ -47,7 +47,7 @@ eel_A16031$corrected_depth <- eel_A16031$pressure - eel_A16031$regression
 eel_A16031$corrected_depth <- eel_A16031$corrected_depth * -1
 
 # Remove data before release and DVM part; hence, select data on continental shelf
-eel_A16031 <- filter(eel_A16031, datetime2 >= "2018-12-09 18:15:00", datetime2 <= "2019-02-13 06:00:00")
+eel_A16031 <- filter(eel_A16031, datetime2 >= "2018-12-09 18:15:00", datetime2 <= "2019-02-13 00:00:00")
 
 
 
