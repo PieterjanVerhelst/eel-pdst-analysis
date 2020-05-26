@@ -8,6 +8,7 @@
 Sys.setenv(TZ='GMT')
 Sys.timezone()
 
+
 # Packages
 library(dplyr)
 library(lubridate)
@@ -54,6 +55,8 @@ tr_data <- filter(tr_data, ID == "9359" |
 
 # 3. Merge datasets ####
 data_circ <- left_join(x = data, y = tr_data, by=c("ID","Date"))
+data_circ$avg_lat <- as.numeric(data_circ$avg_lat)  # important to convert lat and lon to numeric for getSunlightTimes()
+data_circ$avg_lon <- as.numeric(data_circ$avg_lon)
 #plot(data_circ$avg_lon, data_circ$avg_lat)
 
 
@@ -80,11 +83,41 @@ sun <- sun %>%
     avg_lon = lon
   )
 
-
 # Merge sunrise and sunset data to data_circ dataset
 data_circ <- left_join(x = data_circ, y = sun, by=c("Date","avg_lat","avg_lon"))
-data_circ$dayNight <- ifelse(data_circ$datetime2 > data_circ$sunrise & data_circ$datetime2 < data_circ$sunset, 'day', 'night')
+data_circ$circadian <- ifelse(data_circ$datetime2 > data_circ$sunrise & data_circ$datetime2 < data_circ$sunset, 'day', 'night')
 
 
+
+
+# 5. Create plot with day night ####
+# Create subsets of several days
+subset <- filter(data_circ,
+                 ID == "16031",
+                 datetime2 >= "2019-02-04 00:00:00", datetime2 <= "2019-02-07 00:00:00")
+
+# Create line every 24 hours
+gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime2[1], "day"), to= subset$datetime2[nrow(subset)], by = 86400)
+class(lubridate::floor_date(subset$datetime2[1], "day"))
+
+# Create plot
+fig_circadian <- ggplot(subset, aes(x = datetime2,
+                                       y = temperature)) +
+  geom_rect(aes(xmin=sunrise, xmax=sunset, ymin=-Inf, ymax=+Inf), fill='grey', alpha=0.3) +
+  geom_line(binaxis='x', size=1.0, binwidth = 1) +
+  geom_line(data = subset, aes(x = datetime2, y = corrected_depth/2), size = 1.0, alpha = 0.5, colour = "purple") +
+  #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
+  scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
+  theme_minimal() +
+  ylab("Temperature (°C)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  ="1 hour") +
+  #geom_vline(xintercept=ymd_hms(release), colour="blue") + # Release date and time
+  geom_vline(xintercept=gnu, color = "red", size = 1) 
+fig_circadian
 
 
