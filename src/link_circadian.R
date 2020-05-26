@@ -9,8 +9,10 @@ Sys.setenv(TZ='GMT')
 Sys.timezone()
 
 # Packages
-library(suncalc)
+library(dplyr)
 library(lubridate)
+library(suncalc)
+
 
 
 # 1. Load sensor dataset with all eels ####
