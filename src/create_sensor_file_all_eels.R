@@ -18,10 +18,13 @@ library(lubridate)
 # Read in data
 eel_A16031 <- read_csv("./data/interim/sensorlogs/sensor_A16031_08-11-2019.csv")
 
+# Remove temperature data
+eel_A16031$temperature <- NULL
+
 # Aggregate data
 eel_A16031$datetime <- dmy_hms(eel_A16031$datetime)
 eel_A16031$datetime2 <- droplevels(cut(eel_A16031$datetime, breaks="1 min"))   # 1 min cut
-eel_A16031 <- aggregate(cbind(pressure, temperature) ~ datetime2, data=eel_A16031, FUN=mean, na.rm=TRUE) 
+eel_A16031 <- aggregate(cbind(pressure) ~ datetime2, data=eel_A16031, FUN=mean, na.rm=TRUE) 
 eel_A16031$datetime2 <- ymd_hms(eel_A16031$datetime2)
 
 # Correct for Brussels Time zone UTC + 1
@@ -59,10 +62,13 @@ eel_A16031$ID <- 16031
 # Read in data
 eel_A15714 <- read_csv("./data/interim/sensorlogs/sensor_A15714_13-02-2019.csv")
 
+# Remove temperature data
+eel_A15714$temperature <- NULL
+
 # Aggregate data
 eel_A15714$datetime <- dmy_hms(eel_A15714$datetime)
 eel_A15714$datetime2 <- droplevels(cut(eel_A15714$datetime, breaks="1 min"))   # 1 min cut
-eel_A15714 <- aggregate(cbind(pressure, temperature) ~ datetime2, data=eel_A15714, FUN=mean, na.rm=TRUE) 
+eel_A15714 <- aggregate(cbind(pressure) ~ datetime2, data=eel_A15714, FUN=mean, na.rm=TRUE) 
 eel_A15714$datetime2 <- ymd_hms(eel_A15714$datetime2)
 
 # Correct for Brussels Time zone UTC + 1
@@ -102,10 +108,13 @@ eel_A15714$ID <- 15714
 # Read in data
 eel_A15777 <- read_csv("./data/interim/sensorlogs/sensor_A15777_12-11-2019.csv")
 
+# Remove temperature data
+eel_A15777$temperature <- NULL
+
 # Aggregate data
 eel_A15777$datetime <- dmy_hms(eel_A15777$datetime)
 eel_A15777$datetime2 <- droplevels(cut(eel_A15777$datetime, breaks="1 min"))   # 1 min cut
-eel_A15777 <- aggregate(cbind(pressure, temperature) ~ datetime2, data=eel_A15777, FUN=mean, na.rm=TRUE) 
+eel_A15777 <- aggregate(cbind(pressure) ~ datetime2, data=eel_A15777, FUN=mean, na.rm=TRUE) 
 eel_A15777$datetime2 <- ymd_hms(eel_A15777$datetime2)
 
 # Correct for Brussels Time zone UTC + 1
@@ -131,6 +140,51 @@ eel_A15777$ID <- 15777
 
 
 
+# Eel A09359####
+
+# Read in data
+eel_A09359 <- read_csv("./data/interim/sensorlogs/sensor_A09359_11-12-2012.csv")
+
+# Remove temperature data
+eel_A09359$temperature <- NULL
+
+# Aggregate data
+eel_A09359$datetime <- dmy_hms(eel_A09359$datetime)
+eel_A09359$datetime2 <- droplevels(cut(eel_A09359$datetime, breaks="1 min"))   # 1 min cut
+eel_A09359 <- aggregate(cbind(pressure) ~ datetime2, data=eel_A09359, FUN=mean, na.rm=TRUE) 
+eel_A09359$datetime2 <- ymd_hms(eel_A09359$datetime2)
+
+# Correct for Time zone UTC + 2
+#eel_A09359$datetime2 <- eel_A09359$datetime2 - (60*60)
+eel_A09359$datetime2 <- eel_A09359$datetime2 - (2*60*60)  # - 2 hours when UTC+2 (summer daylight saving time)
+eel_A09359$datetime2 <- as.POSIXct(eel_A09359$datetime2, "%Y-%m-%d %H:%M:%S", tz = "GMT")
+
+# Correct for depth drift
+plot(eel_A09359$datetime2, eel_A09359$pressure)
+# Select date: moment of release - 15 min and pop-off moment (moment it was certainly at the surface)
+subset <- filter(eel_A09359, 
+                 datetime2 == as.POSIXct("2012-09-27 12:25:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") |
+                   datetime2 == as.POSIXct("2012-10-18 19:00:00", "%Y-%m-%d %H:%M:%S", tz = "GMT"))
+plot(subset$datetime2, subset$pressure)
+abline(lm(subset$pressure ~ subset$datetime2))
+lm(subset$pressure ~ subset$datetime2)  # To get coefficient and estimates
+# depth = (5.776e-07 * date)  -  7.812e+02
+eel_A09359$numericdate <- as.numeric(eel_A09359$datetime2)
+eel_A09359$regression <- ( 5.776e-07    * eel_A09359$numericdate)   - 7.812e+02
+eel_A09359$corrected_depth <- eel_A09359$pressure - eel_A09359$regression
+
+# Reverse depth
+eel_A09359$corrected_depth <- eel_A09359$corrected_depth * -1
+
+# Remove data before release and from 1 hour before predation (2018-12-22 16:10:00) event onwards
+eel_A09359 <- filter(eel_A09359, datetime2 >= "2012-09-27 12:40:00", datetime2 <= "2012-10-18 18:45:00")
+
+# Add column with ID
+eel_A09359$ID <- 9359
+
+
+
+
 
 
 
@@ -138,7 +192,7 @@ eel_A15777$ID <- 15777
 
 # Create temperature and pressure plot from several days ####
 # Create subsets of several days
-subset <- filter(eel_A15777, datetime2 >= "2019-01-15 00:00:00", datetime2 <= "2019-01-17 00:00:00")
+subset <- filter(eel_A09359, datetime2 >= "2012-10-18 00:00:00", datetime2 <= "2012-10-19 00:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime2[1], "day"), to= subset$datetime2[nrow(subset)], by = 86400)
@@ -146,9 +200,9 @@ class(lubridate::floor_date(subset$datetime2[1], "day"))
 
 # Create plot
 fig_subset_3days <- ggplot(subset, aes(x = datetime2,
-                                       y = temperature)) +
+                                       y = corrected_depth)) +
   geom_line(binaxis='x', size=1.0, binwidth = 1) +
-  geom_line(data = subset, aes(x = datetime2, y = corrected_depth/2), size = 1.0, alpha = 0.5, colour = "purple") +
+  #geom_line(data = subset, aes(x = datetime2, y = corrected_depth/2), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
   theme_minimal() +
