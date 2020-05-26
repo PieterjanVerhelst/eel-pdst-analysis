@@ -93,6 +93,37 @@ eel_A15714 <- filter(eel_A15714, datetime2 >= "2018-12-04 13:00:00", datetime2 <
 
 
 
+# Eel A15777####
+
+# Read in data
+eel_A15777 <- read_csv("./data/interim/sensorlogs/sensor_A15777_12-11-2019.csv")
+
+# Aggregate data
+eel_A15777$datetime <- dmy_hms(eel_A15777$datetime)
+eel_A15777$datetime2 <- droplevels(cut(eel_A15777$datetime, breaks="1 min"))   # 1 min cut
+eel_A15777 <- aggregate(cbind(pressure, temperature) ~ datetime2, data=eel_A15777, FUN=mean, na.rm=TRUE) 
+eel_A15777$datetime2 <- ymd_hms(eel_A15777$datetime2)
+
+# Correct for Brussels Time zone UTC + 1
+eel_A15777$datetime2 <- eel_A15777$datetime2 - (60*60)
+#aggdata$datetime2 <- aggdata$datetime2 - (2*60*60)  # - 2 hours when UTC+2 (summer daylight saving time)
+eel_A15777$datetime2 <- as.POSIXct(eel_A15777$datetime2, "%Y-%m-%d %H:%M:%S", tz = "GMT")
+
+# Correct for depth drift impossible due to sensor failure by predation
+eel_A15777$numericdate <- as.numeric(eel_A15777$datetime2)
+eel_A15777$regression <- NA
+eel_A15777$corrected_depth <- eel_A15777$pressure
+
+# Reverse depth
+eel_A15777$corrected_depth <- eel_A15777$corrected_depth * -1
+
+# Remove data before release and from 1 hour before predation (2018-12-22 16:10:00) event onwards
+eel_A15777 <- filter(eel_A15777, datetime2 >= "2018-12-09 18:15:00", datetime2 <= "2019-01-15 23:31:00")
+
+
+
+
+
 
 
 
@@ -102,7 +133,7 @@ eel_A15714 <- filter(eel_A15714, datetime2 >= "2018-12-04 13:00:00", datetime2 <
 
 # Create temperature and pressure plot from several days ####
 # Create subsets of several days
-subset <- filter(eel_A15714, datetime2 >= "2018-12-22 00:00:00", datetime2 <= "2018-12-23 00:00:00")
+subset <- filter(eel_A15777, datetime2 >= "2019-01-15 00:00:00", datetime2 <= "2019-01-17 00:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime2[1], "day"), to= subset$datetime2[nrow(subset)], by = 86400)
