@@ -186,7 +186,12 @@ all_sensor_eels_processed <- do.call("rbind", list(eel_A09359,
                                             eel_A15777,
                                             eel_A16031))
 
-write.csv(all_sensor_eels_processed, "./interim/all_sensor_eels_processed.csv")
+write.csv(all_sensor_eels_processed, "./data/interim/all_sensor_eels_processed.csv")
+
+
+
+
+
 
 
 
