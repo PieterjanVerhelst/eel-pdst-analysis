@@ -42,6 +42,6 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 7. read_trajectory_data.R: Batch read and process trajectory data obtained via matlab toolbox which is stored in `./data/external/trajectory_data`
 8. analyse_migration_speed.R: Calculate and analyse horizontal migration speeds
 9. create_sensor_file_all_eels.R: Create sensor log file with all eels for analysis, taking into account time settings (UTC), pressure drift and redundant data (e.g. data when on the shelf and during DVM)
-	\rightarrow Generate `all_sensor_eels_processed.csv` in `interim` folder
+	`\rightarrow` Generate `all_sensor_eels_processed.csv` in `interim` folder
 
 
