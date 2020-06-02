@@ -91,7 +91,7 @@ data_circ$night_day <- ifelse(data_circ$datetime2 > data_circ$sunrise & data_cir
 
 
 # 5. write csv ####
-write.csv(data_circ, "./data/interim/data_circadian2.csv")
+write.csv(data_circ, "./data/interim/data_circadian.csv")
 
 
 
