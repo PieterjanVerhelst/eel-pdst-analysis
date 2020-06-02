@@ -19,11 +19,11 @@ data <-
   data %>%
   group_by(ID) %>%
   mutate(is_maximum = if_else(corrected_depth - lag(corrected_depth, 1) > 0 &
-                                corrected_depth - lead(corrected_depth, 1) > 0,
+                                corrected_depth - lead(corrected_depth, 1) >= 0,
                               TRUE,
                               FALSE),
          is_minimum = if_else(corrected_depth - lag(corrected_depth, 1) < 0 &
-                                corrected_depth - lead(corrected_depth, 1) < 0,
+                                corrected_depth - lead(corrected_depth, 1) <= 0,
                               TRUE,
                               FALSE)
   ) %>%
