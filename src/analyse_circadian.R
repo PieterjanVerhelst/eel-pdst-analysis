@@ -10,11 +10,11 @@ library(suncalc)  # To get sunrise, sunset
 
 
 
-# Import data
+# Import data ####
 data <- read_csv("./data/interim/data_circadian.csv", na = "", guess_max = 100000)
 
 
-# Find minima and maxima
+# Find minima and maxima ####
 data <-
   data %>%
   group_by(ID) %>%
@@ -29,12 +29,12 @@ data <-
   ) %>%
   ungroup()
 
-# Take minima and maxima only
+# Take minima and maxima only ####
 data_min_max <-
   data %>%
   filter(is_maximum == TRUE | is_minimum == TRUE)
 
-# Calculate changes in max and min depths
+# Calculate changes in max and min depths ####
 data_min_max <-
   data_min_max %>%
   group_by(ID) %>%
@@ -88,6 +88,39 @@ fig_circadian <- ggplot(data = subset, aes(x = datetime2, y = depth_change), siz
   #geom_vline(xintercept=ymd_hms(release), colour="blue") + # Release date and time
   geom_vline(xintercept=gnu, color = "red", size = 1) 
 fig_circadian
+
+
+# Calculate summary values
+data_min_max <- na.omit(data_min_max)
+aggregate(data_min_max$depth_change, list(data_min_max$night_day, data_min_max$ID), mean)
+
+
+
+# Statistical analysis ####
+
+subset2 <- filter(data_min_max,
+                 ID == "15777",
+                 datetime2 >= "2018-12-22 16:00:00", datetime2 <= "2018-12-22 19:00:00")
+
+
+# Checking normality
+qqPlot(data_min_max$depth_change)
+
+
+# Checking homogeneity of variances
+# http://www.sthda.com/english/wiki/compare-multiple-sample-variances-in-r
+bartlett.test(depth_change ~ night_day, data = data_min_max)
+leveneTest(depth_change ~ night_day, data = data_min_max)
+fligner.test(depth_change ~ night_day, data = data_min_max)
+
+
+t_test <- t.test(data_min_max$depth_change~data_min_max$night_day, var.equal = FALSE)
+t_test
+
+
+
+qqPlot(data_min_max$depth_change)
+shapiro.test(data_min_max$depth_change)
 
 
 
