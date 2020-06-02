@@ -85,13 +85,13 @@ sun <- sun %>%
 
 # Merge sunrise and sunset data to data_circ dataset
 data_circ <- left_join(x = data_circ, y = sun, by=c("Date","avg_lat","avg_lon"))
-data_circ$circadian <- ifelse(data_circ$datetime2 > data_circ$sunrise & data_circ$datetime2 < data_circ$sunset, 'day', 'night')
+data_circ$night_day <- ifelse(data_circ$datetime2 > data_circ$sunrise & data_circ$datetime2 < data_circ$sunset, 'day', 'night')
 
 
 
 
 # 5. write csv ####
-write.csv(data_circ, "./data/interim/data_circadian.csv")
+write.csv(data_circ, "./data/interim/data_circadian2.csv")
 
 
 
