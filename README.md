@@ -26,6 +26,7 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 * `/external:`
 	+ `/geolocation_input_files:` input files for the geolocation model per eel with lat and lon of release and retrieval or pop-off location
 	+ `/trajectory_data:` output from geolocation model with calculated daily lat and lon, and daily summary on temperature and depth (files obtained by David Righton)
+	+ `/dvm_noon:` Equation of time applied to files with the calculated noon, based on the DVM behaviour, to calculate coordinates
 
 
 ### Scripts
