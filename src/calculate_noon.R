@@ -1,4 +1,4 @@
-# Calculate midday to identify lat and lon with the equation of time
+# Calculate noon based on DVM behaviour to identify lat and lon with the equation of time (latter performed in excel)
 # By Pieterjan Verhelst
 # Pieterjan.Verhelst@UGent.be
 
