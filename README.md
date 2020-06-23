@@ -21,6 +21,7 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 			+ `tagID_PRES.csv`: depth data (corrected for depth drift)
 			+ `tagID_TEMP.csv`: temperature data
 			+ `tagID_TEMP_F.csv`: average temperature at sea surface (first 20 m) and daily max depth
+	+ `/dvm_noon:` Files with the calculated noon, based on the DVM behaviour
 
 * `/external:`
 	+ `/geolocation_input_files:` input files for the geolocation model per eel with lat and lon of release and retrieval or pop-off location
@@ -36,14 +37,15 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 1. pdst_functions.R: Functions to serialize/read and tidy pDST datasets
 2. pdst_raw_to_tidy.R: Convert pDST csv files into tidy pDST csv files and store them in `/data/interim/`
 3. create_temperature_depth_plots.R: Create plots with the logged temperature and depth over time
-4. interpolate_longitude.R: Create input file for model: longitude interpolation
-5. create_t_and_p_files.R: Create input file for model: temperature and pressure files
-6. create_sst_file.R: Create file with daily sea surface temperatures (first 20 m depth) and max depths
-7. read_trajectory_data.R: Batch read and process trajectory data obtained via matlab toolbox which is stored in `./data/external/trajectory_data`
-8. analyse_migration_speed.R: Calculate and analyse horizontal migration speeds
-9. create_sensor_file_all_eels.R: Create sensor log file with all eels for analysis, taking into account time settings (UTC), pressure drift and redundant data (e.g. data when on the shelf and during DVM)
+4. calculate_noon: Calculate noon based on DVM behaviour. This noon can be used to calculate lat and lon with the equation of time (in excel)
+5. interpolate_longitude.R: Create input file for model: longitude interpolation
+6. create_t_and_p_files.R: Create input file for model: temperature and pressure files
+7. create_sst_file.R: Create file with daily sea surface temperatures (first 20 m depth) and max depths
+8. read_trajectory_data.R: Batch read and process trajectory data obtained via matlab toolbox which is stored in `./data/external/trajectory_data`
+9. analyse_migration_speed.R: Calculate and analyse horizontal migration speeds
+10. create_sensor_file_all_eels.R: Create sensor log file with all eels for analysis, taking into account time settings (UTC), pressure drift and redundant data (e.g. data when on the shelf and during DVM)
 	+ Generate `all_sensor_eels_processed.csv` in `interim` folder
-10. link_circadian.R: Link circadian phases to the dataset
+11. link_circadian.R: Link circadian phases to the dataset
 	+ Generate `data_circadian.csv` in `interim` folder
-11. analyse_circadian.R: calculate depth difference between minima and maxima, create plot and compute statistics
+12. analyse_circadian.R: calculate depth difference between minima and maxima, create plot and compute statistics
 
