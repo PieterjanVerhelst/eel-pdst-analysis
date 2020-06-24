@@ -21,8 +21,8 @@ temp_press <- merge(temp_data, press_data, by="Date")
 
 # Set date as POSIXct
 # temp_press$Date <- as.POSIXct(temp_press$Date, format = "%d/%m/%Y %H:%M")
-temp_press$Date <- ymd_hms(temp$Date)
-temp_press$Date <- as.POSIXct(temp$Date, "%Y-%m-%d %H:%M:%S", tz = "GMT")
+temp_press$Date <- ymd_hms(temp_press$Date)
+temp_press$Date <- as.POSIXct(temp_press$Date, "%Y-%m-%d %H:%M:%S", tz = "GMT")
 
 
 # 2. Calculate mean temperature for top 20 m water layer and total max depth ####
