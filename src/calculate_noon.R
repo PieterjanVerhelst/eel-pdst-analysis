@@ -2,10 +2,38 @@
 # By Pieterjan Verhelst
 # Pieterjan.Verhelst@UGent.be
 
+# Packages
+library(tidyverse)
+library(lubridate)
+
+# Set time zone
+Sys.setenv(TZ='GMT')
+Sys.timezone()
+
+
+# 1. Read in sensor data ####
+sensordata <- read_csv("./data/interim/sensorlogs/sensor_A15789_22-06-2020.csv")
+
+# 2. Aggregate data ####
+sensordata$datetime <- dmy_hms(sensordata$datetime)
+#sensordata$datetime2 <- droplevels(cut(sensordata$datetime, breaks="hour"))   # 1 hour cut
+sensordata$datetime2 <- droplevels(cut(sensordata$datetime, breaks="5 min"))   # 5 min cut
+
+aggdata <- aggregate(cbind(pressure, temperature) ~ datetime2, data=sensordata, FUN=mean, na.rm=TRUE) 
+aggdata$datetime2 <- ymd_hms(aggdata$datetime2)
+
+# Correct for Brussels Time zone UTC + 1
+aggdata$datetime2 <- aggdata$datetime2 - (60*60)
+#aggdata$datetime2 <- aggdata$datetime2 - (2*60*60)  # - 2 hours when UTC+2 (summer daylight saving time)
+aggdata$datetime2 <- as.POSIXct(aggdata$datetime2, "%Y-%m-%d %H:%M:%S", tz = "GMT")
+
+# Reverse depth
+aggdata$pressure <- aggdata$pressure * -1
+
 
 # Create temperature and pressure plot from several days ####
 # Create subset with DVM
-subset <- filter(aggdata, datetime2 >= "2020-02-13 00:00:00", datetime2 <= "2020-02-14 00:00:00")
+subset <- filter(aggdata, datetime2 >= "2020-02-09 06:00:00", datetime2 <= "2020-02-09 18:30:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime2[1], "day"), to= subset$datetime2[nrow(subset)], by = 86400)
@@ -34,27 +62,27 @@ fig_subset_dvm
 
 
 # Create file to fill in values manually ####
-noon <- data.frame(seq(1:6)) 
+noon2 <- data.frame(seq(1:24)) 
 
-noon$depth_range <- NA
-noon$dawn <- NA
-noon$dusk <- NA
+noon2$depth_range <- NA
+noon2$dawn <- NA
+noon2$dusk <- NA
 
 
 # Filter depth layers
-day1 <- filter(aggdata, datetime2 >= "2020-02-13 06:00:00", datetime2 <= "2020-02-13 20:00:00")
+day1 <- filter(aggdata, datetime2 >= "2020-02-09 06:00:00", datetime2 <= "2020-02-09 18:30:00")
 day1$pressure_rnd <- round(day1$pressure, digits=1)
 
-depth_day1 <- filter(day1, pressure_rnd >= '-420.0', pressure_rnd <= '-470.0')
+depth_day1 <- filter(day1, pressure_rnd >= '-400.0', pressure_rnd <= '-450.0')
 depth_day1
 
 
 # Run in values manually
-i = 1
+i = 9
 
-noon$depth_range[i] <- "424.9-428.5"
-noon$dawn[i] <- "2020-02-13 07:45:00"
-noon$dusk[i] <- "2020-02-13 18:45:00"
+noon2$depth_range[i] <- "434.7-435.5"
+noon2$dawn[i] <- "2020-02-09 07:00:00"
+noon2$dusk[i] <- "2020-02-09 18:10:00"
 
 
 # Convert to date-time
