@@ -12,7 +12,7 @@ Sys.timezone()
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensorlogs/sensor_A15789_22-06-2020.csv")
+sensordata <- read_csv("./data/interim/sensorlogs/sensor_A17510_22-06-2020.csv")
 
 # 2. Aggregate data ####
 sensordata$datetime <- dmy_hms(sensordata$datetime)
@@ -33,7 +33,7 @@ aggdata$pressure <- aggdata$pressure * -1
 
 # Create temperature and pressure plot from several days ####
 # Create subset with DVM
-subset <- filter(aggdata, datetime2 >= "2020-02-15 00:00:00", datetime2 <= "2020-02-16 00:00:00")
+subset <- filter(aggdata, datetime2 >= "2020-01-13 07:50:00", datetime2 <= "2020-01-13 17:45:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime2[1], "day"), to= subset$datetime2[nrow(subset)], by = 86400)
@@ -62,27 +62,27 @@ fig_subset_dvm
 
 
 # Create file to fill in values manually ####
-noon2 <- data.frame(seq(1:24)) 
+noon <- data.frame(seq(1:30)) 
 
-noon2$depth_range <- NA
-noon2$dawn <- NA
-noon2$dusk <- NA
+noon$depth_range <- NA
+noon$dawn <- NA
+noon$dusk <- NA
 
 
 # Filter depth layers
-day1 <- filter(aggdata, datetime2 >= "2020-02-14 07:20:00", datetime2 <= "2020-02-14 19:10:00")
+day1 <- filter(aggdata, datetime2 >= "2020-01-13 07:50:00", datetime2 <= "2020-01-13 17:45:00")
 day1$pressure_rnd <- round(day1$pressure, digits=1)
 
-depth_day1 <- filter(day1, pressure_rnd >= '-450.0', pressure_rnd <= '-550.0')
+depth_day1 <- filter(day1, pressure_rnd >= '-550.0', pressure_rnd <= '-600.0')
 depth_day1
 
 
 # Run in values manually
 i = 24
 
-noon2$depth_range[i] <- "501.2-504.1"
-noon2$dawn[i] <- "2020-02-14 07:30:00"
-noon2$dusk[i] <- "2020-02-14 18:40:00"
+noon$depth_range[i] <- "540.7-541.5"
+noon$dawn[i] <- "2020-01-13 08:10:00"
+noon$dusk[i] <- "2020-01-13 17:05:00"
 
 
 # Convert to date-time
@@ -101,4 +101,4 @@ noon$noon_t <- as.POSIXct(as.numeric(noon$noon_num), origin='1970-01-01')
 
 
 # write csv file
-write.csv(noon, "./data/interim/dvm_noon/A15789_dvm_noon.csv", row.names = FALSE)
+write.csv(noon, "./data/interim/dvm_noon/A17510_dvm_noon.csv", row.names = FALSE)
