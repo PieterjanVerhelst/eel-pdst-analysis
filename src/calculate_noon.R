@@ -33,7 +33,7 @@ aggdata$pressure <- aggdata$pressure * -1
 
 # Create temperature and pressure plot from several days ####
 # Create subset with DVM
-subset <- filter(aggdata, datetime2 >= "2020-02-10 07:00:00", datetime2 <= "2020-02-10 19:00:00")
+subset <- filter(aggdata, datetime2 >= "2020-02-15 00:00:00", datetime2 <= "2020-02-16 00:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime2[1], "day"), to= subset$datetime2[nrow(subset)], by = 86400)
@@ -70,19 +70,19 @@ noon2$dusk <- NA
 
 
 # Filter depth layers
-day1 <- filter(aggdata, datetime2 >= "2020-02-10 07:10:00", datetime2 <= "2020-02-10 18:30:00")
+day1 <- filter(aggdata, datetime2 >= "2020-02-14 07:20:00", datetime2 <= "2020-02-14 19:10:00")
 day1$pressure_rnd <- round(day1$pressure, digits=1)
 
-depth_day1 <- filter(day1, pressure_rnd >= '-550.0', pressure_rnd <= '-580.0')
+depth_day1 <- filter(day1, pressure_rnd >= '-450.0', pressure_rnd <= '-550.0')
 depth_day1
 
 
 # Run in values manually
-i = 12
+i = 24
 
-noon2$depth_range[i] <- "570.1-570.7"
-noon2$dawn[i] <- "2020-02-10 08:15:00"
-noon2$dusk[i] <- "2020-02-10 16:10:00"
+noon2$depth_range[i] <- "501.2-504.1"
+noon2$dawn[i] <- "2020-02-14 07:30:00"
+noon2$dusk[i] <- "2020-02-14 18:40:00"
 
 
 # Convert to date-time
