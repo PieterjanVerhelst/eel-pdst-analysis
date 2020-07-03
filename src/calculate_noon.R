@@ -70,19 +70,19 @@ noon$dusk <- NA
 
 
 # Filter depth layers
-day1 <- filter(aggdata, datetime2 >= "2020-01-15 07:30:00", datetime2 <= "2020-01-15 17:45:00")
+day1 <- filter(aggdata, datetime2 >= "2020-01-06 07:30:00", datetime2 <= "2020-01-06 17:45:00")
 day1$pressure_rnd <- round(day1$pressure, digits=1)
 
-depth_day1 <- filter(day1, pressure_rnd >= '-520.0', pressure_rnd <= '-580.0')
+depth_day1 <- filter(day1, pressure_rnd >= '-380.0', pressure_rnd <= '-400.0')
 depth_day1
 
 
 # Run in values manually
-i = 30
+i = 2
 
-noon$depth_range[i] <- "557.0-557.3"
-noon$dawn[i] <- "2020-01-14 08:20:00"
-noon$dusk[i] <- "2020-01-14 17:00:00"
+noon$depth_range[i] <- "385.0-393.3"
+noon$dawn[i] <- "2020-01-06 07:45:00"
+noon$dusk[i] <- "2020-01-06 17:45:00"
 
 
 # Convert to date-time
