@@ -19,7 +19,7 @@ eel_A16031 <- read_csv("./data/interim/sensorlogs/sensor_A16031_08-11-2019.csv")
 eel_A15714 <- read_csv("./data/interim/sensorlogs/sensor_A15714_13-02-2019.csv")
 eel_A15777 <- read_csv("./data/interim/sensorlogs/sensor_A15777_12-11-2019.csv")
 eel_A09359 <- read_csv("./data/interim/sensorlogs/sensor_A09359_11-12-2012.csv")
-eel_A09359$track_tag_id <- 'A09359'
+    eel_A09359$track_tag_id <- "A09359"
 
 
 # Combine all datasets
@@ -28,10 +28,10 @@ all <- do.call("rbind", list(eel_A09359,
                              eel_A15777,
                              eel_A16031))
 
-list_dfs <- list(eel_A16031,
-                 eel_A15714,
-                 eel_A15777,
-                 eel_A09359)
+list_dfs <- list("A16031" = eel_A16031,
+                 "A15714" = eel_A15714,
+                 "A15777" = eel_A15777,
+                 "A09359" = eel_A09359)
 
 
 
@@ -82,12 +82,14 @@ eel_A16031 <- filter(eel_A16031, datetime2 >= "2018-12-09 18:15:00", datetime2 <
 # Batch process
 
 # Aggregate data
-list_dfs2 <- map(list_dfs, ~dmy_hms(.x))
-
+list_dfs2 <- map(list_dfs, ~dmy_hms(.x$datetime))
 
 
 list_dfs2 <- list_dfs %>%
   map(~dmy_hms(.x$datetime)) 
+
+
+
 
 
 
