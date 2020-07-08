@@ -89,6 +89,9 @@ list_dfs2 <- list_dfs %>%
   map(~dmy_hms(.x$datetime)) 
 
 
+list_dfs3 <- list_dfs %>%
+  map_at(c("A16031","A15714","A15777","A09359"), 
+        ~dmy_hms(.x$datetime)) 
 
 
 
