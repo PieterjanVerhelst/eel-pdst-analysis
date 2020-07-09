@@ -97,3 +97,48 @@ list_dfs3 <- list_dfs %>%
 
 
 
+
+# Aggregate data
+eel_A16031$datetime <- dmy_hms(eel_A16031$datetime)
+eel_A16031$datetime2 <- droplevels(cut(eel_A16031$datetime, breaks="1 min"))   # 1 min cut
+eel_A16031 <- aggregate(cbind(pressure, temperature) ~ datetime2, data=eel_A16031, FUN=mean, na.rm=TRUE) 
+eel_A16031$datetime2 <- ymd_hms(eel_A16031$datetime2)
+
+# Aggregate data
+eel_A09359$datetime <- dmy_hms(eel_A09359$datetime)
+eel_A09359$datetime2 <- droplevels(cut(eel_A09359$datetime, breaks="1 min"))   # 1 min cut
+# Tags from Germany measured temperature every 2 minutes. Hence, when aggregating over 1 min, NA's need to be filled in.
+eel_A09359 <- eel_A09359 %>%
+  fill(temperature)
+eel_A09359 <- aggregate(cbind(pressure, temperature) ~ datetime2, data=eel_A09359, FUN=mean, na.rm=TRUE) 
+eel_A09359$datetime2 <- ymd_hms(eel_A09359$datetime2)
+
+
+
+
+  
+  
+all2 <- all %>%
+  group_by(track_tag_id) %>%
+  fill(temperature) %>%   # Fill temperature NA's with previous measured value
+  mutate(datetime = dmy_hms(datetime))
+  
+all2$datetime2 <- droplevels(cut(all2$datetime, breaks="1 min"))   # 1 min cut
+
+all2 <- all2 %>%
+  group_by(track_tag_id, datetime2) %>%
+  summarise(pressure = mean(pressure),
+            temperature = mean(temperature))
+
+all2$datetime2 <- ymd_hms(all2$datetime2)
+
+
+
+
+
+A16031 <- filter(all3, track_tag_id == "A16031")
+
+
+
+
+
