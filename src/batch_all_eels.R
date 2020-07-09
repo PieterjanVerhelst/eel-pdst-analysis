@@ -1,4 +1,3 @@
-
 # Create sensor log file with all eels for analysis, taking into account time settings (UTC), pressure drift and redundant data (e.g. data when on the shelf and during DVM)
 # By Pieterjan Verhelst
 # Pieterjan.Verhelst@UGent.be
@@ -14,7 +13,7 @@ library(lubridate)
 
 
 
-# Read in data
+# Read in data ####
 eel_A16031 <- read_csv("./data/interim/sensorlogs/sensor_A16031_08-11-2019.csv")
 eel_A15714 <- read_csv("./data/interim/sensorlogs/sensor_A15714_13-02-2019.csv")
 eel_A15777 <- read_csv("./data/interim/sensorlogs/sensor_A15777_12-11-2019.csv")
@@ -22,21 +21,24 @@ eel_A09359 <- read_csv("./data/interim/sensorlogs/sensor_A09359_11-12-2012.csv")
     eel_A09359$track_tag_id <- "A09359"
 
 
-# Combine all datasets
+# Combine all datasets ####
 all <- do.call("rbind", list(eel_A09359,
                              eel_A15714,
                              eel_A15777,
                              eel_A16031))
 
-list_dfs <- list("A16031" = eel_A16031,
-                 "A15714" = eel_A15714,
-                 "A15777" = eel_A15777,
-                 "A09359" = eel_A09359)
+#list_dfs <- list("A16031" = eel_A16031,
+#                 "A15714" = eel_A15714,
+#                 "A15777" = eel_A15777,
+#                 "A09359" = eel_A09359)
 
 
 
-# Read in parameter file
+# Read in parameter file ####
 parameters <- read_csv("./additionals/parameters.csv")
+parameters$start_datetime <-  dmy_hm(parameters$start_datetime)
+parameters$end_datetime <-  dmy_hm(parameters$end_datetime)
+parameters$UTC <-  factor(parameters$UTC)
 
 
 
@@ -79,45 +81,9 @@ eel_A16031 <- filter(eel_A16031, datetime2 >= "2018-12-09 18:15:00", datetime2 <
 
 
 
-# Batch process
-
-# Aggregate data
-list_dfs2 <- map(list_dfs, ~dmy_hms(.x$datetime))
 
 
-list_dfs2 <- list_dfs %>%
-  map(~dmy_hms(.x$datetime)) 
-
-
-list_dfs3 <- list_dfs %>%
-  map_at(c("A16031","A15714","A15777","A09359"), 
-        ~dmy_hms(.x$datetime)) 
-
-
-
-
-
-
-# Aggregate data
-eel_A16031$datetime <- dmy_hms(eel_A16031$datetime)
-eel_A16031$datetime2 <- droplevels(cut(eel_A16031$datetime, breaks="1 min"))   # 1 min cut
-eel_A16031 <- aggregate(cbind(pressure, temperature) ~ datetime2, data=eel_A16031, FUN=mean, na.rm=TRUE) 
-eel_A16031$datetime2 <- ymd_hms(eel_A16031$datetime2)
-
-# Aggregate data
-eel_A09359$datetime <- dmy_hms(eel_A09359$datetime)
-eel_A09359$datetime2 <- droplevels(cut(eel_A09359$datetime, breaks="1 min"))   # 1 min cut
-# Tags from Germany measured temperature every 2 minutes. Hence, when aggregating over 1 min, NA's need to be filled in.
-eel_A09359 <- eel_A09359 %>%
-  fill(temperature)
-eel_A09359 <- aggregate(cbind(pressure, temperature) ~ datetime2, data=eel_A09359, FUN=mean, na.rm=TRUE) 
-eel_A09359$datetime2 <- ymd_hms(eel_A09359$datetime2)
-
-
-
-
-  
-  
+# Aggregate data per 1 min ####
 all2 <- all %>%
   group_by(track_tag_id) %>%
   fill(temperature) %>%   # Fill temperature NA's with previous measured value
@@ -127,11 +93,58 @@ all2$datetime2 <- droplevels(cut(all2$datetime, breaks="1 min"))   # 1 min cut
 
 all2 <- all2 %>%
   group_by(track_tag_id, datetime2) %>%
-  summarise(pressure = mean(pressure),
-            temperature = mean(temperature))
+  summarise(pressure = mean(pressure),            # Calculate mean pressure
+            temperature = mean(temperature))      # Calculate mean temperature
 
 all2$datetime2 <- ymd_hms(all2$datetime2)
 
+
+# Time zone correction ####
+
+all3 <- all2[sample(nrow(all2), 50), ]
+
+parameters$ID <- factor(parameters$ID)
+all3$track_tag_id <- factor(all3$track_tag_id)
+all3 <- all3 %>%
+  rename(ID = track_tag_id)
+
+
+
+
+for (i in 1:dim(all3)[1]){
+  if ((all3$track_tag_id[i] == parameters$ID) & (parameters$UTC == "-1")){
+    all3$datetime2[i] = all3$datetime2[i] - (60*60)
+  } else if ((all3$track_tag_id[i] == parameters$ID) & (parameters$UTC == "-2")){
+    all3$datetime2[i] = all3$datetime2[i] - (2*60*60)
+  }}
+
+
+
+# other option: merge parameter file with all-dataset and apply rules within 1 dataset
+# https://stackoverflow.com/questions/32406412/r-where-a-value-in-two-data-frames-is-the-same-apply-a-set-of-condition-on-one
+
+all4 <- left_join(all3, parameters) %>%
+  mutate(datetime2 = ifelse(UTC == "-1", all3$datetime2 - (60*60), 
+                            ifelse(UTC == "-2", all3$datetime2 - (2*60*60))))
+                                   
+all4$datetime3 <- as.POSIXct(strptime(all4$datetime2, format = "%d/%m/%Y %H:%M:%S"))
+                                   
+                                   
+                                   
+select(-break.1, -break.2, -break.3)
+
+
+
+
+
+
+
+
+
+# Correct for Brussels Time zone UTC + 1
+eel_A16031$datetime2 <- eel_A16031$datetime2 - (60*60)
+#aggdata$datetime2 <- aggdata$datetime2 - (2*60*60)  # - 2 hours when UTC+2 (summer daylight saving time)
+eel_A16031$datetime2 <- as.POSIXct(eel_A16031$datetime2, "%Y-%m-%d %H:%M:%S", tz = "GMT")
 
 
 
