@@ -26,6 +26,10 @@ all <- do.call("rbind", list(eel_A09359,
                              eel_A15714,
                              eel_A15777,
                              eel_A16031))
+    
+all <- all %>%
+  rename(ID = track_tag_id)
+    
 
 #list_dfs <- list("A16031" = eel_A16031,
 #                 "A15714" = eel_A15714,
@@ -77,7 +81,7 @@ eel_A16031$corrected_depth <- eel_A16031$corrected_depth * -1
 # Remove data before release and DVM part; hence, select data on continental shelf
 eel_A16031 <- filter(eel_A16031, datetime2 >= "2018-12-09 18:15:00", datetime2 <= "2019-02-13 00:00:00")
 
-
+###################
 
 
 
@@ -85,14 +89,14 @@ eel_A16031 <- filter(eel_A16031, datetime2 >= "2018-12-09 18:15:00", datetime2 <
 
 # Aggregate data per 1 min ####
 all2 <- all %>%
-  group_by(track_tag_id) %>%
+  group_by(ID) %>%
   fill(temperature) %>%   # Fill temperature NA's with previous measured value
   mutate(datetime = dmy_hms(datetime))
   
 all2$datetime2 <- droplevels(cut(all2$datetime, breaks="1 min"))   # 1 min cut
 
 all2 <- all2 %>%
-  group_by(track_tag_id, datetime2) %>%
+  group_by(ID, datetime2) %>%
   summarise(pressure = mean(pressure),            # Calculate mean pressure
             temperature = mean(temperature))      # Calculate mean temperature
 
@@ -100,56 +104,14 @@ all2$datetime2 <- ymd_hms(all2$datetime2)
 
 
 # Time zone correction ####
-
-all3 <- all2[sample(nrow(all2), 50), ]
-
-parameters$ID <- factor(parameters$ID)
-all3$track_tag_id <- factor(all3$track_tag_id)
-all3 <- all3 %>%
-  rename(ID = track_tag_id)
+all2 <- left_join(all2, parameters, by = "ID") %>%
+  mutate(datetime = ifelse(UTC == "-1", (datetime2 - (60*60)), 
+                            ifelse(UTC == "-2", datetime2 - (2*60*60))))
+all2$datetime <- as.POSIXct(all2$datetime, origin='1970-01-01 00:00:00')
+all2$time_diff <- all2$datetime2 - all2$datetime    # Check for time zone correction
 
 
 
-
-for (i in 1:dim(all3)[1]){
-  if ((all3$track_tag_id[i] == parameters$ID) & (parameters$UTC == "-1")){
-    all3$datetime2[i] = all3$datetime2[i] - (60*60)
-  } else if ((all3$track_tag_id[i] == parameters$ID) & (parameters$UTC == "-2")){
-    all3$datetime2[i] = all3$datetime2[i] - (2*60*60)
-  }}
-
-
-
-# other option: merge parameter file with all-dataset and apply rules within 1 dataset
-# https://stackoverflow.com/questions/32406412/r-where-a-value-in-two-data-frames-is-the-same-apply-a-set-of-condition-on-one
-
-all4 <- left_join(all3, parameters) %>%
-  mutate(datetime2 = ifelse(UTC == "-1", all3$datetime2 - (60*60), 
-                            ifelse(UTC == "-2", all3$datetime2 - (2*60*60))))
-                                   
-all4$datetime3 <- as.POSIXct(strptime(all4$datetime2, format = "%d/%m/%Y %H:%M:%S"))
-                                   
-                                   
-                                   
-select(-break.1, -break.2, -break.3)
-
-
-
-
-
-
-
-
-
-# Correct for Brussels Time zone UTC + 1
-eel_A16031$datetime2 <- eel_A16031$datetime2 - (60*60)
-#aggdata$datetime2 <- aggdata$datetime2 - (2*60*60)  # - 2 hours when UTC+2 (summer daylight saving time)
-eel_A16031$datetime2 <- as.POSIXct(eel_A16031$datetime2, "%Y-%m-%d %H:%M:%S", tz = "GMT")
-
-
-
-
-A16031 <- filter(all3, track_tag_id == "A16031")
 
 
 
