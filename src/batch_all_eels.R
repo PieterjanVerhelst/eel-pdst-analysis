@@ -39,9 +39,10 @@ all <- all %>%
 
 
 # Read in parameter file ####
-parameters <- read_csv("./additionals/parameters.csv")
+parameters <- read_csv("./data/external/parameters.csv")
 parameters$start_datetime <-  dmy_hm(parameters$start_datetime)
 parameters$end_datetime <-  dmy_hm(parameters$end_datetime)
+parameters$popoff_datetime <-  dmy_hm(parameters$popoff_datetime)
 parameters$UTC <-  factor(parameters$UTC)
 
 
@@ -121,11 +122,31 @@ subset <- filter(eel_A16031,
                    datetime2 == as.POSIXct("2019-02-16 04:25:00", "%Y-%m-%d %H:%M:%S", tz = "GMT"))
 plot(subset$datetime2, subset$pressure)
 abline(lm(subset$pressure ~ subset$datetime2))
-lm(subset$pressure ~ subset$datetime2)  # To get coefficient and estimates
+model <- lm(subset$pressure ~ subset$datetime2)  # To get coefficient and estimates
 # depth = (5.567e-07 * date)  -8.589e+02
 eel_A16031$numericdate <- as.numeric(eel_A16031$datetime2)
 eel_A16031$regression <- (5.567e-07    * eel_A16031$numericdate)   -8.589e+02
 eel_A16031$corrected_depth <- eel_A16031$pressure - eel_A16031$regression
 
+# Code structure:
+# group by ID
+# Filter datetime == start
+# Filter datetime == popoff
+
+test <- all2 %>%
+  group_by(ID) %>%
+  filter(datetime == start_datetime | datetime == popoff_datetime,
+         pressure_correction != 0) %>%
+  mutate(numericdate = as.numeric(datetime))
+
+
+
+
+#         model = transpose(as.data.frame((lm(pressure ~ datetime))$coefficients)))
+
+
+
+
+df_test <- transpose(as.data.frame(model$coefficients))
 
 
