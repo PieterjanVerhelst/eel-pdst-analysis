@@ -111,9 +111,21 @@ all2$datetime <- as.POSIXct(all2$datetime, origin='1970-01-01 00:00:00')
 all2$time_diff <- all2$datetime2 - all2$datetime    # Check for time zone correction
 
 
+# Correct for depth drift ####
 
-
-
+# Correct for depth drift
+plot(eel_A16031$datetime2, eel_A16031$pressure)
+# Select date: moment of release - 15 min and pop-off moment (moment it was certainly at the surface)
+subset <- filter(eel_A16031, 
+                 datetime2 == as.POSIXct("2018-12-09 18:00:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") |
+                   datetime2 == as.POSIXct("2019-02-16 04:25:00", "%Y-%m-%d %H:%M:%S", tz = "GMT"))
+plot(subset$datetime2, subset$pressure)
+abline(lm(subset$pressure ~ subset$datetime2))
+lm(subset$pressure ~ subset$datetime2)  # To get coefficient and estimates
+# depth = (5.567e-07 * date)  -8.589e+02
+eel_A16031$numericdate <- as.numeric(eel_A16031$datetime2)
+eel_A16031$regression <- (5.567e-07    * eel_A16031$numericdate)   -8.589e+02
+eel_A16031$corrected_depth <- eel_A16031$pressure - eel_A16031$regression
 
 
 
