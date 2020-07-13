@@ -10,10 +10,11 @@ Sys.timezone()
 # Packages
 library(tidyverse)
 library(lubridate)
+library(broom) # run regression per grouping variable (in 'Correct for depth drift')
 
 
 
-# Read in data ####
+# 1. Read in data ####
 eel_A16031 <- read_csv("./data/interim/sensorlogs/sensor_A16031_08-11-2019.csv")
 eel_A15714 <- read_csv("./data/interim/sensorlogs/sensor_A15714_13-02-2019.csv")
 eel_A15777 <- read_csv("./data/interim/sensorlogs/sensor_A15777_12-11-2019.csv")
@@ -38,115 +39,105 @@ all <- all %>%
 
 
 
-# Read in parameter file ####
+# 2. Read in parameter file ####
 parameters <- read_csv("./data/external/parameters.csv")
 parameters$start_datetime <-  dmy_hm(parameters$start_datetime)
 parameters$end_datetime <-  dmy_hm(parameters$end_datetime)
+parameters$bank_datetime <-  dmy_hm(parameters$bank_datetime)
 parameters$popoff_datetime <-  dmy_hm(parameters$popoff_datetime)
 parameters$UTC <-  factor(parameters$UTC)
 
 
 
-
-# Eel A16031####
-
-
-# Aggregate data
-eel_A16031$datetime <- dmy_hms(eel_A16031$datetime)
-eel_A16031$datetime2 <- droplevels(cut(eel_A16031$datetime, breaks="1 min"))   # 1 min cut
-eel_A16031 <- aggregate(cbind(pressure, temperature) ~ datetime2, data=eel_A16031, FUN=mean, na.rm=TRUE) 
-eel_A16031$datetime2 <- ymd_hms(eel_A16031$datetime2)
-
-# Correct for Brussels Time zone UTC + 1
-eel_A16031$datetime2 <- eel_A16031$datetime2 - (60*60)
-#aggdata$datetime2 <- aggdata$datetime2 - (2*60*60)  # - 2 hours when UTC+2 (summer daylight saving time)
-eel_A16031$datetime2 <- as.POSIXct(eel_A16031$datetime2, "%Y-%m-%d %H:%M:%S", tz = "GMT")
-
-# Correct for depth drift
-plot(eel_A16031$datetime2, eel_A16031$pressure)
-# Select date: moment of release - 15 min and pop-off moment (moment it was certainly at the surface)
-subset <- filter(eel_A16031, 
-                 datetime2 == as.POSIXct("2018-12-09 18:00:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") |
-                   datetime2 == as.POSIXct("2019-02-16 04:25:00", "%Y-%m-%d %H:%M:%S", tz = "GMT"))
-plot(subset$datetime2, subset$pressure)
-abline(lm(subset$pressure ~ subset$datetime2))
-lm(subset$pressure ~ subset$datetime2)  # To get coefficient and estimates
-# depth = (5.567e-07 * date)  -8.589e+02
-eel_A16031$numericdate <- as.numeric(eel_A16031$datetime2)
-eel_A16031$regression <- (5.567e-07    * eel_A16031$numericdate)   -8.589e+02
-eel_A16031$corrected_depth <- eel_A16031$pressure - eel_A16031$regression
-
-# Reverse depth
-eel_A16031$corrected_depth <- eel_A16031$corrected_depth * -1
-
-# Remove data before release and DVM part; hence, select data on continental shelf
-eel_A16031 <- filter(eel_A16031, datetime2 >= "2018-12-09 18:15:00", datetime2 <= "2019-02-13 00:00:00")
-
-###################
-
-
-
-
-
-# Aggregate data per 1 min ####
-all2 <- all %>%
+# 3. Aggregate data per 1 min ####
+all <- all %>%
   group_by(ID) %>%
   fill(temperature) %>%   # Fill temperature NA's with previous measured value
   mutate(datetime = dmy_hms(datetime))
   
-all2$datetime2 <- droplevels(cut(all2$datetime, breaks="1 min"))   # 1 min cut
+all$datetime2 <- droplevels(cut(all$datetime, breaks="1 min"))   # 1 min cut
 
-all2 <- all2 %>%
+all <- all %>%
   group_by(ID, datetime2) %>%
   summarise(pressure = mean(pressure),            # Calculate mean pressure
             temperature = mean(temperature))      # Calculate mean temperature
 
-all2$datetime2 <- ymd_hms(all2$datetime2)
+all$datetime2 <- ymd_hms(all$datetime2)
 
 
-# Time zone correction ####
-all2 <- left_join(all2, parameters, by = "ID") %>%
+# 4. Time zone correction ####
+all <- left_join(all, parameters, by = "ID") %>%
   mutate(datetime = ifelse(UTC == "-1", (datetime2 - (60*60)), 
                             ifelse(UTC == "-2", datetime2 - (2*60*60))))
-all2$datetime <- as.POSIXct(all2$datetime, origin='1970-01-01 00:00:00')
-all2$time_diff <- all2$datetime2 - all2$datetime    # Check for time zone correction
+all$datetime <- as.POSIXct(all$datetime, origin='1970-01-01 00:00:00')
+all$time_diff <- all$datetime2 - all$datetime    # Check for time zone correction
 
 
-# Correct for depth drift ####
+# 5. Correct for depth drift ####
 
-# Correct for depth drift
-plot(eel_A16031$datetime2, eel_A16031$pressure)
-# Select date: moment of release - 15 min and pop-off moment (moment it was certainly at the surface)
-subset <- filter(eel_A16031, 
-                 datetime2 == as.POSIXct("2018-12-09 18:00:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") |
-                   datetime2 == as.POSIXct("2019-02-16 04:25:00", "%Y-%m-%d %H:%M:%S", tz = "GMT"))
-plot(subset$datetime2, subset$pressure)
-abline(lm(subset$pressure ~ subset$datetime2))
-model <- lm(subset$pressure ~ subset$datetime2)  # To get coefficient and estimates
-# depth = (5.567e-07 * date)  -8.589e+02
-eel_A16031$numericdate <- as.numeric(eel_A16031$datetime2)
-eel_A16031$regression <- (5.567e-07    * eel_A16031$numericdate)   -8.589e+02
-eel_A16031$corrected_depth <- eel_A16031$pressure - eel_A16031$regression
-
-# Code structure:
-# group by ID
-# Filter datetime == start
-# Filter datetime == popoff
-
-test <- all2 %>%
+# Select rows with bank datetime and popoff datetime (= when tag was at atmospheric pressure)
+bank_popoff <- all %>%
   group_by(ID) %>%
-  filter(datetime == start_datetime | datetime == popoff_datetime,
+  filter(datetime == bank_datetime | datetime == popoff_datetime,
          pressure_correction != 0) %>%
   mutate(numericdate = as.numeric(datetime))
 
+# Apply linear regression per ID
+model <- bank_popoff %>%
+  group_by(ID) %>%
+  do(fit_model = lm(pressure ~ datetime, data = .))
+
+# Extract model coefficients in a tidy dataframe
+model_coef <- tidy(model, fit_model) %>%
+  spread(key = term, value = estimate) %>%
+  select(-std.error, -statistic, -p.value) %>%
+  rename(intercept_val = `(Intercept)`,
+         datetime_val = datetime)
+
+# Join values to dataset
+all <- left_join(all, model_coef, by = "ID")
+
+# Calculate corrected depth
+all$numericdate <- as.numeric(all$datetime)
+all$regression <- (all$datetime_val  * all$numericdate)  + all$intercept_val
+all$corrected_depth <- all$pressure - all$regression
+
+# For some eels, no correction could be applied. Hence, take original pressure data.
+all <- all %>%
+  mutate(corrected_depth2 = coalesce(corrected_depth, pressure))
+
+# Reverse depth
+all$corrected_depth2 <- all$corrected_depth2 * -1
+
+
+# 6. Remove data before release and
+# - till DVM
+# - till one hour before predatino
+# - 15 minutes before popoff time
+# --> Hence, select data on continental shelf
+all <- all %>%
+  group_by(ID) %>%
+  filter(datetime >= start_datetime, datetime <= end_datetime)
+
+
+# Check depth profiles before and after correction
+#ind_eel <- filter(all, ID == "A16031")
+
+#plot(ind_eel$datetime, ind_eel$pressure)
+#plot(ind_eel$datetime, ind_eel$corrected_depth2)
 
 
 
-#         model = transpose(as.data.frame((lm(pressure ~ datetime))$coefficients)))
+# 7. Clean dataset  ####
+all <- all %>%
+  select(ID, datetime, numericdate, corrected_depth2, temperature) %>%
+  rename(corrected_depth = corrected_depth2)
 
 
 
 
-df_test <- transpose(as.data.frame(model$coefficients))
+write.csv(all, "./data/interim/batch_processed_eels.csv")
+
+
 
 
