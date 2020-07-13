@@ -17,10 +17,12 @@ library(suncalc)
 
 
 # 1. Load sensor dataset with all eels ####
-data <- read_csv("./data/interim/all_sensor_eels_processed.csv")
+data <- read_csv("./data/interim/batch_processed_eels.csv")
 
 # Process columns
-data$Date <- as.Date(data$datetime2)
+data$Date <- as.Date(data$datetime)
+data$ID <- gsub( "A0", "", as.character(data$ID))
+data$ID <- gsub( "A", "", as.character(data$ID))
 data$ID <- factor(data$ID)
 
 
@@ -50,7 +52,7 @@ tr_data <- filter(tr_data, ID == "9359" |
                   ID == "15714" |
                   ID == "15777" |
                   ID == "16031")
-
+tr_data$ID <- factor(tr_data$ID) # rerun 'factor()' so the number of levels is set accurately
 
 
 # 3. Merge datasets ####
@@ -58,8 +60,6 @@ data_circ <- left_join(x = data, y = tr_data, by=c("ID","Date"))
 data_circ$avg_lat <- as.numeric(data_circ$avg_lat)  # important to convert lat and lon to numeric for getSunlightTimes()
 data_circ$avg_lon <- as.numeric(data_circ$avg_lon)
 #plot(data_circ$avg_lon, data_circ$avg_lat)
-
-
 
 
 
@@ -85,7 +85,7 @@ sun <- sun %>%
 
 # Merge sunrise and sunset data to data_circ dataset
 data_circ <- left_join(x = data_circ, y = sun, by=c("Date","avg_lat","avg_lon"))
-data_circ$night_day <- ifelse(data_circ$datetime2 > data_circ$sunrise & data_circ$datetime2 < data_circ$sunset, 'day', 'night')
+data_circ$night_day <- ifelse(data_circ$datetime > data_circ$sunrise & data_circ$datetime < data_circ$sunset, 'day', 'night')
 
 
 
