@@ -1,6 +1,6 @@
-# Analyse circadian phases
-# By Damiano Oldoni (calculating depth differences) and Pieterjan Verhelst (statistics)
-# damiano.oldoni@inbo.be and Pieterjan.Verhelst@ugent.be
+# Calculate depth differences between minima and maxima
+# By Damiano Oldoni
+# damiano.oldoni@inbo.be
 
 # Packages
 library(tidyverse) # To do datascience
@@ -11,7 +11,7 @@ library(suncalc)  # To get sunrise, sunset
 
 
 # Import data ####
-data <- read_csv("./data/interim/data_circadian.csv", na = "", guess_max = 100000)
+data <- read_csv("./data/interim/data_circadian_tidal.csv", na = "", guess_max = 100000)
 
 
 # Find minima and maxima ####
@@ -60,19 +60,18 @@ data_min_max %>%
 
 
 
-
 # Create plot with day night ####
 # Create subsets of several days
 subset <- filter(data_min_max,
                  ID == "16031",
-                 datetime2 >= "2019-02-01 00:00:00", datetime2 <= "2019-02-07 00:00:00")
+                 datetime >= "2019-02-01 00:00:00", datetime <= "2019-02-07 00:00:00")
 
 # Create line every 24 hours
-gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime2[1], "day"), to= subset$datetime2[nrow(subset)], by = 86400)
-class(lubridate::floor_date(subset$datetime2[1], "day"))
+gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
+class(lubridate::floor_date(subset$datetime[1], "day"))
 
 # Create plot
-fig_circadian <- ggplot(data = subset, aes(x = datetime2, y = depth_change), size = 1.0, alpha = 0.5, colour = "black") +
+fig_circadian <- ggplot(data = subset, aes(x = datetime, y = depth_change), size = 1.0, alpha = 0.5, colour = "black") +
   geom_rect(aes(xmin=sunrise, xmax=sunset, ymin=-Inf, ymax=+Inf), fill='grey', alpha=0.3) +
   geom_line(binaxis='x', size=1.0, binwidth = 1) +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
@@ -93,37 +92,4 @@ fig_circadian
 # Calculate summary values
 data_min_max <- na.omit(data_min_max)
 aggregate(data_min_max$depth_change, list(data_min_max$night_day, data_min_max$ID), mean)
-
-
-
-# Statistical analysis ####
-
-subset2 <- filter(data_min_max,
-                 ID == "15777",
-                 datetime2 >= "2018-12-22 16:00:00", datetime2 <= "2018-12-22 19:00:00")
-
-
-# Checking normality
-qqPlot(data_min_max$depth_change)
-
-
-# Checking homogeneity of variances
-# http://www.sthda.com/english/wiki/compare-multiple-sample-variances-in-r
-bartlett.test(depth_change ~ night_day, data = data_min_max)
-leveneTest(depth_change ~ night_day, data = data_min_max)
-fligner.test(depth_change ~ night_day, data = data_min_max)
-
-
-t_test <- t.test(data_min_max$depth_change~data_min_max$night_day, var.equal = FALSE)
-t_test
-
-
-
-qqPlot(data_min_max$depth_change)
-shapiro.test(data_min_max$depth_change)
-
-
-
-
-
 
