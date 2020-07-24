@@ -9,8 +9,8 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 ### Data
 
 * `/raw:`
-	This folder contains the raw download files with temperature and depth data from the archival tags (pDST and PSAT)
-	the folder `non-processed-files`contains raw files that have not been processed and put in the `interim` folder
+	This folder contains the raw download files with temperature and depth data from the archival tags (pDST and PSAT).
+	The folder `non-processed-files`contains raw files that have not been processed and put in the `interim` folder.
 
 * `/interim:`
 	+ `/daylogs:` The daylog-files contain daily summaries of temperature and pressure data (min, mean and max). 
