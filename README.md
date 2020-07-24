@@ -50,5 +50,5 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 	+ Generate `data_circadian.csv` in `interim` folder
 12. link_tidal.R: Link tidal data to the dataset (tidal data obtained via John Aldridge (CEFAS, UK))
 	+ Generate `data_circadian_tidal.csv` in `interim` folder
-13. analyse_circadian.R: calculate depth difference between minima and maxima, create plot and compute statistics
+13. calc_depth_diff.R: calculate depth difference between minima and maxima, create plot and compute statistics
 
