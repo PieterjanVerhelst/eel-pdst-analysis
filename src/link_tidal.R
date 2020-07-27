@@ -63,10 +63,30 @@ tidal <- as.data.frame(tidal)
 data$datehour <- lubridate::floor_date(data$datetime, "hour")
 tidal$datehour <- lubridate::floor_date(tidal$datetime, "hour")
 
-# Remove double dates per eel (ID)
-tidal <- tidal[!duplicated(tidal[c('ID','datehour')]),] 
+# Remove double dates per eel (ID) from tidal dataset
+#tidal <- tidal[!duplicated(tidal[c('ID','datehour')]),] 
+tidal <- tidal %>%     # Add ID number to duplicate dates
+  group_by(ID, datehour) %>%
+  add_tally()
 
-# Merge datasets
+duplicates <- filter(tidal, n == 2)   # Filter duplicate dates
+duplicates <- duplicates %>%             # Add ID number to distinguish between first and second duplicate
+  mutate(number_id = row_number())
+duplicates <- filter(duplicates, number_id == 2)  # Filter second duplicates
+
+tidal <- filter(tidal, n != 2)   # Remove duplicate dates from tidal dataset
+
+# Bind 'duplicates' dataset with second duplicates to the tidal dataset
+tidal <- ungroup(tidal)
+tidal$n <- NULL
+duplicates <- ungroup(duplicates)
+duplicates$n <- NULL
+duplicates$number_id <- NULL
+
+tidal <- rbind(tidal, duplicates)
+
+
+# Merge tracking dataset with tidal dataset
 data_tidal <- left_join(data, tidal, by = c('ID', 'datehour'))
 
 # Process dataset
@@ -74,8 +94,6 @@ data_tidal <- rename(data_tidal, datetime = datetime.x)
 data_tidal$datetime.y <- NULL
 data_tidal$date <- NULL
 data_tidal$time <- NULL
-
-
 
 
 
