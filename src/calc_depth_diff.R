@@ -6,7 +6,7 @@
 library(tidyverse) # To do datascience
 library(tidylog)  # To get infos about dplyr functions
 library(suncalc)  # To get sunrise, sunset
-
+library(schoolmath)  # To check if data (tidal direction) is negative
 
 
 
@@ -87,6 +87,32 @@ fig_circadian <- ggplot(data = subset, aes(x = datetime, y = depth_change), size
   #geom_vline(xintercept=ymd_hms(release), colour="blue") + # Release date and time
   geom_vline(xintercept=gnu, color = "red", size = 1) 
 fig_circadian
+
+
+# Create circular plot
+subset <- filter(data_min_max,
+                 ID == "16031")
+subset$neg_degr <- is.negative(subset$direction)
+subset$direction <- as.numeric(subset$direction)
+subset$degr_360 <- NA
+
+for (i in 1:dim(subset)[1]){
+  if (subset$neg_degr[i] == TRUE){
+    subset$degr_360[i] = subset$direction[i] + 360
+  } else{
+    subset$degr_360[i] = subset$direction[i]
+  }}
+
+
+
+ggplot(subset, aes(x = degr_360, y = depth_change)) +
+  coord_polar(theta = "x", start = 0) +
+  geom_bar(stat = "identity") +
+  scale_x_continuous(breaks = seq(0, 360, 60))
+
+
+
+
 
 
 # Calculate summary values
