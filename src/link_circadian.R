@@ -168,42 +168,5 @@ data_circ <- rename(data_circ, night_day = nigth_day)
 write.csv(data_circ, "./data/interim/data_circadian.csv")
 
 
-# 6. Create plot with day night ####
-# Create subsets of several days
-subset <- filter(data_circ,
-                 ID == "16031",
-                 datetime >= "2019-02-04 00:00:00", 
-                 datetime <= "2019-02-07 00:00:00")
-
-# Create line every 24 hours
-gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to = subset$datetime[nrow(subset)], by = 86400)
-class(lubridate::floor_date(subset$datetime[1], "day"))
-
-
-fig_circadian <- ggplot(subset, aes(x = datetime,
-                                    y = temperature)) +
-  geom_line(binaxis='x', size=1.0, binwidth = 1) +
-  geom_rect(data = subset %>% 
-              filter(night_day == "night") %>%
-              distinct(sunset, sunrise, night_day),
-            inherit.aes = FALSE,
-            mapping = aes(xmin = sunset,
-                          xmax = sunrise,
-                          ymin=-Inf,
-                          ymax=+Inf), fill = "grey", alpha=0.5) +
-  geom_line(data = subset, aes(x = datetime, y = corrected_depth/2), size = 1.0, alpha = 0.5, colour = "purple") +
-  #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
-  scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
-  theme_minimal() +
-  ylab("Temperature (°C)") +
-  xlab("Date") +
-  theme(axis.title.y = element_text(margin = margin(r = 10))) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  theme(axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14)) +
-  scale_x_datetime(date_breaks  ="1 hour") +
-  #geom_vline(xintercept=ymd_hms(release), colour="blue") + # Release date and time
-  geom_vline(xintercept=gnu, color = "red", size = 1) 
-fig_circadian
 
 
