@@ -1,6 +1,6 @@
 # Link circadian phases to the dataset
-# By Pieterjan Verhelst
-# Pieterjan.Verhelst@UGent.be
+# By Pieterjan Verhelst and Damiano Oldoni
+# Pieterjan.Verhelst@UGent.be, damiano.oldoni@inbo.be
 
 
 
@@ -45,34 +45,13 @@ tr_data$Date <- as.Date(tr_data$Date)
 tr_data$ID <- factor(tr_data$ID)
 
 # Remove double dates per eel (ID)
-#tr_data <- tr_data[!duplicated(tr_data[c('ID','Date')]),]
-tr_data <- tr_data %>%     # Add ID number to duplicate dates
-  group_by(ID, Date) %>%
-  add_tally()
-
-duplicates <- filter(tr_data, n == 2)   # Filter duplicate dates
-duplicates <- duplicates %>%             # Add ID number to distinguish between first and second duplicate
-  mutate(number_id = row_number())
-duplicates <- filter(duplicates, number_id == 2)  # Filter second duplicates
-
-
-tr_data <- filter(tr_data, n != 2)   # Remove duplicate dates from tracking dataset
-
-# Bind 'duplicates' dataset with second duplicates to tracking dataset
-tr_data <- ungroup(tr_data)
-tr_data$n <- NULL
-duplicates <- ungroup(duplicates)
-duplicates$n <- NULL
-duplicates$number_id <- NULL
-
-tr_data <- rbind(tr_data, duplicates)
-
+tr_data <- tr_data[!duplicated(tr_data[c('ID','Date')]),]
 
 # Select relevant eels
 tr_data <- filter(tr_data, ID == "9359" |
-                  ID == "15714" |
-                  ID == "15777" |
-                  ID == "16031")
+                    ID == "15714" |
+                    ID == "15777" |
+                    ID == "16031")
 tr_data$ID <- factor(tr_data$ID) # rerun 'factor()' so the number of levels is set accurately
 
 
@@ -106,8 +85,82 @@ sun <- sun %>%
 
 # Merge sunrise and sunset data to data_circ dataset
 data_circ <- left_join(x = data_circ, y = sun, by=c("Date","avg_lat","avg_lon"))
-data_circ$night_day <- ifelse(data_circ$datetime > data_circ$sunrise & data_circ$datetime < data_circ$sunset, 'day', 'night')
 
+# Get ordered series of sunsets and sunrises
+series_sunsets <- unique(data_circ$sunset)
+series_sunsets <- series_sunsets[order(series_sunsets)]
+
+series_sunrises <- unique(data_circ$sunrise)
+series_sunrises <- series_sunsets[order(series_sunrises)]
+
+# Transform to df (tibble)
+series_sunsets <- tibble(sunset = series_sunsets)
+series_sunrises <- tibble(sunrise = series_sunrises)
+
+# Add previous sunset
+series_sunsets <-
+  series_sunsets %>%
+  mutate(previous_sunset = lag(sunset))
+
+# Add next sunrise
+series_sunrises <-
+  series_sunrises %>%
+  mutate(next_sunrise = lead(sunrise))
+
+# Identify day and night periods by using series_sunsets
+data_circ <-
+  data_circ %>%
+  left_join(series_sunsets,
+            by = c("sunset"))
+
+data_circ <-
+  data_circ %>%
+  left_join(series_sunrises,
+            by = c("sunrise"))
+
+data_circ <-
+  data_circ %>%
+  mutate(start_sunmoment = case_when(
+    datetime < sunrise ~ previous_sunset,
+    datetime > sunset ~ sunset,
+    TRUE ~ sunrise),
+    next_sunmoment = case_when(
+      datetime > sunset ~ next_sunrise,
+      datetime < sunrise ~ sunrise,
+      TRUE ~ sunset))
+
+# Add a progressive id to each night and day for each animal
+data_circ <-
+  data_circ %>%
+  distinct(start_sunmoment) %>%
+  arrange(start_sunmoment) %>%
+  mutate(n_day_phase = row_number()) %>%
+  right_join(data_circ,
+             by = "start_sunmoment")
+
+# Add night_day column instead of 
+# data_circ$night_day <- ifelse(data_circ$datetime > data_circ$sunrise & data_circ$datetime < data_circ$sunset, 'day', 'night')
+data_circ <-
+  data_circ %>%
+  mutate(nigth_day = if_else(datetime > sunset |
+                               datetime < sunrise,
+                             "night",
+                             "day"))
+
+# Set sunset of day before (= start_sunmoment) and  sunrise of day after for all values of the night
+data_circ <-
+  data_circ %>%
+  mutate(sunset = if_else(nigth_day == "night",
+                          start_sunmoment,
+                          sunset),
+         sunrise = if_else(nigth_day == "night",
+                           next_sunmoment,
+                           sunrise))
+
+
+# Rearrange columns
+data_circ <- select(data_circ, ID, datetime, numericdate, corrected_depth, temperature, Date, avg_lat, avg_lon, med_lat, med_lon, sunrise, sunset, previous_sunset, next_sunrise, start_sunmoment, next_sunmoment, nigth_day)
+data_circ <- rename(data_circ, night_day = nigth_day)
 
 
 
@@ -115,24 +168,29 @@ data_circ$night_day <- ifelse(data_circ$datetime > data_circ$sunrise & data_circ
 write.csv(data_circ, "./data/interim/data_circadian.csv")
 
 
-
-
-
 # 6. Create plot with day night ####
 # Create subsets of several days
 subset <- filter(data_circ,
                  ID == "16031",
-                 datetime >= "2019-02-04 00:00:00", datetime <= "2019-02-07 00:00:00")
+                 datetime >= "2019-02-04 00:00:00", 
+                 datetime <= "2019-02-07 00:00:00")
 
 # Create line every 24 hours
-gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
+gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to = subset$datetime[nrow(subset)], by = 86400)
 class(lubridate::floor_date(subset$datetime[1], "day"))
 
-# Create plot
+
 fig_circadian <- ggplot(subset, aes(x = datetime,
-                                       y = temperature)) +
-  geom_rect(aes(xmin=sunrise, xmax=sunset, ymin=-Inf, ymax=+Inf), fill='grey', alpha=0.3) +
+                                    y = temperature)) +
   geom_line(binaxis='x', size=1.0, binwidth = 1) +
+  geom_rect(data = subset %>% 
+              filter(night_day == "night") %>%
+              distinct(sunset, sunrise, night_day),
+            inherit.aes = FALSE,
+            mapping = aes(xmin = sunset,
+                          xmax = sunrise,
+                          ymin=-Inf,
+                          ymax=+Inf), fill = "grey", alpha=0.5) +
   geom_line(data = subset, aes(x = datetime, y = corrected_depth/2), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
