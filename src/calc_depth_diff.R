@@ -5,13 +5,20 @@
 # Packages
 library(tidyverse) # To do datascience
 library(tidylog)  # To get infos about dplyr functions
-library(suncalc)  # To get sunrise, sunset
+library(lubridate)
 library(schoolmath)  # To check if data (tidal direction) is negative
 
 
 
 # Import data ####
-data <- read_csv("./data/interim/data_circadian_tidal.csv", na = "", guess_max = 100000)
+data <- read_csv("./data/interim/data_circadian_tidal.csv",
+                 na = "", 
+                 col_types = list(sunrise = col_datetime(),
+                                  previous_sunset = col_datetime(),
+                                  next_sunrise = col_datetime(),
+                                  next_sunmoment = col_datetime(),
+                                  direction = col_double()),          # set direction as numeric
+                 guess_max = 100000)
 
 
 # Find minima and maxima ####
@@ -72,7 +79,14 @@ class(lubridate::floor_date(subset$datetime[1], "day"))
 
 # Create plot
 fig_circadian <- ggplot(data = subset, aes(x = datetime, y = depth_change), size = 1.0, alpha = 0.5, colour = "black") +
-  geom_rect(aes(xmin=sunrise, xmax=sunset, ymin=-Inf, ymax=+Inf), fill='grey', alpha=0.3) +
+  geom_rect(data = subset %>% 
+              filter(night_day == "night") %>%
+              distinct(sunset, sunrise, night_day),
+            inherit.aes = FALSE,
+            mapping = aes(xmin = sunset,
+                          xmax = sunrise,
+                          ymin=-Inf,
+                          ymax=+Inf), fill = "grey", alpha=0.5) +
   geom_line(binaxis='x', size=1.0, binwidth = 1) +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   #scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
