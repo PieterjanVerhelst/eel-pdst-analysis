@@ -6,7 +6,6 @@
 library(tidyverse) # To do datascience
 library(tidylog)  # To get infos about dplyr functions
 library(lubridate)
-library(schoolmath)  # To check if data (tidal direction) is negative
 
 
 
@@ -66,6 +65,10 @@ data_min_max %>%
   select(ID, night_day, depth_change)
 
 
+# Calculate summary values
+data_min_max_no_na <- data_min_max[!is.na(data_min_max$depth_change),]
+aggregate(data_min_max_no_na$depth_change, list(data_min_max_no_na$night_day, data_min_max_no_na$ID), mean)
+
 
 # Create plot with day night ####
 # Create subsets of several days
@@ -106,30 +109,28 @@ fig_circadian
 # Create circular plot
 subset <- filter(data_min_max,
                  ID == "16031")
-subset$neg_degr <- is.negative(subset$direction)
-subset$direction <- as.numeric(subset$direction)
+subset <- select(subset, ID, direction, depth_change)
+
 subset$degr_360 <- NA
+subset <- subset[!is.na(subset$direction),]
 
 for (i in 1:dim(subset)[1]){
-  if (subset$neg_degr[i] == TRUE){
+  if (subset$direction[i] < 0){
     subset$degr_360[i] = subset$direction[i] + 360
   } else{
     subset$degr_360[i] = subset$direction[i]
   }}
 
 
-
 ggplot(subset, aes(x = degr_360, y = depth_change)) +
-  coord_polar(theta = "x", start = 0) +
+  coord_polar(theta = "x") +
   geom_bar(stat = "identity") +
   scale_x_continuous(breaks = seq(0, 360, 60))
 
+subset2 <- select(subset, degr_360, depth_change)
+plot.circular(subset2$degr_360)
 
 
 
 
-
-# Calculate summary values
-data_min_max <- na.omit(data_min_max)
-aggregate(data_min_max$depth_change, list(data_min_max$night_day, data_min_max$ID), mean)
 
