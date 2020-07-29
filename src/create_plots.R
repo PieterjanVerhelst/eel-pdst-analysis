@@ -6,11 +6,19 @@
 # Setup
 library(tidyverse) # To do datascience
 library(tidylog)  # To get infos about dplyr functions
-
+library(lubridate)
 
 
 # Import data
-data <- read_csv("./data/interim/data_circadian_tidal.csv", na = "", guess_max = 100000)
+data <- read_csv("./data/interim/data_circadian_tidal.csv",
+                 na = "", 
+                 col_types = list(sunrise = col_datetime(),
+                                  previous_sunset = col_datetime(),
+                                  next_sunrise = col_datetime(),
+                                  next_sunmoment = col_datetime(),
+                                  direction = col_double()),          # set direction as numeric
+                 guess_max = 100000)
+
 
 # Create subset per eel
 subset <- filter(data,
@@ -21,8 +29,6 @@ subset <- filter(data,
 subset <- filter(data,
                  ID == "16031",
                  datetime >= "2019-02-08 00:00:00", datetime <= "2019-02-13 00:00:00")
-subset$direction <- as.numeric(subset$direction)
-subset$sunrise <- ymd_hms(subset$sunrise)
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
