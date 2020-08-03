@@ -9,7 +9,7 @@ library(lubridate)
 
 
 
-# Import data ####
+# 1. Import data ####
 data <- read_csv("./data/interim/data_circadian_tidal.csv",
                  na = "", 
                  col_types = list(sunrise = col_datetime(),
@@ -20,7 +20,7 @@ data <- read_csv("./data/interim/data_circadian_tidal.csv",
                  guess_max = 100000)
 
 
-# Find minima and maxima ####
+# 2. Find minima and maxima ####
 data <-
   data %>%
   group_by(ID) %>%
@@ -35,12 +35,12 @@ data <-
   ) %>%
   ungroup()
 
-# Take minima and maxima only ####
+# 3. Take minima and maxima only ####
 data_min_max <-
   data %>%
   filter(is_maximum == TRUE | is_minimum == TRUE)
 
-# Calculate changes in max and min depths ####
+# 4. Calculate changes in max and min depths ####
 data_min_max <-
   data_min_max %>%
   group_by(ID) %>%
@@ -70,65 +70,9 @@ data_min_max_no_na <- data_min_max[!is.na(data_min_max$depth_change),]
 aggregate(data_min_max_no_na$depth_change, list(data_min_max_no_na$night_day, data_min_max_no_na$ID), mean)
 
 
-# Create plot with day night ####
-# Create subsets of several days
-subset <- filter(data_min_max,
-                 ID == "16031",
-                 datetime >= "2019-02-01 00:00:00", datetime <= "2019-02-07 00:00:00")
 
-# Create line every 24 hours
-gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
-class(lubridate::floor_date(subset$datetime[1], "day"))
-
-# Create plot
-fig_circadian <- ggplot(data = subset, aes(x = datetime, y = depth_change), size = 1.0, alpha = 0.5, colour = "black") +
-  geom_rect(data = subset %>% 
-              filter(night_day == "night") %>%
-              distinct(sunset, sunrise, night_day),
-            inherit.aes = FALSE,
-            mapping = aes(xmin = sunset,
-                          xmax = sunrise,
-                          ymin=-Inf,
-                          ymax=+Inf), fill = "grey", alpha=0.5) +
-  geom_line(binaxis='x', size=1.0, binwidth = 1) +
-  #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
-  #scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
-  theme_minimal() +
-  ylab("Depth difference (m)") +
-  xlab("Date") +
-  theme(axis.title.y = element_text(margin = margin(r = 10))) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  theme(axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14)) +
-  scale_x_datetime(date_breaks  ="1 day") +
-  #geom_vline(xintercept=ymd_hms(release), colour="blue") + # Release date and time
-  geom_vline(xintercept=gnu, color = "red", size = 1) 
-fig_circadian
-
-
-# Create circular plot
-subset <- filter(data_min_max,
-                 ID == "16031")
-subset <- select(subset, ID, direction, depth_change)
-
-subset$degr_360 <- NA
-subset <- subset[!is.na(subset$direction),]
-
-for (i in 1:dim(subset)[1]){
-  if (subset$direction[i] < 0){
-    subset$degr_360[i] = subset$direction[i] + 360
-  } else{
-    subset$degr_360[i] = subset$direction[i]
-  }}
-
-
-ggplot(subset, aes(x = degr_360, y = depth_change)) +
-  coord_polar(theta = "x") +
-  geom_bar(stat = "identity") +
-  scale_x_continuous(breaks = seq(0, 360, 60))
-
-subset2 <- select(subset, degr_360, depth_change)
-plot.circular(subset2$degr_360)
+# 5. Write csv ####
+write.csv(data_min_max, "./data/interim/data_depth_diff.csv")
 
 
 
