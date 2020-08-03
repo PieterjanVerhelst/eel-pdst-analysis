@@ -72,7 +72,7 @@ aggregate(data_min_max_no_na$depth_change, list(data_min_max_no_na$night_day, da
 
 
 # 5. Write csv ####
-write.csv(data_min_max, "./data/interim/data_depth_diff.csv")
+#write.csv(data_min_max, "./data/interim/data_depth_diff.csv")
 
 
 
