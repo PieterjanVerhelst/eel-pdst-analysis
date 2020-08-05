@@ -31,7 +31,7 @@ subset <- filter(data,
 # Create subset of several days for plot
 subset <- filter(data,
                  ID == "16031",
-                 datetime >= "2018-12-15 00:00:00", datetime <= "2018-12-20 00:00:00")
+                 datetime >= "2019-02-07 00:00:00", datetime <= "2019-02-13 00:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
@@ -78,7 +78,7 @@ source("./src/calc_depth_diff.R")
 # Create subsets of several days
 subset <- filter(data_min_max,
                  ID == "16031",
-                 datetime >= "2018-12-15 00:00:00", datetime <= "2018-12-20 00:00:00")
+                 datetime >= "2019-02-07 00:00:00", datetime <= "2019-02-13 00:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
