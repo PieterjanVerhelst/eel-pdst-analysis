@@ -25,13 +25,13 @@ data <- read_csv("./data/interim/data_circadian_tidal.csv",
 
 # Create subset per eel
 subset <- filter(data,
-                 ID == "15777")
+                 ID == "15714")
 
 
 # Create subset of several days for plot
 subset <- filter(data,
-                 ID == "15777",
-                 datetime >= "2018-12-22 16:00:00", datetime <= "2018-12-29 00:00:00")
+                 ID == "15714",
+                 datetime >= "2018-12-04 00:00:00", datetime <= "2018-12-28 00:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
