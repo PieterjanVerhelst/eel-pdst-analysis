@@ -61,7 +61,7 @@ fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   theme(axis.text = element_text(size = 12),
         axis.title = element_text(size = 14)) +
-  scale_x_datetime(date_breaks  ="1 hour") +
+  scale_x_datetime(date_breaks  ="1 day") +
   #geom_vline(xintercept=ymd_hms(release), colour="blue") + # Release date and time
   geom_vline(xintercept=gnu, color = "red", size = 1) +
   geom_hline(yintercept=0, linetype="dashed", color = "blue", size = 1) +
