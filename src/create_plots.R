@@ -50,7 +50,7 @@ fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
                           xmax = sunrise,
                           ymin=-Inf,
                           ymax=+Inf), fill = "grey", alpha=0.5) +
-  geom_line(binaxis='x', size=1.0, binwidth = 1, colour = "black") +
+  geom_line(size=1.0, binwidth = 1, colour = "black") +
   geom_line(data = subset, aes(x = datetime, y = direction/2), size = 2.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Tidal direction (°)")) +
