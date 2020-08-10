@@ -14,7 +14,6 @@ library(lubridate)
 
 # Import data
 data <- read_csv("./data/interim/data_circadian_tidal.csv",
-                 na = "", 
                  col_types = list(sunrise = col_datetime(),
                                   previous_sunset = col_datetime(),
                                   next_sunrise = col_datetime(),
