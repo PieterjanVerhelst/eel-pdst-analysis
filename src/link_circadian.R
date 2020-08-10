@@ -202,8 +202,4 @@ data_circ <- select(data_circ, ID, datetime, numericdate, corrected_depth, tempe
 
 
 # 5. write csv ####
-write.csv(data_circ, "./data/interim/data_circadian.csv")
-
-
-
-
+write_csv(data_circ, "./data/interim/data_circadian.csv")
