@@ -91,7 +91,7 @@ series_sunsets <- unique(data_circ$sunset)
 series_sunsets <- series_sunsets[order(series_sunsets)]
 
 series_sunrises <- unique(data_circ$sunrise)
-series_sunrises <- series_sunsets[order(series_sunrises)]
+series_sunrises <- series_sunrises[order(series_sunrises)]
 
 # Transform to df (tibble)
 series_sunsets <- tibble(sunset = series_sunsets)
