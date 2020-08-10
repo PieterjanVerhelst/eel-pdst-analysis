@@ -21,6 +21,9 @@ data <- read_csv("./data/interim/data_circadian_tidal.csv",
                                   direction = col_double()),          # set direction as numeric
                  guess_max = 100000)
 
+data <-
+  data %>%
+  arrange(ID, datetime)
 
 # Create subset per eel
 subset <- filter(data,
