@@ -120,7 +120,7 @@ series_sunrises <-
   mutate(next_sunrise = lead(sunrise)) %>%
   ungroup()
 
-# Handle discontinuity in timeserie
+# Handle discontinuity in timeseries
 
 series_sunrises <- 
   series_sunrises %>%
