@@ -25,10 +25,6 @@ data <-
   data %>%
   arrange(ID, datetime)
 
-# Create subset per eel
-subset <- filter(data,
-                 ID == "15714")
-
 
 # Create subset of several days for plot
 subset <- filter(data,
