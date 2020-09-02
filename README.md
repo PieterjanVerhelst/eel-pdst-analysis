@@ -33,6 +33,11 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 			- till DVM
 			- till one hour before predation
 			- 15 minutes before popoff time
+		+ `bank_datetime`: moment eel was on the river bank, i.e. start_datetime - 15 min (GMT)
+		+ `popoff_datetime`: moment the tag reached the surface (GMT)
+		+ `UTC`: UTC time correction (in hours) to convert to GMT 
+		+ `pressure_correction`: indicates if a pressure correction needs to be applied (0 =  no, 1 = yes)
+		+ `comment`: any comments
 
 ### Scripts
 
