@@ -14,29 +14,82 @@ library(broom) # run regression per grouping variable (in 'Correct for depth dri
 
 
 
+
 # 1. Read in data ####
+# Belgian eels
 eel_A16031 <- read_csv("./data/interim/sensorlogs/sensor_A16031_08-11-2019.csv")
 eel_A15714 <- read_csv("./data/interim/sensorlogs/sensor_A15714_13-02-2019.csv")
 eel_A15777 <- read_csv("./data/interim/sensorlogs/sensor_A15777_12-11-2019.csv")
+eel_A15706 <- read_csv("./data/interim/sensorlogs/sensor_A15706_01-08-2019.csv")
+eel_A17443 <- read_csv("./data/interim/sensorlogs/sensor_A17443_27-01-2020.csv")
+eel_A17499 <- read_csv("./data/interim/sensorlogs/sensor_A17499_20-02-2020.csv")
+eel_A17513 <- read_csv("./data/interim/sensorlogs/sensor_A17513_20-02-2020.csv")
+eel_A17534 <- read_csv("./data/interim/sensorlogs/sensor_A17534_17-03-2020.csv")
+eel_A17526 <- read_csv("./data/interim/sensorlogs/sensor_A17526_17-03-2020.csv")
+eel_A17522 <- read_csv("./data/interim/sensorlogs/sensor_A17522_17-03-2020.csv")
+eel_A17492 <- read_csv("./data/interim/sensorlogs/sensor_A17492_05-05-2020.csv")
+eel_A17508 <- read_csv("./data/interim/sensorlogs/sensor_A17508_05-05-2020.csv")
+eel_A17536 <- read_csv("./data/interim/sensorlogs/sensor_A17536_05-05-2020.csv")
+eel_A17538 <- read_csv("./data/interim/sensorlogs/sensor_A17538_05-05-2020.csv")
+eel_A17537 <- read_csv("./data/interim/sensorlogs/sensor_A17537_05-05-2020.csv")
+eel_A17510 <- read_csv("./data/interim/sensorlogs/sensor_A17510_22-06-2020.csv")
+eel_A15789 <- read_csv("./data/interim/sensorlogs/sensor_A15789_22-06-2020.csv")
+
+# German eels
 eel_A09359 <- read_csv("./data/interim/sensorlogs/sensor_A09359_11-12-2012.csv")
-    eel_A09359$track_tag_id <- "A09359"
+eel_A09359$track_tag_id <- "A09359"
+eel_A09349 <- read_csv("./data/interim/sensorlogs/sensor_A09349_07-01-2013_2.csv")
+eel_A09349$track_tag_id <- "A09349"
+eel_A09355 <- read_csv("./data/interim/sensorlogs/sensor_A09355_01-10-2013.csv")
+eel_A09355$track_tag_id <- "A09355"
+eel_A09358 <- read_csv("./data/interim/sensorlogs/sensor_A09358_26-11-2012.csv")
+eel_A09358$track_tag_id <- "A09358"
+eel_A09374 <- read_csv("./data/interim/sensorlogs/sensor_A09374_09-01-2013.csv")
+eel_A09374$track_tag_id <- "A09374"
+eel_A09377 <- read_csv("./data/interim/sensorlogs/sensor_A09377_18-04-2013_2.csv")
+eel_A09377$track_tag_id <- "A09377"
+eel_A09393 <- read_csv("./data/interim/sensorlogs/sensor_A09393_02-08-2013.csv")
+eel_A09393$track_tag_id <- "A09393"
+eel_A09411 <- read_csv("./data/interim/sensorlogs/sensor_A09411_07-03-13.csv")
+eel_A09411$track_tag_id <- "A09411"
+eel_A09423 <- read_csv("./data/interim/sensorlogs/sensor_A09423_11-12-2012.csv")
+eel_A09423$track_tag_id <- "A09423"
+eel_A09424 <- read_csv("./data/interim/sensorlogs/sensor_A09424_21-06-2013.csv")
+eel_A09424$track_tag_id <- "A09424"
+
 
 
 # Combine all datasets ####
-all <- do.call("rbind", list(eel_A09359,
+all <- do.call("rbind", list(eel_A16031,
                              eel_A15714,
                              eel_A15777,
-                             eel_A16031))
-    
+                             eel_A15706,
+                             eel_A17443,
+                             eel_A17499,
+                             eel_A17513,
+                             eel_A17534,
+                             eel_A17526,
+                             eel_A17522,
+                             eel_A17492,
+                             eel_A17508,
+                             eel_A17536,
+                             eel_A17538,
+                             eel_A17537,
+                             eel_A17510,
+                             eel_A15789,
+                             eel_A09359,
+                             eel_A09349,
+                             eel_A09355,
+                             eel_A09358,
+                             eel_A09374,
+                             eel_A09377,
+                             eel_A09393,
+                             eel_A09411,
+                             eel_A09423,
+                             eel_A09424))
+
 all <- all %>%
   rename(ID = track_tag_id)
-    
-
-#list_dfs <- list("A16031" = eel_A16031,
-#                 "A15714" = eel_A15714,
-#                 "A15777" = eel_A15777,
-#                 "A09359" = eel_A09359)
-
 
 
 # 2. Read in parameter file ####
