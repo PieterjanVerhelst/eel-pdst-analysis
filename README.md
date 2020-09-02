@@ -24,10 +24,15 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 	+ `/dvm_noon:` Files with the calculated noon, based on the DVM behaviour
 
 * `/external:`
-	+ `/geolocation_input_files:` input files for the geolocation model per eel with lat and lon of release and retrieval or pop-off location
-	+ `/trajectory_data:` output from geolocation model with calculated daily lat and lon, and daily summary on temperature and depth (files obtained by David Righton)
-	+ `/dvm_noon:` Equation of time applied to files with the calculated noon, based on the DVM behaviour, to calculate coordinates
-
+	+ `/geolocation_input_files`: input files for the geolocation model per eel with lat and lon of release and retrieval or pop-off location
+	+ `/trajectory_data`: output from geolocation model with calculated daily lat and lon, and daily summary on temperature and depth (files obtained by David Righton)
+	+ `/dvm_noon`: Equation of time applied to files with the calculated noon, based on the DVM behaviour, to calculate coordinates
+	+ `parameters.csv`: file containing the parameters to batch process the sensor files
+		+ `start_datetime`: moment eel was released (GMT)
+		+ `end_datetime`: end point of data of interest; in this case when eel is on the continental shelf (GMT)
+			- till DVM
+			- till one hour before predation
+			- 15 minutes before popoff time
 
 ### Scripts
 
