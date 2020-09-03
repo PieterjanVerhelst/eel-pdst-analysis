@@ -45,7 +45,27 @@ tr_data$Date <- as.Date(tr_data$Date)
 tr_data$ID <- factor(tr_data$ID)
 
 # Remove double dates per eel (ID)
-tr_data <- tr_data[!duplicated(tr_data[c('ID','Date')]),]
+#tr_data <- tr_data[!duplicated(tr_data[c('ID','Date')]),]
+tr_data <- tr_data %>%     # Add ID number to duplicate dates
+  group_by(ID, Date) %>%
+  add_tally()
+
+duplicates <- filter(tr_data, n == 2)   # Filter duplicate dates
+duplicates <- duplicates %>%             # Add ID number to distinguish between first and second duplicate
+  mutate(number_id = row_number())
+duplicates <- filter(duplicates, number_id == 2)  # Filter second duplicates
+
+tr_data <- filter(tr_data, n != 2)   # Remove duplicate dates from tracking dataset
+
+# Bind 'duplicates' dataset with second duplicates to tracking dataset
+tr_data <- ungroup(tr_data)
+tr_data$n <- NULL
+duplicates <- ungroup(duplicates)
+duplicates$n <- NULL
+duplicates$number_id <- NULL
+
+tr_data <- rbind(tr_data, duplicates)
+
 
 # Select relevant eels
 tr_data <- filter(tr_data, ID == "9359" |
