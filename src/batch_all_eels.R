@@ -130,6 +130,11 @@ parameters$popoff_datetime <-  dmy_hm(parameters$popoff_datetime)
 parameters$UTC <-  factor(parameters$UTC)
 
 
+# Temporarily remove 2 PSAT eels
+parameters <- parameters %>%
+  filter(ID != c('112061')) %>%
+  filter(ID != c('112064'))
+
 
 # 3. Aggregate data per 1 min ####
 all <- all %>%
