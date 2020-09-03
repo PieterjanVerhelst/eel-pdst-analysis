@@ -91,6 +91,35 @@ all <- do.call("rbind", list(eel_A16031,
 all <- all %>%
   rename(ID = track_tag_id)
 
+# Remove seperate files
+rm(eel_A16031,
+   eel_A15714,
+   eel_A15777,
+   eel_A15706,
+   eel_A17443,
+   eel_A17499,
+   eel_A17513,
+   eel_A17534,
+   eel_A17526,
+   eel_A17522,
+   eel_A17492,
+   eel_A17508,
+   eel_A17536,
+   eel_A17538,
+   eel_A17537,
+   eel_A17510,
+   eel_A15789,
+   eel_A09359,
+   eel_A09349,
+   eel_A09355,
+   eel_A09358,
+   eel_A09374,
+   eel_A09377,
+   eel_A09393,
+   eel_A09411,
+   eel_A09423,
+   eel_A09424)
+
 
 # 2. Read in parameter file ####
 parameters <- read_csv("./data/external/parameters.csv")
