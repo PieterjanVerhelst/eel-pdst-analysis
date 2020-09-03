@@ -22,11 +22,16 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 			+ `tagID_TEMP.csv`: temperature data
 			+ `tagID_TEMP_F.csv`: average temperature at sea surface (first 20 m) and daily max depth
 	+ `/dvm_noon:` Files with the calculated noon, based on the DVM behaviour
+	+ `batch_processed_eels.csv`: file with all eels for analysis aggregated over 1 min period and with corrected pressure values.
+	+ `data_circadian.csv`: batch_processed_eels.csv with circadian phases.
+	+ `data_circadian_tidal.csv`: data_circadian.csv with tidal data.
+	+ `data_depth_diff.csv`: batch processed file for which the depth difference is calculated between minima and maxima.
 
 * `/external:`
 	+ `/geolocation_input_files`: input files for the geolocation model per eel with lat and lon of release and retrieval or pop-off location
 	+ `/trajectory_data`: output from geolocation model with calculated daily lat and lon, and daily summary on temperature and depth (files obtained by David Righton)
 	+ `/dvm_noon`: Equation of time applied to files with the calculated noon, based on the DVM behaviour, to calculate coordinates
+	+ `/tidal_data_john_aldridge`: .dat files containing information on tidal direction and current strength
 	+ `parameters.csv`: file containing the parameters to batch process the sensor files
 		+ `start_datetime`: moment eel was released (GMT)
 		+ `end_datetime`: end point of data of interest; in this case when eel is on the continental shelf (GMT)
