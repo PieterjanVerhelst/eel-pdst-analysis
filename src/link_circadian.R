@@ -72,6 +72,7 @@ data <- filter(data, ID == "9359" |
                   ID == "15714" |
                   ID == "15777" |
                   ID == "16031")
+data$ID <- factor(data$ID) # rerun 'factor()' so the number of levels is set accurately
 
 tr_data <- filter(tr_data, ID == "9359" |
                     ID == "15714" |
