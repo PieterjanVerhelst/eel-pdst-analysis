@@ -68,6 +68,11 @@ tr_data <- rbind(tr_data, duplicates)
 
 
 # Select relevant eels
+data <- filter(data, ID == "9359" |
+                  ID == "15714" |
+                  ID == "15777" |
+                  ID == "16031")
+
 tr_data <- filter(tr_data, ID == "9359" |
                     ID == "15714" |
                     ID == "15777" |
