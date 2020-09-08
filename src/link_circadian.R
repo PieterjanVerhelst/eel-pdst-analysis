@@ -71,13 +71,59 @@ tr_data <- rbind(tr_data, duplicates)
 data <- filter(data, ID == "9359" |
                   ID == "15714" |
                   ID == "15777" |
-                  ID == "16031")
+                  ID == "16031" |
+                  ID == "15706" |
+                 ID == "17443" |
+                 ID == "17499" |
+                 ID == "17513" |
+                 ID == "9349" |
+                 ID == "9355" |
+                 ID == "9358" |
+                 ID == "9374" |
+                 ID == "9377" |
+                 ID == "9393" |
+                 ID == "9411" |
+                 ID == "9423" |
+                 ID == "9424" |
+                 ID == "17534" |
+                 ID == "17526" |
+                 ID == "17522" |
+                 ID == "17492" |
+                 ID == "17508" |
+                 ID == "17536" |
+                 ID == "17538" |
+                 ID == "17537" |
+                 ID == "17510" |
+                 ID == "15789")
 data$ID <- factor(data$ID) # rerun 'factor()' so the number of levels is set accurately
 
 tr_data <- filter(tr_data, ID == "9359" |
                     ID == "15714" |
                     ID == "15777" |
-                    ID == "16031")
+                    ID == "16031" |
+                    ID == "15706" |
+                    ID == "17443" |
+                    ID == "17499" |
+                    ID == "17513" |
+                    ID == "9349" |
+                    ID == "9355" |
+                    ID == "9358" |
+                    ID == "9374" |
+                    ID == "9377" |
+                    ID == "9393" |
+                    ID == "9411" |
+                    ID == "9423" |
+                    ID == "9424" |
+                    ID == "17534" |
+                    ID == "17526" |
+                    ID == "17522" |
+                    ID == "17492" |
+                    ID == "17508" |
+                    ID == "17536" |
+                    ID == "17538" |
+                    ID == "17537" |
+                    ID == "17510" |
+                    ID == "15789")
 tr_data$ID <- factor(tr_data$ID) # rerun 'factor()' so the number of levels is set accurately
 
 
