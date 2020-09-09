@@ -127,7 +127,7 @@ parameters$start_datetime <-  dmy_hm(parameters$start_datetime)
 parameters$end_datetime <-  dmy_hm(parameters$end_datetime)
 parameters$bank_datetime <-  dmy_hm(parameters$bank_datetime)
 parameters$popoff_datetime <-  dmy_hm(parameters$popoff_datetime)
-parameters$popoff_datetime15 <-  parameters$popoff_datetime + minutes(15)
+#parameters$popoff_datetime15 <-  parameters$popoff_datetime + minutes(15)
 parameters$UTC <-  factor(parameters$UTC)
 
 
@@ -166,7 +166,7 @@ all$time_diff <- all$datetime2 - all$datetime    # Check for time zone correctio
 # Select rows with bank datetime and popoff datetime + 15 minutes (= when tag was at atmospheric pressure)
 bank_popoff <- all %>%
   group_by(ID) %>%
-  filter(datetime == bank_datetime | datetime == popoff_datetime15,
+  filter(datetime == bank_datetime | datetime == popoff_datetime,
          pressure_correction != 0) %>%
   mutate(numericdate = as.numeric(datetime))
 
