@@ -171,16 +171,35 @@ bank_popoff <- all %>%
   mutate(numericdate = as.numeric(datetime))
 
 # Apply linear regression per ID
+# https://cran.r-project.org/web/packages/broom/vignettes/broom_and_dplyr.html
+#model <- bank_popoff %>%
+#  group_by(ID) %>%
+#  do(fit_model = lm(pressure ~ datetime, data = .)) 
 model <- bank_popoff %>%
-  group_by(ID) %>%
-  do(fit_model = lm(pressure ~ datetime, data = .))
+  nest(data = -ID) %>% 
+  mutate(
+    fit = map(data, ~ lm(pressure ~ datetime, data = .x)),
+    tidied = map(fit, tidy)
+  ) %>% 
+  unnest(tidied)
+
+# Remove redundant columns
+model <- select(model, -data, -fit, -std.error, -statistic, -p.value)
+
 
 # Extract model coefficients in a tidy dataframe
-model_coef <- tidy(model, fit_model) %>%
+#model_coef <- tidy(model, fit_model) %>%
+#  spread(key = term, value = estimate) %>%
+#  select(-std.error, -statistic, -p.value) %>%
+#  rename(intercept_val = `(Intercept)`,
+#         datetime_val = datetime)
+
+model_coef <- model %>%
   spread(key = term, value = estimate) %>%
-  select(-std.error, -statistic, -p.value) %>%
   rename(intercept_val = `(Intercept)`,
          datetime_val = datetime)
+
+
 
 # Join values to dataset
 all <- left_join(all, model_coef, by = "ID")
