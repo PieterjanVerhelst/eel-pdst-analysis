@@ -70,7 +70,14 @@ fig_circadian_tidal
 
 
 # 2. Plot difference in depth between minima and maxima ####
-source("./src/calc_depth_diff.R")
+data_min_max <- read_csv("./data/interim/data_depth_diff.csv",
+                 na = "", 
+                 col_types = list(sunrise = col_datetime(),
+                                  previous_sunset = col_datetime(),
+                                  next_sunrise = col_datetime(),
+                                  next_sunmoment = col_datetime(),
+                                  direction = col_double()),          # set direction as numeric
+                 guess_max = 100000)
 
 # Create plot with day night #
 # Create subsets of several days
