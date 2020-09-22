@@ -56,8 +56,6 @@ avg_km_day <- tr_data %>%
 summary(tr_data$Distance)
 sd(tr_data$Distance)
 
-#write.csv(avg_km_day, "./data/interim/avg_km_day.csv")
-
 
 # Calculate number of days and total distance
 tr_summary <- tr_data %>%
@@ -66,8 +64,16 @@ tr_summary <- tr_data %>%
             days = max(Date)-min(Date))
 
 
-# Calculate migration speed (km/day)
+tr_summary <- merge(tr_summary, avg_km_day, by = "ID")
+summary(tr_summary$total_dist)
+sd(tr_summary$total_dist)
+
 tr_summary$days <- as.numeric(tr_summary$days)
+summary(tr_summary$days)
+sd(tr_summary$days)
+
+
+# Calculate migration speed (km/day)
 tr_summary$speed <- tr_summary$total_dist/tr_summary$days
 
 
@@ -78,77 +84,37 @@ direction <- read_csv("./data/external/migration_direction.csv")
 tr_summary <- merge(tr_summary, direction, by = "ID")
 
 
+#write.csv(tr_summary, "./data/interim/summary_tracks.csv")
+
+
 # Data exploration
 
-# 1. All eels
+# 1. Speed per direction
 boxplot(speed ~ Direction, data = tr_summary)
 tr_summary %>%
   group_by(Direction) %>%
   summarize(mean = mean(speed))
-min(tr_summary$total_dist)
-max(tr_summary$total_dist)
-min(tr_summary$days)
-max(tr_summary$days)
 
-# 2. Eels with nice tracks
-tr_summary2 <- filter(tr_summary, ID == '9349' |
-                        ID == '9355' |
-                        ID == '9358' |
-                        ID == '9359' |
-                        ID == '9374' |
-                        ID == '9377' |
-                        ID == '9393' |
-                        ID == '9423' |
-                        ID == '9424' |
-                        ID == '15706' |
-                        ID == '15714' |
-                        ID == '15730' |
-                        ID == '15777' |
-                        ID == '15805' |
-                        ID == '15981' |
-                        ID == '16031' |
-                        ID == '112061' |
-                        ID == '112064')
-
-boxplot(speed ~ Direction, data = tr_summary2)
-tr_summary2 %>%
-  group_by(Direction) %>%
-  summarize(mean_speed = mean(speed),
-            min_dist = min(total_dist),
-            max_dist = max(total_dist),
-            min_days = min(days),
-            max_days = max(days))
-
-
-
-# 3. Eels with crappy tracks
-tr_summary3 <- filter(tr_summary, ID != '9349' ,
-                        ID != '9355' ,
-                        ID != '9358' ,
-                        ID != '9359' ,
-                        ID != '9374' ,
-                        ID != '9377' ,
-                        ID != '9393' ,
-                        ID != '9423' ,
-                        ID != '9424' ,
-                        ID != '15706' ,
-                        ID != '15714' ,
-                        ID != '15730' ,
-                        ID != '15777' ,
-                        ID != '15805' ,
-                        ID != '15981' ,
-                        ID != '16031' ,
-                        ID != '112061' ,
-                        ID != '112064')
-
-boxplot(speed ~ Direction, data = tr_summary3)
-tr_summary3 %>%
-  group_by(Direction) %>%
+# 2. Speed per country
+boxplot(speed ~ Country, data = tr_summary)
+tr_summary %>%
+  group_by(Country) %>%
   summarize(mean = mean(speed))
-min(tr_summary3$total_dist)
-max(tr_summary3$total_dist)
-min(tr_summary3$days)
-max(tr_summary3$days)
+
+# 3. Speed per direction and country
+tr_summary$Direction_Country <- paste(tr_summary$Direction, tr_summary$Country)
+tr_summary$Direction_Country <- factor(tr_summary$Direction_Country)
+boxplot(speed ~ Direction_Country, data = tr_summary)
+
+# 4. Relationship between speed and size
+plot(speed ~ Length, data = tr_summary)
+plot(speed ~ Weight, data = tr_summary)
+cor(tr_summary$speed, tr_summary$Weight)
+
+# Belgian eels
+bel <- filter(tr_summary, Country == "Belgium")
+plot(speed ~ Weight, data = bel)
+cor(bel$speed, bel$Weight)
 
 
 
