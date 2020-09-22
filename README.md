@@ -43,6 +43,7 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 		+ `UTC`: UTC time correction (in hours) to convert to GMT 
 		+ `pressure_correction`: indicates if a pressure correction needs to be applied (0 =  no, 1 = yes)
 		+ `comment`: any comments
+	+ `migration_direction.csv`: file with the migration direction of the relevant eels for analysis
 
 ### Scripts
 
