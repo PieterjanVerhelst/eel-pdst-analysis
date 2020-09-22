@@ -129,6 +129,44 @@ tr_summary2$Direction_Country <- factor(tr_summary2$Direction_Country)
 
 boxplot(speed ~ Direction_Country, data = tr_summary2)
 
+
+# make a named list for the location of the number of eels
+eel_per_group <- tr_summary2 %>% group_by(Direction_Country) %>% 
+  summarise(n_eels = n_distinct(ID))
+eels_per_group_list <- rep(50, nrow(eel_per_group))
+names(eels_per_group_list) <- as.vector(eel_per_group$Direction_Country)
+# create ggplot (cfr. styling earlier plot)
+boxplot_dir_country <- ggplot(tr_summary2, aes(x = Direction_Country,
+                                     y = speed)) +
+  geom_boxplot(outlier.shape = NA) +
+  #coord_flip() +
+  #scale_y_continuous(breaks = seq(0, 600, by = 50)) +
+  ylim(0,50) + 
+  theme_minimal() +
+  ylab("Speed (km/day)") +
+  geom_text(data = data.frame(),
+            aes(x = names(eels_per_group_list),
+                y = eels_per_group_list,
+                label = as.character(eel_per_group$n_eels)),
+            col = 'black', size = 6) +
+  #xlab("ALS position relative to shipping lock complex") +
+  scale_x_discrete(limits=c("N Germany",      # Changes oreder of plots
+                            "SW Germany",
+                            "SW Belgium")) +    
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.title.x = element_text(margin = margin(r = 10))) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        axis.title.x = element_blank()) 
+boxplot_dir_country
+
+
+
+
+
+
+
+
 # One-way anova
 # The one-way anova is an extension of independent two-samples t-test for comparing means in a situation where there are more than two groups (= grouping variable with more than 2 levels)
 # http://www.sthda.com/english/wiki/one-way-anova-test-in-r
