@@ -13,6 +13,51 @@ tr_data$ID <- as.factor(tr_data$ID)
 tr_data$Date <- as.Date(tr_data$Date)
 tr_data$Distance <- as.numeric(tr_data$Distance)
 
+# Filter eels with >= 14 days out at large
+tr_data <- filter(tr_data, ID == '9349' |
+                        ID == '9355' |
+                        ID == '9358' |
+                        ID == '9359' |
+                        ID == '9374' |
+                        ID == '9377' |
+                        ID == '9393' |
+                        ID == '9411' |
+                        ID == '9423' |
+                        ID == '9424' |
+                        ID == '15714' |
+                        ID == '16031' |
+                        ID == '15706' |
+                        ID == '15777' |
+                        ID == '17443' |
+                        ID == '17499' |
+                        ID == '17513' |
+                        ID == '17534' |
+                        ID == '17526' |
+                        ID == '17522' |
+                        ID == '17492' |
+                        ID == '17508' |
+                        ID == '17536' |
+                        ID == '17537' |
+                        ID == '17538' |
+                        ID == '17510' |
+                        ID == '15789' |
+                        ID == '112061' |
+                        ID == '112064')
+
+
+# Calculate average, sd, min and max km per day per eel and for all eels
+avg_km_day <- tr_data %>%
+  group_by(ID) %>%
+  summarize(avg_dist = mean(Distance),
+            sd = sd(Distance),
+            min = mean(Distance),
+            max = max(Distance))
+
+summary(tr_data$Distance)
+sd(tr_data$Distance)
+
+#write.csv(avg_km_day, "./data/interim/avg_km_day.csv")
+
 
 # Calculate number of days and total distance
 tr_summary <- tr_data %>%
