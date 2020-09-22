@@ -2,6 +2,8 @@
 # By Pieterjan Verhelst
 # Pieterjan.Verhelst@UGent.be
 
+# Packages
+library(car)
 
 
 # Load file with trajectory distances for all eels
@@ -120,9 +122,43 @@ cor(bel$speed, bel$Weight)
 
 # Data analysis
 
+# Remove L Germany and N Belgium
+tr_summary2 <- filter(tr_summary, Direction_Country != "N Belgium" ,
+                                  Direction_Country != "L Germany" )
+tr_summary2$Direction_Country <- factor(tr_summary2$Direction_Country)
+
+boxplot(speed ~ Direction_Country, data = tr_summary2)
+
+# One-way anova
+# The one-way anova is an extension of independent two-samples t-test for comparing means in a situation where there are more than two groups (= grouping variable with more than 2 levels)
+# http://www.sthda.com/english/wiki/one-way-anova-test-in-r
+model_aov <- aov(speed ~ Direction_Country, data = tr_summary2)
+summary(model_aov)
+TukeyHSD(model_aov)
+
+
+# 1. Homogeneity of variances
+plot(model_aov, 1)
+leveneTest(speed ~ Direction_Country, data = tr_summary2)
+# When p > 0.05, there is no significant difference between the two variances => assumption met
+
+# 2. Normality
+plot(model_aov, 2)
+
+# Extract the residuals
+aov_residuals <- residuals(object = model_aov )
+# Run Shapiro-Wilk test
+shapiro.test(x = aov_residuals)
+# When p > 0.05, the assumption of normality is met
+
+
+
+
+###################################################################
+
 # independent 2-group t-test
 # t.test(y~x) # where y is numeric and x is a binary factor 
-t.test(tr_summary2$speed~tr_summary2$Direction)
+t.test(tr_summary2$speed~tr_summary2$Direction_Country)
 
 # Assumptions:
 # 1. 2 independent groups
