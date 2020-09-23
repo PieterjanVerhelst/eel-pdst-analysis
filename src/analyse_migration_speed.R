@@ -120,12 +120,14 @@ tr_summary$Direction_Country <- factor(tr_summary$Direction_Country)
 boxplot(speed ~ Direction_Country, data = tr_summary)
 
 # 4. Relationship between speed and size
-plot(speed ~ Length, data = tr_summary)
-plot(speed ~ Weight, data = tr_summary)
-cor(tr_summary$speed, tr_summary$Weight)
+# Without eel A09355 that did not show a clear migration direction
+tr_summary2 <- filter(tr_summary, ID != "9355")
+plot(speed ~ Length, data = tr_summary2)
+plot(speed ~ Weight, data = tr_summary2)
+cor(tr_summary2$speed, tr_summary2$Weight)
 
 # Belgian eels
-bel <- filter(tr_summary, Country == "Belgium")
+bel <- filter(tr_summary2, Country == "Belgium")
 plot(speed ~ Weight, data = bel)
 cor(bel$speed, bel$Weight)
 
@@ -144,7 +146,12 @@ aggregate(tr_summary2$speed, list(tr_summary2$Direction_Country), sd)
 aggregate(tr_summary2$speed, list(tr_summary2$Direction_Country), min)
 aggregate(tr_summary2$speed, list(tr_summary2$Direction_Country), max)
 
+# Correlation between speed and size
+plot(tr_summary2$speed ~ tr_summary2$Weight)
+cor(tr_summary2$speed, tr_summary2$Weight)
 
+
+# Create boxplot
 boxplot(speed ~ Direction_Country, data = tr_summary2)
 
 # make a named list for the location of the number of eels
