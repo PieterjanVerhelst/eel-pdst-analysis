@@ -57,7 +57,10 @@ avg_km_day <- tr_data %>%
 
 summary(tr_data$Distance)
 sd(tr_data$Distance)
-
+# Without eel A09355 that did not show a clear migration direction
+tr_data2 <- filter(tr_data, ID != "9355")
+summary(tr_data2$Distance)
+sd(tr_data2$Distance)
 
 # Calculate number of days and total distance
 tr_summary <- tr_data %>%
@@ -73,6 +76,11 @@ sd(tr_summary$total_dist)
 tr_summary$days <- as.numeric(tr_summary$days)
 summary(tr_summary$days)
 sd(tr_summary$days)
+# Without eel A09355 that did not show a clear migration direction
+tr_summary2 <- filter(tr_summary, ID != "9355")
+summary(tr_summary2$days)
+sd(tr_summary2$days)
+
 
 
 # Calculate migration speed (km/day)
