@@ -85,7 +85,10 @@ sd(tr_summary2$days)
 
 # Calculate migration speed (km/day)
 tr_summary$speed <- tr_summary$total_dist/tr_summary$days
-
+# Without eel A09355 that did not show a clear migration direction
+tr_summary2 <- filter(tr_summary, ID != "9355")
+summary(tr_summary2$speed)
+sd(tr_summary2$speed)
 
 # Upload file with migration direction
 direction <- read_csv("./data/external/migration_direction.csv")
@@ -135,8 +138,14 @@ tr_summary2 <- filter(tr_summary, Direction_Country != "N Belgium" ,
                                   Direction_Country != "L Germany" )
 tr_summary2$Direction_Country <- factor(tr_summary2$Direction_Country)
 
-boxplot(speed ~ Direction_Country, data = tr_summary2)
+# Calculate speed per group
+aggregate(tr_summary2$speed, list(tr_summary2$Direction_Country), mean)
+aggregate(tr_summary2$speed, list(tr_summary2$Direction_Country), sd)
+aggregate(tr_summary2$speed, list(tr_summary2$Direction_Country), min)
+aggregate(tr_summary2$speed, list(tr_summary2$Direction_Country), max)
 
+
+boxplot(speed ~ Direction_Country, data = tr_summary2)
 
 # make a named list for the location of the number of eels
 eel_per_group <- tr_summary2 %>% group_by(Direction_Country) %>% 
@@ -167,11 +176,6 @@ boxplot_dir_country <- ggplot(tr_summary2, aes(x = Direction_Country,
         axis.title = element_text(size = 14),
         axis.title.x = element_blank()) 
 boxplot_dir_country
-
-
-
-
-
 
 
 
