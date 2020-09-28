@@ -11,8 +11,8 @@ library(lubridate)
 Sys.setenv(TZ='GMT')
 
 # 1. Read in temperature and corrected pressure data ####
-temp_data <- read_csv("./data/interim/geolocation_input_files/input_A17521/EELA17521TEMP.csv")
-press_data <- read_csv("./data/interim/geolocation_input_files/input_A17521/EELA17521PRES.csv")
+temp_data <- read_csv("./data/interim/geolocation_input_files/input_A17535/EELA17535TEMP.csv")
+press_data <- read_csv("./data/interim/geolocation_input_files/input_A17535/EELA17535PRES.csv")
 
 
 # Merge them together
@@ -50,7 +50,7 @@ input_sst <- input_sst[,c(1,3,4,2)]
 
 
 # 4. Write csv files ####
-write.csv(input_sst, "./data/interim/geolocation_input_files/input_A17521/EELA17521TEMP_F.csv", na = "NaN", row.names = FALSE)
+write.csv(input_sst, "./data/interim/geolocation_input_files/input_A17535/EELA17535TEMP_F.csv", na = "NaN", row.names = FALSE)
 
 
 # Check 
