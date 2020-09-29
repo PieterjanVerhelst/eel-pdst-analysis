@@ -18,8 +18,6 @@ library(broom) # run regression per grouping variable (in 'Correct for depth dri
 # 1. Read in data ####
 # Belgian eels
 eel_A16031 <- read_csv("./data/interim/sensorlogs/sensor_A16031_08-11-2019.csv")
-eel_A15805 <- read_csv("./data/interim/sensorlogs/sensor_A15805_03-04-2019.csv")
-eel_A15981 <- read_csv("./data/interim/sensorlogs/sensor_A15981_06-02-2020.csv")
 eel_A15714 <- read_csv("./data/interim/sensorlogs/sensor_A15714_13-02-2019.csv")
 eel_A15777 <- read_csv("./data/interim/sensorlogs/sensor_A15777_12-11-2019.csv")
 eel_A15706 <- read_csv("./data/interim/sensorlogs/sensor_A15706_01-08-2019.csv")
@@ -61,8 +59,6 @@ eel_A09424$track_tag_id <- "A09424"
 
 # Combine all datasets ####
 all <- do.call("rbind", list(eel_A16031,
-                             eel_A15805,
-                             eel_A15981,
                              eel_A15714,
                              eel_A15777,
                              eel_A15706,
@@ -94,8 +90,6 @@ all <- all %>%
 
 # Remove seperate files
 rm(eel_A16031,
-   eel_A15805,
-   eel_A15981,
    eel_A15714,
    eel_A15777,
    eel_A15706,
