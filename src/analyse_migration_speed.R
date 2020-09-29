@@ -17,7 +17,6 @@ tr_data$Distance <- as.numeric(tr_data$Distance)
 
 # Filter eels with >= 14 days out at large
 tr_data <- filter(tr_data, ID == '9349' |
-                        ID == '9355' |
                         ID == '9358' |
                         ID == '9359' |
                         ID == '9374' |
@@ -29,6 +28,8 @@ tr_data <- filter(tr_data, ID == '9349' |
                         ID == '15714' |
                         ID == '16031' |
                         ID == '15706' |
+                        ID == '15805' |
+                        ID == '15981' |
                         ID == '15777' |
                         ID == '17443' |
                         ID == '17499' |
@@ -57,17 +58,13 @@ avg_km_day <- tr_data %>%
 
 summary(tr_data$Distance)
 sd(tr_data$Distance)
-# Without eel A09355 that did not show a clear migration direction
-tr_data2 <- filter(tr_data, ID != "9355")
-summary(tr_data2$Distance)
-sd(tr_data2$Distance)
+
 
 # Calculate number of days and total distance
 tr_summary <- tr_data %>%
   group_by(ID) %>%
   summarize(total_dist = sum(Distance),
             days = max(Date)-min(Date))
-
 
 tr_summary <- merge(tr_summary, avg_km_day, by = "ID")
 summary(tr_summary$total_dist)
@@ -76,19 +73,12 @@ sd(tr_summary$total_dist)
 tr_summary$days <- as.numeric(tr_summary$days)
 summary(tr_summary$days)
 sd(tr_summary$days)
-# Without eel A09355 that did not show a clear migration direction
-tr_summary2 <- filter(tr_summary, ID != "9355")
-summary(tr_summary2$days)
-sd(tr_summary2$days)
-
 
 
 # Calculate migration speed (km/day)
 tr_summary$speed <- tr_summary$total_dist/tr_summary$days
-# Without eel A09355 that did not show a clear migration direction
-tr_summary2 <- filter(tr_summary, ID != "9355")
-summary(tr_summary2$speed)
-sd(tr_summary2$speed)
+summary(tr_summary$speed)
+sd(tr_summary$speed)
 
 # Upload file with migration direction
 direction <- read_csv("./data/external/migration_direction.csv")
