@@ -125,32 +125,27 @@ cor(bel$speed, bel$Weight)
 
 # Data analysis
 
-# Remove L Germany and N Belgium
-tr_summary2 <- filter(tr_summary, Direction_Country != "N Belgium" ,
-                                  Direction_Country != "L Germany" )
-tr_summary2$Direction_Country <- factor(tr_summary2$Direction_Country)
-
 # Calculate speed per group
-aggregate(tr_summary2$speed, list(tr_summary2$Direction_Country), mean)
-aggregate(tr_summary2$speed, list(tr_summary2$Direction_Country), sd)
-aggregate(tr_summary2$speed, list(tr_summary2$Direction_Country), min)
-aggregate(tr_summary2$speed, list(tr_summary2$Direction_Country), max)
+aggregate(tr_summary$speed, list(tr_summary$Direction_Country), mean)
+aggregate(tr_summary$speed, list(tr_summary$Direction_Country), sd)
+aggregate(tr_summary$speed, list(tr_summary$Direction_Country), min)
+aggregate(tr_summary$speed, list(tr_summary$Direction_Country), max)
 
 # Correlation between speed and size
-plot(tr_summary2$speed ~ tr_summary2$Weight)
-cor(tr_summary2$speed, tr_summary2$Weight)
+plot(tr_summary$speed ~ tr_summary$Weight)
+cor(tr_summary$speed, tr_summary$Weight)
 
 
 # Create boxplot
-boxplot(speed ~ Direction_Country, data = tr_summary2)
+boxplot(speed ~ Direction_Country, data = tr_summary)
 
 # make a named list for the location of the number of eels
-eel_per_group <- tr_summary2 %>% group_by(Direction_Country) %>% 
+eel_per_group <- tr_summary %>% group_by(Direction_Country) %>% 
   summarise(n_eels = n_distinct(ID))
 eels_per_group_list <- rep(50, nrow(eel_per_group))
 names(eels_per_group_list) <- as.vector(eel_per_group$Direction_Country)
 # create ggplot (cfr. styling earlier plot)
-boxplot_dir_country <- ggplot(tr_summary2, aes(x = Direction_Country,
+boxplot_dir_country <- ggplot(tr_summary, aes(x = Direction_Country,
                                      y = speed)) +
   geom_boxplot(outlier.shape = NA) +
   #coord_flip() +
@@ -166,6 +161,7 @@ boxplot_dir_country <- ggplot(tr_summary2, aes(x = Direction_Country,
   #xlab("ALS position relative to shipping lock complex") +
   scale_x_discrete(limits=c("N Germany",      # Changes oreder of plots
                             "SW Germany",
+                            "N Belgium",
                             "SW Belgium")) +    
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.title.x = element_text(margin = margin(r = 10))) +
