@@ -180,7 +180,7 @@ model <- bank_popoff %>%
   unnest(tidied)
 
 # Remove redundant columns
-model <- select(model, -data, -fit, -std.error, -statistic, -p.value)
+model <- dplyr::select(model, -data, -fit, -std.error, -statistic, -p.value)
 
 
 # Extract model coefficients in a tidy dataframe
