@@ -233,7 +233,7 @@ all <- all %>%
 
 # 7. Clean dataset  ####
 all <- all %>%
-  select(ID, datetime, numericdate, corrected_depth2, temperature) %>%
+  dplyr::select(ID, datetime, numericdate, corrected_depth2, temperature) %>%
   rename(corrected_depth = corrected_depth2)
 
 
