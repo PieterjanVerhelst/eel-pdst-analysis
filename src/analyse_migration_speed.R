@@ -15,50 +15,215 @@ tr_data$ID <- as.factor(tr_data$ID)
 tr_data$Date <- as.Date(tr_data$Date)
 tr_data$Distance <- as.numeric(tr_data$Distance)
 
-# Filter eels with >= 14 days out at large
-tr_data <- filter(tr_data, ID == '9349' |
-                        ID == '9358' |
-                        ID == '9359' |
-                        ID == '9374' |
-                        ID == '9377' |
-                        ID == '9393' |
-                        ID == '9411' |
-                        ID == '9423' |
-                        ID == '9424' |
-                        ID == '15714' |
-                        ID == '16031' |
-                        ID == '15706' |
-                        ID == '15805' |
-                        ID == '15981' |
-                        ID == '15777' |
-                        ID == '17443' |
-                        ID == '17499' |
-                        ID == '17513' |
-                        ID == '17534' |
-                        ID == '17526' |
-                        ID == '17522' |
-                        ID == '17492' |
-                        ID == '17508' |
-                        ID == '17536' |
-                        ID == '17537' |
-                        ID == '17538' |
-                        ID == '17510' |
-                        ID == '15789' |
-                        ID == '112061' |
-                        ID == '112064')
 
-
-# Calculate average, sd, min and max km per day per eel and for all eels
-avg_km_day <- tr_data %>%
+# Calculate total number of days and total distance
+tr_summary <- tr_data %>%
   group_by(ID) %>%
-  summarize(avg_dist = mean(Distance),
-            sd = sd(Distance),
-            min = mean(Distance),
-            max = max(Distance))
+  summarize(total_dist = sum(Distance),
+            days = max(Date)-min(Date))
 
-summary(tr_data$Distance)
-sd(tr_data$Distance)
+# Calculate total speed
+tr_summary$days <- as.numeric(tr_summary$days)
+tr_summary$total_speed <- tr_summary$total_dist / tr_summary$days
 
+# Select eels that migrated >= 100 km
+tr_summary <- filter(tr_summary, total_dist >= 100)
+tr_summary$ID <- factor(tr_summary$ID)
+unique(tr_summary$ID)
+
+
+# Remove 2 eels
+# 9355 does not have a net distance displacement of >= 100 km. It did have a total track of >= 100 km. Check with geolocation plots
+# 17533 is unlikely an eel based on vertical movement pattern. Needs further checking
+tr_summary <- filter(tr_summary, ID != 9355)
+tr_summary <- filter(tr_summary, ID != 17533)
+tr_summary$ID <- factor(tr_summary$ID)
+unique(tr_summary$ID)
+
+# Upload file with migration direction, eel sizes and release positions
+direction <- read_csv("./data/external/migration_direction.csv")
+
+# Merge direction to dataset
+tr_summary <- merge(tr_summary, direction, by = "ID")
+
+# Calculate avg, sd, min and max distance & tracking days per country of origin
+total_distance_days <- tr_summary %>%
+  group_by(Country) %>%
+  summarize(avg_dist = mean(total_dist),
+            sd_dist = sd(total_dist),
+            min_dist = min(total_dist),
+            max_dist = max(total_dist),
+            avg_days = mean(days),
+            sd_days = sd(days),
+            min_days = min(days),
+            max_days = max(days))
+
+
+
+# Filter eels that migrated >= 100 km by merging tr_summary dataset to tr_data
+tr_data <- merge(tr_data, tr_summary, by = "ID")
+tr_data$ID <- factor(tr_data$ID)
+unique(tr_data$ID)
+
+
+
+# Calculate average, sd, min and max km per day per eel per country
+#avg_km_day <- tr_data %>%
+#  group_by(Country) %>%
+#  summarize(avg_dist = mean(Distance),
+#            sd = sd(Distance),
+#            min = min(Distance),
+#            max = max(Distance))
+
+
+
+# 1. Analyse difference in size between countries  ####
+tr_summary$Country <- factor(tr_summary$Country)
+boxplot(tr_summary$Weight ~ tr_summary$Country)
+cor(tr_summary$speed, tr_summary$Weight)
+
+# independent 2-group t-test
+# t.test(y~x) # where y is numeric and x is a binary factor 
+t.test(tr_summary$Weight~tr_summary$Country, var.equal = TRUE)
+
+# Assumptions:
+# 1. 2 independent groups
+# N and SW are independent (each direction is attributed to a different animal)
+
+# 2. Normality
+qqnorm(tr_summary$Weight, pch = 1, frame = TRUE)
+qqline(tr_summary$Weight, col = "steelblue", lwd = 2)
+
+shapiro.test(tr_summary$Weight)
+# The p-value > 0.05 implying that the distribution of the data are not significantly different from normal distribution. In other words, we can assume the normality.
+
+# 3. Homogeneity of variances
+# F-test 
+# The F-test is used to assess whether the variances of two populations (A and B) are equal. The test requires normality (in case no normality, apply Fligner-Killeen’s test)
+# https://www.datanovia.com/en/lessons/homogeneity-of-variance-test-in-r/
+var.test(Weight ~ Country, data = tr_summary)
+# When p > 0.05, there is no significant difference between the two variances.
+
+
+
+
+# 2. Analyse difference in total speed between countries and directions ####
+tr_summary$Direction_Country <- paste(tr_summary$Direction, tr_summary$Country)
+tr_summary$Direction_Country <- factor(tr_summary$Direction_Country)
+boxplot(total_speed ~ Direction_Country, data = tr_summary)
+
+# Calculate speed per group
+aggregate(tr_summary$total_speed, list(tr_summary$Direction_Country), mean)
+aggregate(tr_summary$total_speed, list(tr_summary$Direction_Country), sd)
+aggregate(tr_summary$total_speed, list(tr_summary$Direction_Country), min)
+aggregate(tr_summary$total_speed, list(tr_summary$Direction_Country), max)
+
+# Create elaborated boxplot
+# make a named list for the location of the number of eels
+eel_per_group <- tr_summary %>% group_by(Direction_Country) %>% 
+  summarise(n_eels = n_distinct(ID))
+eels_per_group_list <- rep(50, nrow(eel_per_group))
+names(eels_per_group_list) <- as.vector(eel_per_group$Direction_Country)
+# create ggplot (cfr. styling earlier plot)
+boxplot_dir_country <- ggplot(tr_summary, aes(x = Direction_Country,
+                                              y = total_speed)) +
+  geom_boxplot(outlier.shape = NA) +
+  #coord_flip() +
+  #scale_y_continuous(breaks = seq(0, 600, by = 50)) +
+  ylim(0,50) + 
+  theme_minimal() +
+  ylab("Speed (km/day)") +
+  geom_text(data = data.frame(),
+            aes(x = names(eels_per_group_list),
+                y = eels_per_group_list,
+                label = as.character(eel_per_group$n_eels)),
+            col = 'black', size = 6) +
+  #xlab("ALS position relative to shipping lock complex") +
+  scale_x_discrete(limits=c("N Germany",      # Changes oreder of plots
+                            "SW Germany",
+                            "N Belgium",
+                            "SW Belgium")) +    
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.title.x = element_text(margin = margin(r = 10))) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        axis.title.x = element_blank()) 
+boxplot_dir_country
+
+
+
+# One-way anova
+# The one-way anova is an extension of independent two-samples t-test for comparing means in a situation where there are more than two groups (= grouping variable with more than 2 levels)
+# http://www.sthda.com/english/wiki/one-way-anova-test-in-r
+model_aov <- aov(total_speed ~ Direction_Country, data = tr_summary)
+summary(model_aov)
+TukeyHSD(model_aov)
+
+# Assumptions
+# 1. Homogeneity of variances
+plot(model_aov, 1)
+leveneTest(total_speed ~ Direction_Country, data = tr_summary)
+# When p > 0.05, there is no significant difference between the two variances => assumption met
+
+# 2. Normality
+plot(model_aov, 2)
+
+# Extract the residuals
+aov_residuals <- residuals(object = model_aov)
+# Run Shapiro-Wilk test
+shapiro.test(x = aov_residuals)
+# When p > 0.05, the assumption of normality is met
+
+
+
+
+
+# 3. Analyse difference in daily speeds between countries and directions ####
+tr_data$Direction_Country <- paste(tr_data$Direction, tr_data$Country)
+tr_data$Direction_Country <- factor(tr_data$Direction_Country)
+boxplot(Distance ~ Direction_Country, data = tr_data)
+
+par(mfrow=c(2,1))
+boxplot(total_speed ~ Direction_Country, data = tr_summary)
+boxplot(Distance ~ Direction_Country, data = tr_data)
+
+model_aov <- aov(Distance ~ Direction_Country, data = tr_data)
+summary(model_aov)
+TukeyHSD(model_aov)
+
+# Assumptions
+# 1. Homogeneity of variances
+plot(model_aov, 1)
+leveneTest(Distance ~ Direction_Country, data = tr_data)
+# When p > 0.05, there is no significant difference between the two variances => assumption met
+
+# 2. Normality
+plot(model_aov, 2)
+
+# Extract the residuals
+aov_residuals <- residuals(object = model_aov)
+# Run Shapiro-Wilk test
+shapiro.test(x = aov_residuals)
+# When p > 0.05, the assumption of normality is met
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# OLD CODE ####
 
 # Calculate number of days and total distance
 tr_summary <- tr_data %>%
@@ -134,6 +299,8 @@ aggregate(tr_summary$speed, list(tr_summary$Direction_Country), max)
 # Correlation between speed and size
 plot(tr_summary$speed ~ tr_summary$Weight)
 cor(tr_summary$speed, tr_summary$Weight)
+
+
 
 
 # Create boxplot
