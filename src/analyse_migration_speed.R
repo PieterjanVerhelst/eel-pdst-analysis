@@ -136,8 +136,8 @@ boxplot_country <- ggplot(tr_summary, aes(x = Country,
                 label = as.character(eel_per_group$n_eels)),
             col = 'black', size = 6) +
   #xlab("ALS position relative to shipping lock complex") +
-  scale_x_discrete(limits=c("Belgium",      # Changes oreder of plots
-                            "Germany")) +    
+  scale_x_discrete(limits=c("Germany",      # Changes oreder of plots
+                            "Belgium")) +    
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.title.x = element_text(margin = margin(r = 10))) +
   theme(axis.text = element_text(size = 12),
