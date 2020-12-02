@@ -16,8 +16,10 @@ tr_data <-  list.files(path = "./data/external/trajectory_data/",
 
 
 # Select columns
-tr_data <- select(tr_data, ID, Date, MPL.Hori_Dist_km)
-tr_data <- rename(tr_data, Distance = MPL.Hori_Dist_km)
+tr_data <- select(tr_data, ID, Date, MPL.Hori_Dist_km, MPL.Avg.Lat, MPL.Avg.Lon)
+tr_data <- rename(tr_data, Distance = MPL.Hori_Dist_km,
+                  Lat = MPL.Avg.Lat,
+                  Lon = MPL.Avg.Lon)
 
 
 # Remove NA
