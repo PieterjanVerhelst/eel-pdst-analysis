@@ -4,6 +4,8 @@
 
 # Packages
 library(car)
+#library(lme4)
+library(nlme)
 
 
 # Load file with trajectory distances for all eels
@@ -178,7 +180,7 @@ shapiro.test(x = aov_residuals)
 
 
 
-# 3. Analyse difference in daily speeds between countries and directions ####
+# 3. Analyse difference in daily distance (= speed per day) between countries and directions ####
 tr_data$Direction_Country <- paste(tr_data$Direction, tr_data$Country)
 tr_data$Direction_Country <- factor(tr_data$Direction_Country)
 boxplot(Distance ~ Direction_Country, data = tr_data)
@@ -209,9 +211,71 @@ shapiro.test(x = aov_residuals)
 
 
 
+# 4. Analyse difference in daily distance (= speed per day) according to longitude ####
+tr_data$Lon <- as.numeric(tr_data$Lon)
+tr_data$Lat <- as.numeric(tr_data$Lat)
+
+
+swb <- filter(tr_data, Direction_Country == "SW Belgium")
+nb <- filter(tr_data, Direction_Country == "N Belgium")
+swg <- filter(tr_data, Direction_Country == "SW Germany")
+ng <- filter(tr_data, Direction_Country == "N Germany")
+
+b <- filter(tr_data, Country == "Belgium")
+g <- filter(tr_data, Country == "Germany")
 
 
 
+plot <- ggplot(tr_data, aes(x=Lon, y=Distance)) +
+  geom_line(alpha = 0.5) +
+  geom_smooth(method = "loess", se = FALSE)
+plot
+
+
+#tr_data$Lon <- as.numeric(tr_data$Lon)
+# GLM
+glm_model <- glm(Distance ~  Lon, family = gaussian(link = "identity"), data = tr_data)
+
+summary(glm_model)
+vif(glm_model)
+par(mfrow=c(2,2))
+plot(glm_model)
+dev.off()
+
+# GLMM
+# 1. lmer() from lme4 package
+# Allows to calculate variance explained by random effects
+mixed.lmer <- lmer(Distance ~ Lon + Lat + Country + (1|ID), data = tr_data)
+summary(mixed.lmer)
+# variance explained by the random effect 'ID' (= individual variability)
+46.17/(46.17+79.53)
+
+# 2. lme() from nlme package
+# Gives p-values
+mixed <- lme(Distance ~ Lon + Lat + Country, random = ~1|ID, data = tr_data)
+summary(mixed)
+anova(mixed)
+
+
+# Check assumptions
+# 1. Homogeneity of variance
+plot(mixed.lmer)  # Make sure there are no patterns
+
+# 2. Normality
+qqnorm(resid(mixed.lmer))
+qqline(resid(mixed.lmer))
+
+
+# Plot predicted over response variable with loess smoother
+tr_data$predicted <- predict(mixed, type="response")
+tr_data$residuals <- residuals(mixed, type="response")
+tr_data$fitted <- fitted(mixed, type="response")
+
+plot <- ggplot(tr_data, aes(x=Lon, y=Distance)) +
+  geom_line(alpha = 0.5) +
+  geom_line(tr_data, mapping = aes(x=Lon, y=predicted), colour = "red") +
+  geom_smooth(method = "loess", se = FALSE)
+plot
 
 
 
