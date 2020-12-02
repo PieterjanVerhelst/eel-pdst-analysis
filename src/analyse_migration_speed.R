@@ -80,7 +80,7 @@ unique(tr_data$ID)
 # 1. Analyse difference in size between countries  ####
 tr_summary$Country <- factor(tr_summary$Country)
 boxplot(tr_summary$Weight ~ tr_summary$Country)
-cor(tr_summary$speed, tr_summary$Weight)
+#cor(tr_summary$speed, tr_summary$Weight)
 
 # independent 2-group t-test
 # t.test(y~x) # where y is numeric and x is a binary factor 
