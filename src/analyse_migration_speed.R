@@ -108,8 +108,70 @@ var.test(Weight ~ Country, data = tr_summary)
 
 
 
+# 2. Analyse difference in total speed between countries ####
+# Calculate speed per group
+aggregate(tr_summary$total_speed, list(tr_summary$Country), mean)
+aggregate(tr_summary$total_speed, list(tr_summary$Country), sd)
+aggregate(tr_summary$total_speed, list(tr_summary$Country), min)
+aggregate(tr_summary$total_speed, list(tr_summary$Country), max)
 
-# 2. Analyse difference in total speed between countries and directions ####
+# Create elaborated boxplot
+# make a named list for the location of the number of eels
+eel_per_group <- tr_summary %>% group_by(Country) %>% 
+  summarise(n_eels = n_distinct(ID))
+eels_per_group_list <- rep(50, nrow(eel_per_group))
+names(eels_per_group_list) <- as.vector(eel_per_group$Country)
+# create ggplot (cfr. styling earlier plot)
+boxplot_country <- ggplot(tr_summary, aes(x = Country,
+                                              y = total_speed)) +
+  geom_boxplot(outlier.shape = NA) +
+  #coord_flip() +
+  #scale_y_continuous(breaks = seq(0, 600, by = 50)) +
+  ylim(0,50) + 
+  theme_minimal() +
+  ylab("Speed (km/day)") +
+  geom_text(data = data.frame(),
+            aes(x = names(eels_per_group_list),
+                y = eels_per_group_list,
+                label = as.character(eel_per_group$n_eels)),
+            col = 'black', size = 6) +
+  #xlab("ALS position relative to shipping lock complex") +
+  scale_x_discrete(limits=c("Belgium",      # Changes oreder of plots
+                            "Germany")) +    
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.title.x = element_text(margin = margin(r = 10))) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        axis.title.x = element_blank()) 
+boxplot_country
+
+# independent 2-group t-test
+# t.test(y~x) # where y is numeric and x is a binary factor 
+t.test(tr_summary$total_speed~tr_summary$Country, var.equal = TRUE)
+
+# Assumptions:
+# 1. 2 independent groups
+# N and SW are independent (each direction is attributed to a different animal)
+
+# 2. Normality
+qqnorm(tr_summary$total_speed, pch = 1, frame = TRUE)
+qqline(tr_summary$total_speed, col = "steelblue", lwd = 2)
+
+shapiro.test(tr_summary$total_speed)
+# The p-value > 0.05 implying that the distribution of the data are not significantly different from normal distribution. In other words, we can assume the normality.
+
+# 3. Homogeneity of variances
+# F-test 
+# The F-test is used to assess whether the variances of two populations (A and B) are equal. The test requires normality (in case no normality, apply Fligner-Killeen’s test)
+# https://www.datanovia.com/en/lessons/homogeneity-of-variance-test-in-r/
+var.test(total_speed ~ Country, data = tr_summary)
+# When p > 0.05, there is no significant difference between the two variances.
+
+
+
+
+
+# 3. Analyse difference in total speed between countries and directions ####
 tr_summary$Direction_Country <- paste(tr_summary$Direction, tr_summary$Country)
 tr_summary$Direction_Country <- factor(tr_summary$Direction_Country)
 boxplot(total_speed ~ Direction_Country, data = tr_summary)
@@ -180,7 +242,7 @@ shapiro.test(x = aov_residuals)
 
 
 
-# 3. Analyse difference in daily distance (= speed per day) between countries and directions ####
+# 4. Analyse difference in daily distance (= speed per day) between countries and directions ####
 tr_data$Direction_Country <- paste(tr_data$Direction, tr_data$Country)
 tr_data$Direction_Country <- factor(tr_data$Direction_Country)
 boxplot(Distance ~ Direction_Country, data = tr_data)
@@ -211,7 +273,7 @@ shapiro.test(x = aov_residuals)
 
 
 
-# 4. Analyse difference in daily distance (= speed per day) according to longitude ####
+# 5. Analyse difference in daily distance (= speed per day) according to longitude ####
 tr_data$Lon <- as.numeric(tr_data$Lon)
 tr_data$Lat <- as.numeric(tr_data$Lat)
 
