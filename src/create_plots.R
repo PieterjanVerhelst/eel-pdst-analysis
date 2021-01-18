@@ -13,7 +13,7 @@ library(lubridate)
 # 1. Plot raw data ####
 
 # Import data
-data <- read_csv("./data/interim/data_circadian_tidal.csv",
+data <- read_csv("./data/interim/data_circadian_tidal_moon.csv",
                  col_types = list(sunrise = col_datetime(),
                                   previous_sunset = col_datetime(),
                                   next_sunrise = col_datetime(),
