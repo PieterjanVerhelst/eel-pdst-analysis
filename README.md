@@ -71,6 +71,8 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 	+ Generate `data_circadian_tidal_moon.csv` in `interim` folder
 14. calc_depth_diff.R: calculate depth difference between minima and maxima
 	+ Generate `data_depth_diff.csv` in `interim` folder
-15. create_plots.R: Create plots for data exploration
+15. calc_hourly_migrations.R: calculate the number of vertical migrations per hour together with hourly summarised environmental data
+	+ Generate `data_hourly_migrations.csv` in `interim` folder
+16. create_plots.R: Create plots for data exploration
 
 
