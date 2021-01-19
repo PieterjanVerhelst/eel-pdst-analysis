@@ -17,7 +17,7 @@ library(suncalc)
 
 
 # 1. Load sensor dataset with all eels ####
-data <- read_csv("./data/interim/batch_processed_eels.csv")
+data <- read_csv("./data/interim/batch_processed_eels_1hour.csv")
 
 # Process columns
 data$Date <- as.Date(data$datetime)
@@ -272,4 +272,4 @@ data_circ <- select(data_circ, ID, datetime, numericdate, corrected_depth, tempe
 
 
 # 5. write csv ####
-write_csv(data_circ, "./data/interim/data_circadian.csv")
+write_csv(data_circ, "./data/interim/data_circadian_1hour.csv")
