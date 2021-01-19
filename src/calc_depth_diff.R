@@ -10,7 +10,7 @@ library(lubridate)
 
 
 # 1. Import data ####
-data <- read_csv("./data/interim/data_circadian_tidal_moon.csv",
+data <- read_csv("./data/interim/data_circadian_tidal_moon_5min.csv",
                  na = "", 
                  col_types = list(sunrise = col_datetime(),
                                   previous_sunset = col_datetime(),
