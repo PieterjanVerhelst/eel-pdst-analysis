@@ -15,7 +15,7 @@ library(suncalc)
 
 
 # 1. Import data ####
-data <- read_csv("./data/interim/data_circadian_tidal.csv",
+data <- read_csv("./data/interim/data_circadian_tidal_1hour.csv",
                  na = "", 
                  col_types = list(sunrise = col_datetime(),
                                   previous_sunset = col_datetime(),
@@ -40,5 +40,5 @@ data <- merge(data, moon_fraction, by="datetime")
 
 
 # 3. write csv ####
-write.csv(data, "./data/interim/data_circadian_tidal_moon.csv")
+write.csv(data, "./data/interim/data_circadian_tidal_moon_1hour.csv")
 
