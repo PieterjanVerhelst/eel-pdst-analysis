@@ -62,7 +62,8 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 8. read_trajectory_data.R: Batch read and process trajectory data obtained via matlab toolbox which is stored in `./data/external/trajectory_data`
 9. analyse_migration_speed.R: Calculate and analyse horizontal migration speeds
 10. batch_all_eels.R: Create sensor log file with all eels for analysis, taking into account time settings (UTC), pressure drift and redundant data (e.g. data when not on the shelf, during DVM and predation)
-	+ Generate `batch_processed_eels.csv` in `interim` folder
+	+ Generate `batch_processed_eels_5min.csv` in `interim` folder
+	+ Generate `batch_processed_eels_1hour.csv` in `interim` folder
 11. link_circadian.R: Link circadian phases to the dataset
 	+ Generate `data_circadian.csv` in `interim` folder
 12. link_tidal.R: Link tidal data to the dataset (tidal data obtained via John Aldridge (CEFAS, UK))

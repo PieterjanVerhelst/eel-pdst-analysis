@@ -140,6 +140,7 @@ all <- all %>%
   mutate(datetime = dmy_hms(datetime))
   
 all$datetime2 <- droplevels(cut(all$datetime, breaks="5 min"))   # 5 min cut
+#all$datetime2 <- droplevels(cut(all$datetime, breaks="60 min"))   # 60 min cut
 
 all <- all %>%
   group_by(ID, datetime2) %>%
@@ -238,8 +239,8 @@ all <- all %>%
 
 
 
-
-write.csv(all, "./data/interim/batch_processed_eels.csv")
+write.csv(all, "./data/interim/batch_processed_eels_5min.csv")
+#write.csv(all, "./data/interim/batch_processed_eels_1hour.csv")
 
 
 
