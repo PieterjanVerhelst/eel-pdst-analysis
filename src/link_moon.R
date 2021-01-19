@@ -15,7 +15,7 @@ library(suncalc)
 
 
 # 1. Import data ####
-data <- read_csv("./data/interim/data_circadian_tidal_1hour.csv",
+data <- read_csv("./data/interim/data_circadian_tidal_5min.csv",
                  na = "", 
                  col_types = list(sunrise = col_datetime(),
                                   previous_sunset = col_datetime(),
@@ -26,19 +26,20 @@ data <- read_csv("./data/interim/data_circadian_tidal_1hour.csv",
 
 
 # 2. Link illuminated moon fraction to the dataset
-moon_fraction <- getMoonIllumination(data$datetime, keep = "fraction")
-moon_fraction <- moon_fraction %>% 
-  rename(
-    datetime = date,
-    moon_fraction = fraction
-  )
+moon_fraction <- data %>%
+  select(ID, datetime) %>%
+  mutate(getMoonIllumination(datetime, keep = "fraction"))
+
+moon_fraction$date <- NULL
+moon_fraction <- rename(moon_fraction, moon_fraction = fraction)
+
 
 class(moon_fraction$datetime)
 class(moon_fraction$moon_fraction)
 
-data <- merge(data, moon_fraction, by="datetime")
+data <- left_join(data, moon_fraction, by=c("ID", "datetime"))
 
 
 # 3. write csv ####
-write.csv(data, "./data/interim/data_circadian_tidal_moon_1hour.csv")
+write.csv(data, "./data/interim/data_circadian_tidal_moon_5min.csv")
 
