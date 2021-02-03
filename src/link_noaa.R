@@ -5,21 +5,24 @@
 
 # Load packages
 library(tidyverse)
+library(assertthat)
 library(glue)
 library(lubridate)
 library(worldmet)
 library(sf)
 library(purrr)
+source("./src/noaa_functions.R")
 
 # Check stations on map
-info <- getMeta(lat = 55.5, lon = 7.5)
+# info <- getMeta(lat = 55.5, lon = 7.5)
+info <- getMeta(lat = 51.2, lon = 3)
 
-# 1. Download NOAA data ####
+# 1. Define NOAA stations ####
+
 station_codes <- list(
   andrew = "031405-99999",
   sleipner = "010886-99999",
-  lerwick = "030050-99999")
-,
+  lerwick = "030050-99999",
   gullfax = "013755-99999",
   bruce = "031402-99999",
   heimdal = "010875-99999",
@@ -88,72 +91,132 @@ station_codes <- list(
   melen = "072030-99999"
 )
 
-# wrap function around importNOAA() to get data we want
-get_data_noaa <- function(station_code, 
-                          station_nickname, 
-                          hourly_data, 
-                          years) {
-  message(glue("Importing data of station '{ nickname }' ({ code })",
-               nickname = station_nickname,
-               code = station_code))
-  data <- importNOAA(code = station_code, hourly = hourly_data, year = years)
-  if (!"cl" %in% names(data)) {
-    warning(glue("Station {station} has no column 'cl'. Created by duplicating values of 'cl_1'."),
-            station = station_code)
-    # haumet station (070220-99999) has no cl
-    data$cl <- data$cl_1
-  }
-  data %>% 
-    select(station, date, latitude, longitude, atmos_pres, cl_1, cl)
-}
+# Short version for testing
+station_codes <- list(
+  zeebrugge = "064180-99999",
+  oostende = "064070-99999",
+  koksijde = "064000-99999"
+)
 
-# 2. Combine datasets ####
-noaa<- map2_dfr(station_codes,
+
+# 2. Download and combine datasets ####
+noaa <- map2_dfr(station_codes,
                 names(station_codes),
                 get_data_noaa,
                 hourly_data = TRUE, 
                 years = 2018:2019)
 
+# Reference code for one station
+# andrew <- importNOAA(code = "031405-99999", hourly = TRUE, year = 2018:2019)
+# andrew <- select(andrew, station, date, latitude, longitude, atmos_pres, cl)
+
 # 3. Load dataset with all eels ####
 data <- read.csv("./data/interim/data_circadian_tidal.csv")
 data$X <- NULL
 data$ID <- factor(data$ID)
-
+data$datetime  <- as_datetime(data$datetime)
 
 # Filter 1 animal for testing
-subset <- filter(data, ID == "16031")
-summary(subset$direction)
+data <- filter(data, ID == "16031")
+summary(data$direction)
 
 # Check NAs
-sum(is.na(noaa$atmos_pres))
-sum(is.na(noaa$cl_1))  
 sum(is.na(noaa$cl))  
 sum(is.na(noaa$latitude))  
 sum(is.na(noaa$longitude))  
 
-# Remove unnecessary columns
-noaa$atmos_pres <- NULL
-noaa$cl_1 <- NULL
-
 # Remove NAs 
 noaa <- noaa[!is.na(noaa$cl), ]
+noaa <- noaa[!is.na(noaa$latitude), ]
+noaa <- noaa[!is.na(noaa$longitude), ]
 
-
-
+# check "metadata" from noaa
+noaa %>%
+  distinct(code, station, latitude, longitude)
 
 # 4. Link environmental NOAA data to DST tracks
 
-# create GIS layers from the tracks and NOAA stations
-det_stations <- st_as_sf(subset,
-                         coords = c("avg_lon",
-                                    "avg_lat"),
-                         crs = 4326)
+# "chop" data based on coordinates and create GIS layers from the tracks and
+# NOAA stations
+dst_tracks <- 
+  data %>%
+  mutate(latitude = lat,
+         longitude = lon) %>%
+  group_by(latitude,
+           longitude,
+           avg_lat,
+           avg_lon) %>%
+  chop() %>%
+  st_as_sf(coords = c("longitude","latitude"), crs = 4326) %>%
+  st_transform(crs = 3035)
 
-env_stations <- st_as_sf(noaa,
-                         coords = c("longitude",
-                                    "latitude"),
-                         crs = 4326)
+dst_tracks
 
+env_stations_sf <- 
+  noaa %>%
+  group_by(code, station, longitude, latitude) %>%
+  nest() %>%
+  st_as_sf(coords = c("longitude",
+                      "latitude"),
+           crs = 4326) %>%
+  st_transform(crs = 3035)
 
+env_stations_sf
 
+# create distance matrix (df)
+dist_df <- 
+  dst_tracks %>% 
+  st_distance(env_stations_sf) %>%
+  as_tibble()
 
+#' assign names based on env station codes (ensures uniqueness and traceability)
+#' Eventually could we opt for the nicknames by:
+#' names(dist_df) <- names(station_codes)
+names(dist_df) <- as.character(env_stations_sf$code)
+
+dist_df
+
+remove(dst_tracks)
+
+# Add row ID to tracking data (unique identifier, useful for linking env station
+# data to trackign data)
+data <- data %>%
+  rownames_to_column(var = "row_id") %>%
+  mutate(row_id = as.numeric(row_id))
+
+# retrieve best fitting environmental data
+env_data <- 
+  map2_dfr(data$row_id[1:5000],
+           data$datetime[1:5000],
+           function(rowID, dt) {
+             # get stations in the neighborhood
+             near_stations <- get_nearest_stations(rowID = rowID,
+                                                   dist_threshold = 50 * 10^3,
+                                                   distance_df = dist_df,
+                                                   tracking_data = data)
+             
+             # find the best fitting environmental data (geographically and temporally)
+             env_data_to_add <- get_best_env_data(datetime_track = dt,
+                                                  ordered_noaa_stations = near_stations,
+                                                  timethreshold_hours = 2, 
+                                                  rowID = rowID,
+                                                  df_noaa_stations = noaa)
+           }
+)
+
+# rename some returned columns
+env_data <-
+  env_data %>%
+  rename(noaa_station_lat = latitude,
+         noaa_station_lon = longitude,
+         noaa_date = date)
+
+# check number of rows
+assertthat::assert_that(nrow(data) == nrow(env_data),
+                        msg = glue("DST tracking data and environmental data must contain same number of rows"))
+
+# Join environmental data to DST tracking data
+data <-
+  data %>%
+  left_join(env_data, by = "row_id")
+data
