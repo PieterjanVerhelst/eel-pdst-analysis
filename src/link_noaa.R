@@ -186,8 +186,8 @@ data <- data %>%
 
 # retrieve best fitting environmental data
 env_data <- 
-  map2_dfr(data$row_id[1:5000],
-           data$datetime[1:5000],
+  map2_dfr(data$row_id,
+           data$datetime,
            function(rowID, dt) {
              # get stations in the neighborhood
              near_stations <- get_nearest_stations(rowID = rowID,
