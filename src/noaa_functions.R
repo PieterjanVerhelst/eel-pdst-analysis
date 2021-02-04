@@ -108,7 +108,9 @@ get_best_env_data <- function(datetime_track,
     # final filter by taking the nearest station and the nearest time
     if (nrow(env_data) > 0) {
       env_data %>%
+        # get data from nearest station left
         filter(code == names(ordered_noaa_stations_left)[1]) %>%
+        # get the temporal nearest data
         filter(abs_diff_datetime == min(abs_diff_datetime)) %>%
         # if datetime difference is exactly the same (e.g. 18:30:00 is 30 mins
         # from 19:00:00 and 18:00:00 as well) take the first row (typically the
