@@ -93,9 +93,7 @@ station_codes <- list(
 
 # Short version for testing
 station_codes <- list(
-  zeebrugge = "064180-99999",
-  oostende = "064070-99999",
-  koksijde = "064000-99999"
+  haumet = "070220-99999"
 )
 
 
@@ -125,10 +123,16 @@ sum(is.na(noaa$cl))
 sum(is.na(noaa$latitude))  
 sum(is.na(noaa$longitude))  
 
+sum(is.na(data$lat))  
+sum(is.na(data$lon))  
+
 # Remove NAs 
 noaa <- noaa[!is.na(noaa$cl), ]
 noaa <- noaa[!is.na(noaa$latitude), ]
 noaa <- noaa[!is.na(noaa$longitude), ]
+
+data <- data[!is.na(data$lat), ]
+data <- data[!is.na(data$lon), ]
 
 # check "metadata" from noaa
 noaa %>%
