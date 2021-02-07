@@ -96,13 +96,18 @@ station_codes <- list(
   haumet = "070220-99999"
 )
 
+# Path where NOAA data files are stored: directory will be created if not
+# exists. If it exists, an informative warning is returned
+noaa_path <- "./data/external/noaa"
+dir.create(noaa_path, showWarnings = TRUE)
 
 # 2. Download and combine datasets ####
 noaa <- map2_dfr(station_codes,
                 names(station_codes),
                 get_data_noaa,
                 hourly_data = TRUE, 
-                years = 2018:2019)
+                years = 2018:2019,
+                path = noaa_path)
 
 # Reference code for one station
 # andrew <- importNOAA(code = "031405-99999", hourly = TRUE, year = 2018:2019)

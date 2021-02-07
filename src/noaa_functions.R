@@ -17,30 +17,86 @@
 #' @param hourly_date (logical) Should hourly means be calculated?
 #' @param years (numeric) The year to import. This can be a vector of years e.g.
 #'   year = 2000:2005
+#' @param path (character) Path to folder containing NOAA data files 
 #'   
 get_data_noaa <- function(station_code, 
                           station_nickname, 
                           hourly_data, 
-                          years) {
+                          years,
+                          path) {
   
-  message(glue("Importing data of station '{ nickname }' ({ code })",
-               nickname = station_nickname,
-               code = station_code))
-  noaa_data <- importNOAA(code = station_code, hourly = hourly_data, year = years)
-  if (!"cl" %in% names(noaa_data)) {
-    warning(glue("Station {station} has no column 'cl'. Created by duplicating values of 'cl_1'.", station = station_code))
-    # haumet station (070220-99999) has no cl
-    noaa_data$cl <- noaa_data$cl_1
+  filename = glue("{ station_code }_{ year_start }-{ year_end }_{ nickname }.csv",
+                  station_code = station_code,
+                  year_start = years[1],
+                  year_end = years[2],
+                  nickname = station_nickname)
+  is.dir(path)
+  if (filename %in% list.files(path)) {
+    message(glue("Reading data of station '{ nickname }' ({ code }) from file { path }/{ filename }",
+                 nickname = station_nickname,
+                 code = station_code,
+                 path = path,
+                 filename = filename))
+    noaa_data <- read_csv(file = glue("{path}/{filename}",
+                                      path = path,
+                                      filename = filename),
+                          na = "",
+                          col_types = cols(date = col_datetime("")))
+  } else {
+    message(glue("Importing data of station '{ nickname }' ({ code })",
+                 nickname = station_nickname,
+                 code = station_code))
+    noaa_data <- importNOAA(code = station_code, hourly = hourly_data, year = years)
+  
+    if (!"cl" %in% names(noaa_data)) {
+      warning(glue("Station {station} has no column 'cl'. Created by duplicating values of 'cl_1'.", station = station_code))
+      # haumet station (070220-99999) has no cl
+      noaa_data$cl <- noaa_data$cl_1
+    }
+    
+    noaa_data <- 
+      noaa_data %>% 
+      # select relevant columns
+      select(code, station, date, latitude, longitude, cl) %>%
+      # set date as datetime object
+      mutate(date = as_datetime(date)) %>%
+      mutate(code = as.character(code))
+    
+    message(glue("Saving data in file {path}/{filename}",
+                 path = path,
+                 filename = filename))
+    save_data_noaa_csv(noaa_df = noaa_data, 
+                       filename = filename,
+                       path = path)
+    return(noaa_data)
   }
-  
-  noaa_data %>% 
-    # select relevant columns
-    select(code, station, date, latitude, longitude, cl) %>%
-    # set date as datetime object
-    mutate(date = as_datetime(date)) %>%
-    mutate(code = as.character(code))
 }
 
+
+#' Save NOAA stations data 
+#'
+#' Function to save data retrieved via `get_data_noaa()` as csv file
+#' 
+#' @param noaa_df (data.frame) A df containing the NOAA environmental data to save
+#' @param filename (character) Name of the csv file which will be saved
+#' @param path (character) Directory where csv file will be saved
+save_data_noaa_csv <- function(noaa_df, 
+                               filename,
+                               path) {
+  is.dir(path)
+  is.character(filename)
+  file <- glue("{ path }/{ filename }",
+               path = path,
+               filename = filename)
+  write_csv(x = noaa_df,
+            file = file,
+            na = "")
+  message(glue("Saving { filename } completed. Size: { size_file } bytes",
+               path = path,
+               filename = filename,
+               size_file = file.size(file))
+  )
+}
 
 #' Function to retrieve the nearest NOAA env stations
 #'
