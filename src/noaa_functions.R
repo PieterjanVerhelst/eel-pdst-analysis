@@ -56,7 +56,6 @@ get_nearest_stations <- function(rowID,
   dist_df_near_stations <- dist_df_sorted[dist_df_sorted <= dist_threshold]
   track_lat <- tracking_data[rowID,]$lat
   track_lon <- tracking_data[rowID,]$lon
-  min_distance <- dist_df_sorted[[1]]
   if (length(dist_df_near_stations) == 0) {
     message(glue("Row { rowID } No stations found in the neighborhood ({ threshold } m) of ({ lat },{ lon }). Nearest station: { station_code } ({ distance })",
                  rowID = rowID,
