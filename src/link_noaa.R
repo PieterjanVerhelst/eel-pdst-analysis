@@ -11,7 +11,11 @@ library(lubridate)
 library(worldmet)
 library(sf)
 library(purrr)
+library(furrr)
 source("./src/noaa_functions.R")
+
+# set up multiprocessing
+future::plan(multisession)
 
 # Check stations on map
 # info <- getMeta(lat = 55.5, lon = 7.5)
@@ -195,7 +199,7 @@ data <- data %>%
 
 # retrieve best fitting environmental data
 env_data <- 
-  map2_dfr(data$row_id,
+  future_map2_dfr(data$row_id,
            data$datetime,
            function(rowID, dt) {
              # get stations in the neighborhood
