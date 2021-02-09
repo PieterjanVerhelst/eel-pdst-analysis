@@ -132,14 +132,14 @@ parameters <- parameters %>%
   filter(ID != c('112064'))
 
 
-# 3. Aggregate data per 5 min ####
+# 3. Aggregate data per 5 min  or 60 min ####
 all <- all %>%
   group_by(ID) %>%
   fill(temperature) %>%   # Fill temperature NA's with previous measured value
   mutate(datetime = dmy_hms(datetime))
   
-all$datetime2 <- droplevels(cut(all$datetime, breaks="5 min"))   # 5 min cut
-#all$datetime2 <- droplevels(cut(all$datetime, breaks="60 min"))   # 60 min cut
+#all$datetime2 <- droplevels(cut(all$datetime, breaks="5 min"))   # 5 min cut
+all$datetime2 <- droplevels(cut(all$datetime, breaks="60 min"))   # 60 min cut
 
 all <- all %>%
   group_by(ID, datetime2) %>%
