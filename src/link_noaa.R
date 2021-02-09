@@ -12,6 +12,8 @@ library(worldmet)
 library(sf)
 library(purrr)
 library(furrr)
+
+# Source noaa functions
 source("./src/noaa_functions.R")
 
 # set up multiprocessing
