@@ -96,9 +96,9 @@ station_codes <- list(
 )
 
 # Short version for testing
-station_codes <- list(
-  haumet = "070220-99999"
-)
+#station_codes <- list(
+#  haumet = "070220-99999"
+#)
 
 # Path where NOAA data files are stored: directory will be created if not
 # exists. If it exists, an informative warning is returned
@@ -124,8 +124,7 @@ data$ID <- factor(data$ID)
 data$datetime  <- as_datetime(data$datetime)
 
 # Filter 1 animal for testing
-data <- filter(data, ID == "16031")
-summary(data$direction)
+#data <- filter(data, ID == "16031")
 
 # Check NAs
 sum(is.na(noaa$cl))  
