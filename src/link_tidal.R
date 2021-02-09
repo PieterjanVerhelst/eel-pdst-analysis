@@ -16,7 +16,7 @@ library(lubridate)
 
 
 # 1. Load dataset with all eels ####
-data <- read_csv("./data/interim/data_circadian_1hour.csv")
+data <- read_csv("./data/interim/data_circadian_5min.csv")
 data$X1 <- NULL
 data$X1_1 <- NULL
 data$ID <- factor(data$ID)
@@ -98,4 +98,4 @@ data_tidal$time <- NULL
 
 
 # 4. write csv ####
-write.csv(data_tidal, "./data/interim/data_circadian_tidal_1hour.csv")
+write.csv(data_tidal, "./data/interim/data_circadian_tidal_5min.csv")
