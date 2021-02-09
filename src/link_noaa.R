@@ -1,6 +1,6 @@
 # Link data from NOAA (e;g. cloud cover and atmospheric pressure) to dataset
-# By Pieterjan Verhelst
-# Pieterjan.Verhelst@UGent.be
+# By Pieterjan Verhelst and Damiano Oldoni 
+# Pieterjan.Verhelst@UGent.be and damiano.oldoni@inbo.be
 
 
 # Load packages
@@ -22,6 +22,15 @@ future::plan(multisession)
 info <- getMeta(lat = 51.2, lon = 3)
 
 # 1. Define NOAA stations ####
+
+# Stations to remove when downloading data from 2012:2013 :
+#ula = "014281-99999"
+#harald = "060224-99999"
+#gormc = "060221-99999"
+#halfdan = "060222-99999"
+#zeebrugge = "064180-99999"
+#landsend = "038060-99999"
+
 
 station_codes <- list(
   andrew = "031405-99999",
