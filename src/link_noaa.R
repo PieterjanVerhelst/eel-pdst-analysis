@@ -31,7 +31,6 @@ info <- getMeta(lat = 51.2, lon = 3)
 #zeebrugge = "064180-99999"
 #landsend = "038060-99999"
 
-
 station_codes <- list(
   andrew = "031405-99999",
   sleipner = "010886-99999",
@@ -127,7 +126,7 @@ noaa <- map2_dfr(station_codes,
 # andrew <- select(andrew, station, date, latitude, longitude, atmos_pres, cl)
 
 # 3. Load dataset with all eels ####
-data <- read.csv("./data/interim/data_circadian_tidal.csv")
+data <- read.csv("./data/interim/data_circadian_tidal_5min.csv")
 data$X <- NULL
 data$ID <- factor(data$ID)
 data$datetime  <- as_datetime(data$datetime)
