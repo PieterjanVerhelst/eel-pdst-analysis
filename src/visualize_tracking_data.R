@@ -96,7 +96,7 @@ frames[[length(frames)]] # preview last frame
 
 # animate frames
 animate_frames(frames,
-               out_file = glue("visualization_trajectory_ID_{ id }.gif",
+               out_file = glue("./data/output/visualization_trajectory_ID_{ id }.gif",
                                id = glue_collapse(unique(data$nickname), sep = "-")),
                overwrite = TRUE)
 
