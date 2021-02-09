@@ -128,10 +128,17 @@ noaa <- map2_dfr(station_codes,
 # andrew <- select(andrew, station, date, latitude, longitude, atmos_pres, cl)
 
 # 3. Load dataset with all eels ####
-data <- read.csv("./data/interim/data_circadian_tidal_5min.csv")
+data <- read.csv("./data/interim/data_circadian_tidal_moon_5min.csv")
 data$X <- NULL
+data$X1 <- NULL
 data$ID <- factor(data$ID)
 data$datetime  <- as_datetime(data$datetime)
+data$Country <- factor(data$Country)
+
+# Filter German eels with temporal window 2012
+data <- filter(data, Country == "Germany")
+summary(data$datetime)
+
 
 # Filter 1 animal for testing
 #data <- filter(data, ID == "16031")
