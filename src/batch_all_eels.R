@@ -14,7 +14,6 @@ library(broom) # run regression per grouping variable (in 'Correct for depth dri
 
 
 
-
 # 1. Read in data ####
 # Belgian eels
 eel_A16031 <- read_csv("./data/interim/sensorlogs/sensor_A16031_08-11-2019.csv")
@@ -238,7 +237,18 @@ all <- all %>%
   rename(corrected_depth = corrected_depth2)
 
 
+# 8. Merge eel metadata to dataset
+eel <- read.csv("./data/external/eel_metadata.csv")
+eel$ID <- factor(eel$ID)
+eel$Direction <- factor(eel$Direction)
+eel$Country <- factor(eel$Country)
 
+
+data <- left_join(data, eel, by = "ID")
+
+
+
+# 9. Write csv file
 write.csv(all, "./data/interim/batch_processed_eels_5min.csv")
 #write.csv(all, "./data/interim/batch_processed_eels_1hour.csv")
 
