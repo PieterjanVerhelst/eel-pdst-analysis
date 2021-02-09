@@ -243,8 +243,7 @@ eel$ID <- factor(eel$ID)
 eel$Direction <- factor(eel$Direction)
 eel$Country <- factor(eel$Country)
 
-
-data <- left_join(data, eel, by = "ID")
+all <- left_join(all, eel, by = "ID")
 
 
 
