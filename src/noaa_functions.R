@@ -41,7 +41,12 @@ get_data_noaa <- function(station_code,
                                       path = path,
                                       filename = filename),
                           na = "",
-                          col_types = cols(date = col_datetime("")))
+                          col_types = cols(code = col_character(),
+                                           station = col_character(),
+                                           date = col_datetime(""),
+                                           latitude = col_number(),
+                                           longitude = col_number(),
+                                           cl = col_number()))
   } else {
     message(glue("Importing data of station '{ nickname }' ({ code })",
                  nickname = station_nickname,
@@ -49,8 +54,8 @@ get_data_noaa <- function(station_code,
     noaa_data <- importNOAA(code = station_code, hourly = hourly_data, year = years)
   
     if (!"cl" %in% names(noaa_data)) {
-      warning(glue("Station {station} has no column 'cl'. Created by duplicating values of 'cl_1'.", station = station_code))
       # haumet station (070220-99999) has no cl
+      warning(glue("Station {station} has no column 'cl'. Created by duplicating values of 'cl_1'.", station = station_code))
       noaa_data$cl <- noaa_data$cl_1
     }
     
@@ -101,23 +106,26 @@ save_data_noaa_csv <- function(noaa_df,
 #' Function to retrieve the nearest NOAA env stations
 #'
 #' @param rowID (numeric) row number to read from (see  `distance_df` below)
-#' @param dist_threshold distance threshold in meters (10km = 10^4 meters)
+#' @param dist_threshold distance threshold in kilometers
 #' @param distance_df (data.frame) a data.frame containing the distance between
 #'   DST tracking data (rows) and NOAA environmental stations (columns)
+#' @param tracking_data_lon (numeric) x position (in meters) of the tacked
+#'   individual
+#' @param tracking_data_lat (numeric) y position (in meters) of the tacked
+#'   individual
 get_nearest_stations <- function(rowID,
                                  dist_threshold,
                                  distance_df,
-                                 tracking_data) {
+                                 tracking_data_lon,
+                                 tracking_data_lat) {
   dist_df_sorted <- as.list(sort(distance_df[rowID,]))
-  dist_df_near_stations <- dist_df_sorted[dist_df_sorted <= dist_threshold]
-  track_lat <- tracking_data[rowID,]$lat
-  track_lon <- tracking_data[rowID,]$lon
+  dist_df_near_stations <- dist_df_sorted[dist_df_sorted <= dist_threshold*1000]
   if (length(dist_df_near_stations) == 0) {
-    message(glue("Row { rowID } No stations found in the neighborhood ({ threshold } m) of ({ lat },{ lon }). Nearest station: { station_code } ({ distance })",
+    message(glue("Row { rowID } No stations found in the neighborhood ({ threshold } km) of (x={ x }, y={ y }). Nearest station: { station_code } ({ distance })",
                  rowID = rowID,
                  threshold = dist_threshold,
-                 lat = track_lat,
-                 lon = track_lon,
+                 x = tracking_data_lon,
+                 y = tracking_data_lat,
                  station_code = names(dist_df_sorted[1]),
                  distance = dist_df_sorted[1]))
     NA
@@ -142,7 +150,7 @@ get_best_env_data <- function(datetime_track,
                               timethreshold_hours,
                               rowID,
                               df_noaa_stations){
-  if (!is.na(ordered_noaa_stations)) {
+  if (!is.na(ordered_noaa_stations[1])) {
     env_data <- 
       df_noaa_stations %>%
       # filter by "space"
