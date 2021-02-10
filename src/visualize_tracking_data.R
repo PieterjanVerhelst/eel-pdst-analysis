@@ -29,7 +29,7 @@ unique(data$ID)
 #' eels_ID <- unique(data$ID)
 
 # Select 2019 eels
-eels_ID <- c(17443, 17499, 17513, 17534, 17526, 17522, 17492, 17508, 17536, 17538, 17537, 17510, 15789) 
+eels_ID <- c(17443, 17499, 17513, 17534, 17526, 17522, 17508, 17536, 17538, 17537, 17510, 15789) 
 # eels_ID <- unique(data$ID)
 
 data <- data %>% filter(ID %in% eels_ID)
@@ -52,7 +52,7 @@ data <-
 
 #' set color vector
 #' this example allows max 5 individuals. Add more colors otherwise
-eels_cols <- c("red", "blue", "darkgreen", "black", "yellow", "pink", "purple", "brown", "orange", "white", "cyan", "chartreuse", "grey")
+eels_cols <- c("red", "blue", "darkgreen", "black", "yellow", "pink", "purple", "brown", "orange", "white", "cyan", "chartreuse")
 
 # trim color vector based on number of tracked individuals in data
 eels_cols <- eels_cols[1:length(eels_ID)]
@@ -77,7 +77,6 @@ data <-
                            "17534" = "17534",
                            "17526" = "17526",
                            "17522" = "17522",
-                           "17492" = "17492",
                            "17508" = "17508",
                            "17536" = "17536",
                            "17538" = "17538",
@@ -96,7 +95,7 @@ m <- align_move(move_data, res = 1, unit = "days")
 
 # create spatial frames with a OpenStreetMap watercolour map
 frames <- frames_spatial(m, path_colours = eels_cols,
-                         map_service = "osm", map_type = "humanitarian", alpha = 0.5) %>%
+                         map_service = "osm", map_type = "terrain_bg", alpha = 0.5) %>%
   add_labels(x = "Longitude", y = "Latitude") %>% # add some customizations, such as axis labels
   add_northarrow() %>%
   add_scalebar() %>%
@@ -108,6 +107,7 @@ frames[[length(frames)]] # preview last frame
 
 # animate frames
 animate_frames(frames,
+               fps = 10,
                out_file = glue("./data/output/visualization_trajectory_ID_{ id }.gif",
                                id = glue_collapse(unique(data$nickname), sep = "-")),
                overwrite = TRUE)
