@@ -75,10 +75,14 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 13. link_moon.R: Link illuminated moon fraction data to the dataset
 	+ Generate `data_circadian_tidal_moon_5min.csv` in `interim` folder
 	+ Generate `data_circadian_tidal_moon_1hour.csv` in `interim` folder
-14. calc_depth_diff.R: calculate depth difference between minima and maxima
+14. link_noaa.R: Link cloud cover to the dataset. Cloud cover data is obtained 'worldmet' R-package and communicates with NOAA database 
+14b. noaa_functions.R: Functions applied in `link_noaa.R` script.
+	+ Generate `data_circadian_tidal_moon_cloud_5min.csv` in `interim` folder
+	+ Generate `data_circadian_tidal_moon_cloud_1hour.csv` in `interim` folder
+15. calc_depth_diff.R: calculate depth difference between minima and maxima
 	+ Generate `data_depth_diff.csv` in `interim` folder
-15. calc_hourly_migrations.R: calculate the number of vertical migrations per hour together with hourly summarised environmental data
+16. calc_hourly_migrations.R: calculate the number of vertical migrations per hour together with hourly summarised environmental data
 	+ Generate `data_hourly_migrations.csv` in `interim` folder
-16. create_plots.R: Create plots for data exploration
+17. create_plots.R: Create plots for data exploration
 
 
