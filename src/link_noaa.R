@@ -165,8 +165,8 @@ noaa %>%
 # NOAA stations
 dst_tracks <- 
   data %>%
-  mutate(latitude = lat,
-         longitude = lon) %>%
+  mutate(latitude = avg_lat,
+         longitude = avg_lon) %>%
   group_by(latitude,
            longitude,
            avg_lat,
