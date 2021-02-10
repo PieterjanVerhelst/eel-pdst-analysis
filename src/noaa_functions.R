@@ -109,20 +109,23 @@ save_data_noaa_csv <- function(noaa_df,
 #' @param dist_threshold distance threshold in meters (10km = 10^4 meters)
 #' @param distance_df (data.frame) a data.frame containing the distance between
 #'   DST tracking data (rows) and NOAA environmental stations (columns)
+#' @param tracking_data_lon (numeric) x position (in meters) of the tacked
+#'   individual
+#' @param tracking_data_lat (numeric) y position (in meters) of the tacked
+#'   individual
 get_nearest_stations <- function(rowID,
                                  dist_threshold,
                                  distance_df,
-                                 tracking_data) {
+                                 tracking_data_lon,
+                                 tarcking_data_lat) {
   dist_df_sorted <- as.list(sort(distance_df[rowID,]))
   dist_df_near_stations <- dist_df_sorted[dist_df_sorted <= dist_threshold]
-  track_lat <- tracking_data[rowID,]$lat
-  track_lon <- tracking_data[rowID,]$lon
   if (length(dist_df_near_stations) == 0) {
-    message(glue("Row { rowID } No stations found in the neighborhood ({ threshold } m) of ({ lat },{ lon }). Nearest station: { station_code } ({ distance })",
+    message(glue("Row { rowID } No stations found in the neighborhood ({ threshold } m) of (x={ lon }, y={ lat }). Nearest station: { station_code } ({ distance })",
                  rowID = rowID,
                  threshold = dist_threshold,
-                 lat = track_lat,
-                 lon = track_lon,
+                 x = tracking_data_lon,
+                 y = tracking_data_lat,
                  station_code = names(dist_df_sorted[1]),
                  distance = dist_df_sorted[1]))
     NA
