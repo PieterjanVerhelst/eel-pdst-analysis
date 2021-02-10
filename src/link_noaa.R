@@ -17,10 +17,6 @@ source("./src/noaa_functions.R")
 # set up multiprocessing
 future::plan(multisession)
 
-# define parameters/thresholds
-spatial_threshold_in_kilometers <- 50
-temporal_threshold_in_hours <- 2
-
 # Check stations on map
 # info <- getMeta(lat = 55.5, lon = 7.5)
 info <- getMeta(lat = 51.2, lon = 3)
@@ -134,9 +130,6 @@ data <- read.csv("./data/interim/data_circadian_tidal_5min.csv")
 data$X <- NULL
 data$ID <- factor(data$ID)
 data$datetime  <- as_datetime(data$datetime)
-data$Country <- factor(data$Country)
-
-
 
 # Filter 1 animal for testing
 #data <- filter(data, ID == "16031")
@@ -146,16 +139,16 @@ sum(is.na(noaa$cl))
 sum(is.na(noaa$latitude))  
 sum(is.na(noaa$longitude))  
 
-sum(is.na(data$avg_lat))  
-sum(is.na(data$avg_lon))  
+sum(is.na(data$lat))  
+sum(is.na(data$lon))  
 
 # Remove NAs 
 noaa <- noaa[!is.na(noaa$cl), ]
 noaa <- noaa[!is.na(noaa$latitude), ]
 noaa <- noaa[!is.na(noaa$longitude), ]
 
-data <- data[!is.na(data$avg_lat), ]
-data <- data[!is.na(data$avg_lon), ]
+data <- data[!is.na(data$lat), ]
+data <- data[!is.na(data$lon), ]
 
 # check "metadata" from noaa
 noaa %>%
@@ -167,9 +160,11 @@ noaa %>%
 # NOAA stations
 dst_tracks <- 
   data %>%
-  mutate(latitude = avg_lat,
-         longitude = avg_lon) %>%
-  group_by(avg_lat,
+  mutate(latitude = lat,
+         longitude = lon) %>%
+  group_by(latitude,
+           longitude,
+           avg_lat,
            avg_lon) %>%
   chop() %>%
   st_as_sf(coords = c("longitude","latitude"), crs = 4326) %>%
@@ -214,23 +209,18 @@ env_data <-
   future_map2_dfr(data$row_id,
            data$datetime,
            function(rowID, dt) {
-             x_y_tracked <- list(x = data[data$row_id == rowID,]$avg_lon,
-                                 y = data[data$row_id == rowID,]$avg_lat)
              # get stations in the neighborhood
-             near_stations <- get_nearest_stations(
-               rowID = rowID,
-               dist_threshold = spatial_threshold_in_kilometers,
-               distance_df = dist_df,
-               tracking_data_lon = x_y_tracked$x,
-               tracking_data_lat = x_y_tracked$y)
+             near_stations <- get_nearest_stations(rowID = rowID,
+                                                   dist_threshold = 50 * 10^3,
+                                                   distance_df = dist_df,
+                                                   tracking_data = data)
              
              # find the best fitting environmental data (geographically and temporally)
-             env_data_to_add <- get_best_env_data(
-               datetime_track = dt,
-               ordered_noaa_stations = near_stations,
-               timethreshold_hours = temporal_threshold_in_hours, 
-               rowID = rowID,
-               df_noaa_stations = noaa)
+             env_data_to_add <- get_best_env_data(datetime_track = dt,
+                                                  ordered_noaa_stations = near_stations,
+                                                  timethreshold_hours = 2, 
+                                                  rowID = rowID,
+                                                  df_noaa_stations = noaa)
            }
 )
 
