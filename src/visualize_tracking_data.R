@@ -13,14 +13,14 @@ library(tidyverse)
 library(glue)
 
 # Load dataset with all eels
-data <- read.csv("./data/interim/data_circadian_tidal_5min.csv")
+data <- read.csv("./data/interim/data_circadian_5min_totaltrack.csv")
 data$X <- NULL
 # data$ID <- factor(data$ID)
 data$datetime  <- as_datetime(data$datetime)
 
 # Remove NAs
-data <- data[!is.na(data$lat), ]
-data <- data[!is.na(data$lon), ]
+data <- data[!is.na(data$avg_lat), ]
+data <- data[!is.na(data$avg_lon), ]
 
 # ID eels in data
 unique(data$ID)
@@ -28,7 +28,8 @@ unique(data$ID)
 #' select all by:
 #' eels_ID <- unique(data$ID)
 
-eels_ID <- c(17510, 15789, 17526, 17534, 17538)
+# Select 2019 eels
+eels_ID <- c(17443, 17499, 17513, 17534, 17526, 17522, 17492, 17508, 17536, 17538, 17537, 17510, 15789) 
 # eels_ID <- unique(data$ID)
 
 data <- data %>% filter(ID %in% eels_ID)
@@ -51,7 +52,7 @@ data <-
 
 #' set color vector
 #' this example allows max 5 individuals. Add more colors otherwise
-eels_cols <- c("red", "blue", "green", "black", "yellow")
+eels_cols <- c("red", "blue", "darkgreen", "black", "yellow", "pink", "purple", "brown", "orange", "white", "cyan", "chartreuse", "grey")
 
 # trim color vector based on number of tracked individuals in data
 eels_cols <- eels_cols[1:length(eels_ID)]
@@ -70,11 +71,19 @@ use_disk(frames_to_disk = TRUE, n_memory_frames = 50)
 data <-
   data %>%
   mutate(nickname = recode(as.character(ID),
-                           "17510" = "17510",
-                           "15789" = "15789",
-                           "17526" = "17526",
+                           "17443" = "17443",
+                           "17499" = "17499",
+                           "17513" = "17513",
                            "17534" = "17534",
-                           "17538" = "17538"))
+                           "17526" = "17526",
+                           "17522" = "17522",
+                           "17492" = "17492",
+                           "17508" = "17508",
+                           "17536" = "17536",
+                           "17538" = "17538",
+                           "17537" = "17537",
+                           "17510" = "17510",
+                           "15789" = "15789"))
 
 # use df2move to convert the data.frame into a moveStack
 move_data <- 
