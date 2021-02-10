@@ -166,9 +166,7 @@ dst_tracks <-
   data %>%
   mutate(latitude = avg_lat,
          longitude = avg_lon) %>%
-  group_by(latitude,
-           longitude,
-           avg_lat,
+  group_by(avg_lat,
            avg_lon) %>%
   chop() %>%
   st_as_sf(coords = c("longitude","latitude"), crs = 4326) %>%
