@@ -223,6 +223,13 @@ all <- all %>%
   filter(datetime >= start_datetime, datetime <= end_datetime)
 
 
+# 6b. Remove data before release and after pop-off
+#all <- all %>%
+#  group_by(ID) %>%
+#  filter(datetime >= start_datetime, datetime <= popoff_datetime)
+
+
+
 # Check depth profiles before and after correction
 #ind_eel <- filter(all, ID == "A16031")
 
@@ -250,7 +257,7 @@ all <- left_join(all, eel, by = "ID")
 # 9. Write csv file
 write.csv(all, "./data/interim/batch_processed_eels_5min.csv")
 #write.csv(all, "./data/interim/batch_processed_eels_1hour.csv")
-
+#write.csv(all, "./data/interim/batch_processed_eels_5min_totaltrack.csv")
 
 
 
