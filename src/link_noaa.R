@@ -209,11 +209,14 @@ env_data <-
   future_map2_dfr(data$row_id,
            data$datetime,
            function(rowID, dt) {
+             x_y_tracked <- list(x = data[data$row_id == rowID,]$avg_lon,
+                                 y = data[data$row_id == rowID,]$avg_lat)
              # get stations in the neighborhood
              near_stations <- get_nearest_stations(rowID = rowID,
                                                    dist_threshold = 50 * 10^3,
                                                    distance_df = dist_df,
-                                                   tracking_data = data)
+                                                   tracking_data_lon = x_y_tracked$x,
+                                                   tracking_data_lat = x_y_tracked$y)
              
              # find the best fitting environmental data (geographically and temporally)
              env_data_to_add <- get_best_env_data(datetime_track = dt,

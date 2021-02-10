@@ -117,7 +117,7 @@ get_nearest_stations <- function(rowID,
                                  dist_threshold,
                                  distance_df,
                                  tracking_data_lon,
-                                 tarcking_data_lat) {
+                                 tracking_data_lat) {
   dist_df_sorted <- as.list(sort(distance_df[rowID,]))
   dist_df_near_stations <- dist_df_sorted[dist_df_sorted <= dist_threshold*1000]
   if (length(dist_df_near_stations) == 0) {
