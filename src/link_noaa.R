@@ -134,6 +134,10 @@ data <- read.csv("./data/interim/data_circadian_tidal_5min.csv")
 data$X <- NULL
 data$ID <- factor(data$ID)
 data$datetime  <- as_datetime(data$datetime)
+data$Country <- factor(data$Country)
+
+# Filter German data
+data <- filter(data, Country == "Germany")
 
 # Filter 1 animal for testing
 #data <- filter(data, ID == "16031")
@@ -143,16 +147,16 @@ sum(is.na(noaa$cl))
 sum(is.na(noaa$latitude))  
 sum(is.na(noaa$longitude))  
 
-sum(is.na(data$lat))  
-sum(is.na(data$lon))  
+sum(is.na(data$avg_lat))  
+sum(is.na(data$avg_lon))  
 
 # Remove NAs 
 noaa <- noaa[!is.na(noaa$cl), ]
 noaa <- noaa[!is.na(noaa$latitude), ]
 noaa <- noaa[!is.na(noaa$longitude), ]
 
-data <- data[!is.na(data$lat), ]
-data <- data[!is.na(data$lon), ]
+data <- data[!is.na(data$avg_lat), ]
+data <- data[!is.na(data$avg_lon), ]
 
 # check "metadata" from noaa
 noaa %>%
