@@ -13,7 +13,7 @@ library(tidyverse)
 library(glue)
 
 # Load dataset with all eels
-data <- read.csv("./data/interim/data_circadian_tidal.csv")
+data <- read.csv("./data/interim/data_circadian_tidal_5min.csv")
 data$X <- NULL
 # data$ID <- factor(data$ID)
 data$datetime  <- as_datetime(data$datetime)
@@ -28,7 +28,7 @@ unique(data$ID)
 #' select all by:
 #' eels_ID <- unique(data$ID)
 
-eels_ID <- c(15714, 15777)
+eels_ID <- c(17510, 15789, 17526, 17534, 17538)
 # eels_ID <- unique(data$ID)
 
 data <- data %>% filter(ID %in% eels_ID)
@@ -70,21 +70,24 @@ use_disk(frames_to_disk = TRUE, n_memory_frames = 50)
 data <-
   data %>%
   mutate(nickname = recode(as.character(ID),
-                           "15714" = "Flotsam",
-                           "15777" = "Jetsam"))
+                           "17510" = "17510",
+                           "15789" = "15789",
+                           "17526" = "17526",
+                           "17534" = "17534",
+                           "17538" = "17538"))
 
 # use df2move to convert the data.frame into a moveStack
 move_data <- 
   df2move(data,
           proj = "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0",
-          x = "lon", y = "lat", time = "datetime", track_id = "nickname")
+          x = "avg_lon", y = "avg_lat", time = "datetime", track_id = "nickname")
 
 # align move_data to a uniform time scale
 m <- align_move(move_data, res = 1, unit = "days")
 
 # create spatial frames with a OpenStreetMap watercolour map
 frames <- frames_spatial(m, path_colours = eels_cols,
-                         map_service = "osm", map_type = "watercolor", alpha = 0.5) %>%
+                         map_service = "osm", map_type = "humanitarian", alpha = 0.5) %>%
   add_labels(x = "Longitude", y = "Latitude") %>% # add some customizations, such as axis labels
   add_northarrow() %>%
   add_scalebar() %>%
