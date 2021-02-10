@@ -150,7 +150,7 @@ get_best_env_data <- function(datetime_track,
                               timethreshold_hours,
                               rowID,
                               df_noaa_stations){
-  if (!is.na(ordered_noaa_stations)) {
+  if (!is.na(ordered_noaa_stations[1])) {
     env_data <- 
       df_noaa_stations %>%
       # filter by "space"
