@@ -84,6 +84,5 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 16. calc_hourly_migrations.R: calculate the number of vertical migrations per hour together with hourly summarised environmental data
 	+ Generate `data_hourly_migrations.csv` in `interim` folder
 17. create_plots.R: Create plots for data exploration
-18. visualise_tracking_data.R: Visualise tracking data as animated gif using `moveVis` R-package. The output is stored in `data\output\`.
 
 
