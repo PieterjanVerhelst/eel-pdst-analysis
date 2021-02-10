@@ -273,5 +273,5 @@ data_circ <- dplyr::select(data_circ, ID, datetime, numericdate, corrected_depth
 
 # 5. write csv ####
 write_csv(data_circ, "./data/interim/data_circadian_1hour.csv")
-#write.csv(all, "./data/interim/data_circadian_5min_totaltrack.csv")
+#write.csv(data_circ, "./data/interim/data_circadian_5min_totaltrack.csv")
 
