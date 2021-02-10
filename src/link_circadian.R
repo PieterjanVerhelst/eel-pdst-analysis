@@ -268,7 +268,7 @@ data_circ <-
 
 
 # Rearrange columns
-data_circ <- dplyr::select(data_circ, ID, datetime, numericdate, corrected_depth, temperature, Date, avg_lat, avg_lon, med_lat, med_lon, sunrise, sunset, previous_sunset, next_sunrise, start_sunmoment, next_sunmoment, night_day)
+data_circ <- select(data_circ, ID, datetime, numericdate, corrected_depth, temperature, Date, avg_lat, avg_lon, med_lat, med_lon, sunrise, sunset, previous_sunset, next_sunrise, start_sunmoment, next_sunmoment, night_day)
 
 
 # 5. write csv ####
