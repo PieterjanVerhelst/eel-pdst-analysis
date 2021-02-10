@@ -41,7 +41,12 @@ get_data_noaa <- function(station_code,
                                       path = path,
                                       filename = filename),
                           na = "",
-                          col_types = cols(date = col_datetime("")))
+                          col_types = cols(code = col_character(),
+                                           station = col_character(),
+                                           date = col_datetime(""),
+                                           latitude = col_number(),
+                                           longitude = col_number(),
+                                           cl = col_number()))
   } else {
     message(glue("Importing data of station '{ nickname }' ({ code })",
                  nickname = station_nickname,
@@ -49,8 +54,8 @@ get_data_noaa <- function(station_code,
     noaa_data <- importNOAA(code = station_code, hourly = hourly_data, year = years)
   
     if (!"cl" %in% names(noaa_data)) {
-      warning(glue("Station {station} has no column 'cl'. Created by duplicating values of 'cl_1'.", station = station_code))
       # haumet station (070220-99999) has no cl
+      warning(glue("Station {station} has no column 'cl'. Created by duplicating values of 'cl_1'.", station = station_code))
       noaa_data$cl <- noaa_data$cl_1
     }
     
