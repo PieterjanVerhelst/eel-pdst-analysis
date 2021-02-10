@@ -136,8 +136,7 @@ data$ID <- factor(data$ID)
 data$datetime  <- as_datetime(data$datetime)
 data$Country <- factor(data$Country)
 
-# Filter German data
-data <- filter(data, Country == "Germany")
+
 
 # Filter 1 animal for testing
 #data <- filter(data, ID == "16031")
