@@ -106,7 +106,7 @@ save_data_noaa_csv <- function(noaa_df,
 #' Function to retrieve the nearest NOAA env stations
 #'
 #' @param rowID (numeric) row number to read from (see  `distance_df` below)
-#' @param dist_threshold distance threshold in meters (10km = 10^4 meters)
+#' @param dist_threshold distance threshold in kilometers
 #' @param distance_df (data.frame) a data.frame containing the distance between
 #'   DST tracking data (rows) and NOAA environmental stations (columns)
 #' @param tracking_data_lon (numeric) x position (in meters) of the tacked
@@ -119,7 +119,7 @@ get_nearest_stations <- function(rowID,
                                  tracking_data_lon,
                                  tarcking_data_lat) {
   dist_df_sorted <- as.list(sort(distance_df[rowID,]))
-  dist_df_near_stations <- dist_df_sorted[dist_df_sorted <= dist_threshold]
+  dist_df_near_stations <- dist_df_sorted[dist_df_sorted <= dist_threshold*1000]
   if (length(dist_df_near_stations) == 0) {
     message(glue("Row { rowID } No stations found in the neighborhood ({ threshold } m) of (x={ lon }, y={ lat }). Nearest station: { station_code } ({ distance })",
                  rowID = rowID,

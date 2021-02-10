@@ -17,6 +17,10 @@ source("./src/noaa_functions.R")
 # set up multiprocessing
 future::plan(multisession)
 
+# define parameters/thresholds
+spatial_threshold_in_kilometers <- 50
+temporal_threshold_in_hours <- 2
+
 # Check stations on map
 # info <- getMeta(lat = 55.5, lon = 7.5)
 info <- getMeta(lat = 51.2, lon = 3)
@@ -212,18 +216,20 @@ env_data <-
              x_y_tracked <- list(x = data[data$row_id == rowID,]$avg_lon,
                                  y = data[data$row_id == rowID,]$avg_lat)
              # get stations in the neighborhood
-             near_stations <- get_nearest_stations(rowID = rowID,
-                                                   dist_threshold = 50 * 10^3,
-                                                   distance_df = dist_df,
+             near_stations <- get_nearest_stations(
+               rowID = rowID,
+               dist_threshold = spatial_threshold_in_kilometers,
+               distance_df = dist_df,
                tracking_data_lon = x_y_tracked$x,
                tracking_data_lat = x_y_tracked$y)
              
              # find the best fitting environmental data (geographically and temporally)
-             env_data_to_add <- get_best_env_data(datetime_track = dt,
-                                                  ordered_noaa_stations = near_stations,
-                                                  timethreshold_hours = 2, 
-                                                  rowID = rowID,
-                                                  df_noaa_stations = noaa)
+             env_data_to_add <- get_best_env_data(
+               datetime_track = dt,
+               ordered_noaa_stations = near_stations,
+               timethreshold_hours = temporal_threshold_in_hours, 
+               rowID = rowID,
+               df_noaa_stations = noaa)
            }
 )
 
