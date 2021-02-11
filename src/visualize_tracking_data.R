@@ -13,14 +13,14 @@ library(tidyverse)
 library(glue)
 
 # Load dataset with all eels
-data <- read.csv("./data/interim/data_circadian_5min_totaltrack.csv")
+data <- read.csv("./data/interim/batch_processed_eels_5min_totaltrack.csv")
 data$X <- NULL
-# data$ID <- factor(data$ID)
+data$ID <- factor(data$ID)
 data$datetime  <- as_datetime(data$datetime)
 
 # Remove NAs
-data <- data[!is.na(data$avg_lat), ]
-data <- data[!is.na(data$avg_lon), ]
+data <- data[!is.na(data$geoloc_avg_lat), ]
+data <- data[!is.na(data$geoloc_avg_lon), ]
 
 # ID eels in data
 unique(data$ID)
@@ -31,7 +31,6 @@ unique(data$ID)
 # Select 2019 eels
 eels_ID <- c(17443, 17499, 17513, 17534, 17526, 17522, 17508, 17536, 17538, 17537, 17510, 15789) 
 # eels_ID <- unique(data$ID)
-
 data <- data %>% filter(ID %in% eels_ID)
 
 # Check min max datetime for each eel to see if they are compatible (same time slot)
@@ -52,7 +51,7 @@ data <-
 
 #' set color vector
 #' this example allows max 5 individuals. Add more colors otherwise
-eels_cols <- c("red", "blue", "darkgreen", "black", "yellow", "pink", "purple", "brown", "orange", "white", "cyan", "chartreuse")
+eels_cols <- c("red", "blue", "darkgreen", "black", "yellow", "pink", "purple", "brown", "orange", "darkgray", "cyan", "chartreuse")
 
 # trim color vector based on number of tracked individuals in data
 eels_cols <- eels_cols[1:length(eels_ID)]
@@ -88,7 +87,7 @@ data <-
 move_data <- 
   df2move(data,
           proj = "+init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0",
-          x = "avg_lon", y = "avg_lat", time = "datetime", track_id = "nickname")
+          x = "geoloc_avg_lon", y = "geoloc_avg_lat", time = "datetime", track_id = "nickname")
 
 # align move_data to a uniform time scale
 m <- align_move(move_data, res = 1, unit = "days")
