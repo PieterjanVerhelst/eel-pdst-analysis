@@ -64,14 +64,13 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 7. create_sst_file.R: Create file with daily sea surface temperatures (first 20 m depth) and max depths
 8. read_trajectory_data.R: Batch read and process trajectory data obtained via matlab toolbox which is stored in `./data/external/trajectory_data`
 9. analyse_migration_speed.R: Calculate and analyse horizontal migration speeds
-10. batch_all_eels.R: Create sensor log file with all eels for analysis, taking into account time settings (UTC), pressure drift and redundant data (e.g. data when not on the shelf, during DVM and predation)
+10. batch_all_eels.R: Create sensor log file with all eels for analysis, taking into account time settings (UTC), pressure drift and redundant data (e.g. data when not on the shelf, during DVM and predation). Also link eel metadata and the trajectory data (coordinates) obtained via geolocation model to the sensor file.
 	+ Generate `batch_processed_eels_5min.csv` in `interim` folder
 	+ Generate `batch_processed_eels_1hour.csv` in `interim` folder
 	+ Generate `batch_processed_eels_5min_totaltrack.csv` in `interim` folder: batch processed file containing the tracks untill the pop-off time.
 11. link_circadian.R: Link circadian phases to the dataset
 	+ Generate `data_circadian_5min.csv` in `interim` folder
 	+ Generate `data_circadian_1hour.csv` in `interim` folder
-	+ Generate `data_circadian_5min_totaltrack.csv` in `interim` folder: link circadian data and trajectory coordinates to the tracks untill the pop-off time.
 12. link_tidal.R: Link tidal data to the dataset (tidal data obtained via John Aldridge (CEFAS, UK))
 	+ Generate `data_circadian_tidal_5min.csv` in `interim` folder
 	+ Generate `data_circadian_tidal_1hour.csv` in `interim` folder

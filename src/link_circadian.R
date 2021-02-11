@@ -17,130 +17,20 @@ library(suncalc)
 
 
 # 1. Load sensor dataset with all eels ####
-data <- read_csv("./data/interim/batch_processed_eels_1hour.csv")
+data_circ <- read_csv("./data/interim/batch_processed_eels_5min.csv")
 
-# Process columns
-data$Date <- as.Date(data$datetime)
-data$ID <- gsub( "A0", "", as.character(data$ID))
-data$ID <- gsub( "A", "", as.character(data$ID))
-data$ID <- factor(data$ID)
+data_circ$X1 <- NULL
+data_circ$ID <- factor(data_circ$ID)
 
 
-# 2. Load trajectory dataset with coordinates ####
-tr_data <-  list.files(path = "./data/external/trajectory_data/",
-                       pattern = "*.csv", 
-                       full.names = T) %>% 
-  map_df(~read_csv(., col_types = cols(.default = "c"))) 
-
-# Select columns
-tr_data <- dplyr::select(tr_data, ID, Date, MPL.Avg.Lat, MPL.Avg.Lon, Med.Lat, Med.Lon)
-tr_data <- rename(tr_data, 
-                  avg_lat = MPL.Avg.Lat,
-                  avg_lon = MPL.Avg.Lon,
-                  med_lat = Med.Lat,
-                  med_lon = Med.Lon)
-
-# Process columns
-tr_data$Date <- as.Date(tr_data$Date)
-tr_data$ID <- factor(tr_data$ID)
-
-# Remove double dates per eel (ID)
-#tr_data <- tr_data[!duplicated(tr_data[c('ID','Date')]),]
-tr_data <- tr_data %>%     # Add ID number to duplicate dates
-  group_by(ID, Date) %>%
-  add_tally()
-
-duplicates <- filter(tr_data, n == 2)   # Filter duplicate dates
-duplicates <- duplicates %>%             # Add ID number to distinguish between first and second duplicate
-  mutate(number_id = row_number())
-duplicates <- filter(duplicates, number_id == 2)  # Filter second duplicates
-
-tr_data <- filter(tr_data, n != 2)   # Remove duplicate dates from tracking dataset
-
-# Bind 'duplicates' dataset with second duplicates to tracking dataset
-tr_data <- ungroup(tr_data)
-tr_data$n <- NULL
-duplicates <- ungroup(duplicates)
-duplicates$n <- NULL
-duplicates$number_id <- NULL
-
-tr_data <- rbind(tr_data, duplicates)
-
-
-# Select relevant eels
-data <- filter(data, ID == "9359" |
-                  ID == "15714" |
-                  ID == "15777" |
-                  ID == "16031" |
-                  ID == "15706" |
-                 ID == "17443" |
-                 ID == "17499" |
-                 ID == "17513" |
-                 ID == "9349" |
-                 ID == "9358" |
-                 ID == "9374" |
-                 ID == "9377" |
-                 ID == "9393" |
-                 ID == "9411" |
-                 ID == "9423" |
-                 ID == "9424" |
-                 ID == "17534" |
-                 ID == "17526" |
-                 ID == "17522" |
-                 ID == "17492" |
-                 ID == "17508" |
-                 ID == "17536" |
-                 ID == "17538" |
-                 ID == "17537" |
-                 ID == "17510" |
-                 ID == "15789")
-data$ID <- factor(data$ID) # rerun 'factor()' so the number of levels is set accurately
-
-tr_data <- filter(tr_data, ID == "9359" |
-                    ID == "15714" |
-                    ID == "15777" |
-                    ID == "16031" |
-                    ID == "15706" |
-                    ID == "17443" |
-                    ID == "17499" |
-                    ID == "17513" |
-                    ID == "9349" |
-                    ID == "9358" |
-                    ID == "9374" |
-                    ID == "9377" |
-                    ID == "9393" |
-                    ID == "9411" |
-                    ID == "9423" |
-                    ID == "9424" |
-                    ID == "17534" |
-                    ID == "17526" |
-                    ID == "17522" |
-                    ID == "17492" |
-                    ID == "17508" |
-                    ID == "17536" |
-                    ID == "17538" |
-                    ID == "17537" |
-                    ID == "17510" |
-                    ID == "15789")
-tr_data$ID <- factor(tr_data$ID) # rerun 'factor()' so the number of levels is set accurately
-
-
-# 3. Merge datasets ####
-data_circ <- left_join(x = data, y = tr_data, by=c("ID","Date"))
-data_circ$avg_lat <- as.numeric(data_circ$avg_lat)  # important to convert lat and lon to numeric for getSunlightTimes()
-data_circ$avg_lon <- as.numeric(data_circ$avg_lon)
-#plot(data_circ$avg_lon, data_circ$avg_lat)
-
-
-
-# 4. Link circadian phases to dataset ####
+# 2. Link circadian phases to dataset ####
 # Calculate sunrise and sunset for each date + position
-m <- dplyr::select(data_circ, Date, avg_lat, avg_lon)
+m <- dplyr::select(data_circ, Date, geoloc_avg_lat, geoloc_avg_lon)
 m <- m %>% 
   rename(
     date = Date,
-    lat= avg_lat,
-    lon = avg_lon
+    lat= geoloc_avg_lat,
+    lon = geoloc_avg_lon
   )
 
 sun <- getSunlightTimes(data = m, tz = "UTC", keep = c("sunrise", "sunset"))
@@ -149,12 +39,12 @@ sun <- distinct(sun)
 sun <- sun %>% 
   rename(
     Date = date,
-    avg_lat= lat,
-    avg_lon = lon
+    geoloc_avg_lat= lat,
+    geoloc_avg_lon = lon
   )
 
 # Merge sunrise and sunset data to data_circ dataset
-data_circ <- left_join(x = data_circ, y = sun, by=c("Date","avg_lat","avg_lon"))
+data_circ <- left_join(x = data_circ, y = sun, by=c("Date","geoloc_avg_lat","geoloc_avg_lon"))
 
 # Get ordered series of sunsets and sunrises per eel
 data_circ$sunset <- as.character(data_circ$sunset)
@@ -268,10 +158,11 @@ data_circ <-
 
 
 # Rearrange columns
-data_circ <- select(data_circ, ID, datetime, numericdate, Country, Direction, Length, Weight, Rel_lat, Rel_long, corrected_depth, temperature, Date, avg_lat, avg_lon, med_lat, med_lon, sunrise, sunset, previous_sunset, next_sunrise, start_sunmoment, next_sunmoment, night_day)
+data_circ <- select(data_circ, ID, datetime, numericdate, Country, Direction, Length, Weight, Rel_lat, Rel_long, corrected_depth, temperature, Date, geoloc_avg_lat, geoloc_avg_lon, geoloc_med_lat, geoloc_med_lon, sunrise, sunset, previous_sunset, next_sunrise, start_sunmoment, next_sunmoment, night_day)
 
 
 # 5. write csv ####
-write_csv(data_circ, "./data/interim/data_circadian_1hour.csv")
-#write.csv(data_circ, "./data/interim/data_circadian_5min_totaltrack.csv")
+#write.csv(data_circ, "./data/interim/data_circadian_5min.csv")
+#write_csv(data_circ, "./data/interim/data_circadian_1hour.csv")
+
 

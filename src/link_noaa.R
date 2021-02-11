@@ -136,6 +136,7 @@ noaa <- map2_dfr(station_codes,
 data <- read.csv("./data/interim/data_circadian_tidal_moon_5min.csv")
 data$X <- NULL
 data$X1 <- NULL
+data$X1_1 <- NULL
 data$ID <- factor(data$ID)
 data$datetime  <- as_datetime(data$datetime)
 data$Country <- factor(data$Country)
@@ -143,7 +144,6 @@ data$Country <- factor(data$Country)
 # Filter German eels with temporal window 2012
 data <- filter(data, Country == "Germany")
 summary(data$datetime)
-
 
 # Filter 1 animal for testing
 #data <- filter(data, ID == "16031")
@@ -153,16 +153,16 @@ sum(is.na(noaa$cl))
 sum(is.na(noaa$latitude))  
 sum(is.na(noaa$longitude))  
 
-sum(is.na(data$lat))  
-sum(is.na(data$lon))  
+sum(is.na(data$geoloc_avg_lat))  
+sum(is.na(data$geoloc_avg_lon))  
 
 # Remove NAs 
 noaa <- noaa[!is.na(noaa$cl), ]
 noaa <- noaa[!is.na(noaa$latitude), ]
 noaa <- noaa[!is.na(noaa$longitude), ]
 
-data <- data[!is.na(data$lat), ]
-data <- data[!is.na(data$lon), ]
+data <- data[!is.na(data$geoloc_avg_lat), ]
+data <- data[!is.na(data$geoloc_avg_lon), ]
 
 # check "metadata" from noaa
 noaa %>%
@@ -174,10 +174,10 @@ noaa %>%
 # NOAA stations
 dst_tracks <- 
   data %>%
-  mutate(latitude = avg_lat,
-         longitude = avg_lon) %>%
-  group_by(avg_lat,
-           avg_lon) %>%
+  mutate(latitude = geoloc_avg_lat,
+         longitude = geoloc_avg_lon) %>%
+  group_by(geoloc_avg_lat,
+           geoloc_avg_lon) %>%
   chop() %>%
   st_as_sf(coords = c("longitude","latitude"), crs = 4326) %>%
   st_transform(crs = 3035)
@@ -221,8 +221,8 @@ env_data <-
   future_map2_dfr(data$row_id,
            data$datetime,
            function(rowID, dt) {
-             x_y_tracked <- list(x = data[data$row_id == rowID,]$avg_lon,
-                                 y = data[data$row_id == rowID,]$avg_lat)
+             x_y_tracked <- list(x = data[data$row_id == rowID,]$geoloc_avg_lon,
+                                 y = data[data$row_id == rowID,]$geoloc_avg_lat)
              # get stations in the neighborhood
              near_stations <- get_nearest_stations(rowID = rowID,
                                                    dist_threshold = spatial_threshold_in_kilometers,

@@ -17,8 +17,8 @@ library(lubridate)
 
 # 1. Load dataset with all eels ####
 data <- read_csv("./data/interim/data_circadian_5min.csv")
+
 data$X1 <- NULL
-data$X1_1 <- NULL
 data$ID <- factor(data$ID)
 
 
@@ -44,8 +44,8 @@ tidal$source_file <- NULL
 tidal <- tidal %>%
   rename(date = V1,
          time = V2,
-         lon = V3,
-         lat = V4,
+         current_lon = V3,
+         current_lat = V4,
          U = V5,
          V = V6,
          speed = V7,
