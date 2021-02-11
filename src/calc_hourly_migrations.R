@@ -45,7 +45,7 @@ summary(hourly)
 # 4. Select circadian phases per hour
 circadian <- data %>%
   group_by(ID, datehour) %>%
-  select(ID, datehour, night_day) %>%
+  dplyr::select(ID, datehour, night_day) %>%
   distinct()
 
 
