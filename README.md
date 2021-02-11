@@ -46,6 +46,9 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 		+ `comment`: any comments
 	+ `migration_direction.csv`: file with the migration direction of the relevant eels for analysis
 
+* `/output:` This folder contains visual outputs from specific scripts.
+
+
 ### Scripts
 
 ! Important note: the clock settings of the pDSTs are the same as Pieterjan's laptop, hence their time setting is UTC+1 (Brussels time zone)!
