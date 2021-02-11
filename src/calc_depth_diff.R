@@ -10,7 +10,7 @@ library(lubridate)
 
 
 # 1. Import data ####
-data <- read_csv("./data/interim/data_circadian_tidal_moon_5min.csv",
+data <- read_csv("./data/interim/data_circadian_tidal_moon_cloud_5min.csv",
                  na = "", 
                  col_types = list(sunrise = col_datetime(),
                                   previous_sunset = col_datetime(),
@@ -62,7 +62,7 @@ ggplot(data_min_max) +
 # Arrange depth changes in descending order and see in which phase of the day if occurs
 data_min_max %>%
   arrange(desc(depth_change)) %>%
-  select(ID, night_day, depth_change)
+  dplyr::select(ID, night_day, depth_change)
 
 
 # Calculate summary values
