@@ -21,7 +21,7 @@ future::plan(multisession)
 
 
 # define parameters/thresholds
-spatial_threshold_in_kilometers <- 50
+spatial_threshold_in_kilometers <- 100
 temporal_threshold_in_hours <- 2
 
 # Check stations on map
@@ -46,7 +46,7 @@ station_codes <- list(
   bruce = "031402-99999",
   heimdal = "010875-99999",
   harding = "031403-99999",
-  #ula = "014281-99999",
+  ula = "014281-99999",
   trollc = "010887-99999",
   trolla = "010877-99999",
   utsirafyr= "014030-99999",
@@ -57,10 +57,10 @@ station_codes <- list(
   ekofisk = "014000-99999",
   ekofiskoil = "014033-99999",
   a12 = "062050-99999",
-  #harald = "060224-99999",
+  harald = "060224-99999",
   tyrae = "060223-99999",
-  #gormc = "060221-99999",
-  #halfdan = "060222-99999",
+  gormc = "060221-99999",
+  halfdan = "060222-99999",
   thyboroen = "060520-99999",
   hvide = "060580-99999",
   hornsb = "060170-99999",
@@ -76,7 +76,7 @@ station_codes <- list(
   helipad = "062120-99999",
   k14 = "062040-99999",
   ruyter = "062030-99999",
-  #zeebrugge = "064180-99999",
+  zeebrugge = "064180-99999",
   oostende = "064070-99999",
   landwick = "036930-99999",
   koksijde = "064000-99999",
@@ -102,7 +102,7 @@ station_codes <- list(
   batz = "071160-99999",
   brignogan = "071070-99999",
   ouessant = "071000-99999",
-  #landsend = "038060-99999",
+  landsend = "038060-99999",
   scilly = "038030-99999",
   mathieu = "071020-99999",
   raz = "071030-99999",
@@ -125,7 +125,7 @@ noaa <- map2_dfr(station_codes,
                 names(station_codes),
                 get_data_noaa,
                 hourly_data = TRUE, 
-                years = 2012:2013,
+                years = 2018:2020,
                 path = noaa_path)
 
 # Reference code for one station
@@ -133,7 +133,7 @@ noaa <- map2_dfr(station_codes,
 # andrew <- select(andrew, station, date, latitude, longitude, atmos_pres, cl)
 
 # 3. Load dataset with all eels ####
-data <- read.csv("./data/interim/data_circadian_tidal_moon_5min.csv")
+data <- read.csv("./data/interim/data_circadian_tidal_moon_1hour.csv")
 data$X <- NULL
 data$X1 <- NULL
 data$X1_1 <- NULL
@@ -143,6 +143,10 @@ data$Country <- factor(data$Country)
 
 # Filter German eels with temporal window 2012
 data <- filter(data, Country == "Germany")
+summary(data$datetime)
+
+# Filter Belgian eels with temporal window 2018:2021
+data <- filter(data, Country == "Belgium")
 summary(data$datetime)
 
 # Filter 1 animal for testing
@@ -255,3 +259,19 @@ data <-
   data %>%
   left_join(env_data, by = "row_id")
 data
+
+
+# 4. Set data as German or Belgian ####
+german <- data
+belgian <- data
+
+
+# Bind rows to merge german and belgian dataset
+data <- rbind(german, belgian)
+
+
+# 5. write csv ####
+#write.csv(data, "./data/interim/data_circadian_tidal_moon_cloud_5min.csv")
+#write.csv(data, "./data/interim/data_circadian_tidal_moon_cloud_1hour.csv")
+
+
