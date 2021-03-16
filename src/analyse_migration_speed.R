@@ -345,9 +345,10 @@ tr_data$residuals <- residuals(mixed, type="response")
 tr_data$fitted <- fitted(mixed, type="response")
 
 plot <- ggplot(tr_data, aes(x=Lon, y=Distance)) +
-  geom_line(alpha = 0.5) +
-  geom_line(tr_data, mapping = aes(x=Lon, y=predicted), colour = "red") +
-  geom_smooth(method = "loess", se = FALSE)
+  theme_bw() +
+  geom_point() +
+  geom_point(tr_data, mapping = aes(x=Lon, y=predicted), colour = "red") #+
+  #geom_smooth(method = "loess", se = FALSE)
 plot
 
 
