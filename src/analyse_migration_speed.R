@@ -54,7 +54,7 @@ tr_summary$ID <- factor(tr_summary$ID)
 unique(tr_summary$ID)
 
 # Upload file with migration direction, eel sizes and release positions
-direction <- read_csv("./data/external/migration_direction.csv")
+direction <- read_csv("./data/external/eel_metadata.csv")
 
 # Merge direction to dataset
 tr_summary <- merge(tr_summary, direction, by = "ID")
