@@ -18,6 +18,17 @@ tr_data$Date <- as.Date(tr_data$Date)
 tr_data$Distance <- as.numeric(tr_data$Distance)
 
 
+# Remove predation days
+# 15714
+eel15714 <- filter(tr_data, ID == "15714")
+tr_data <- tr_data[!(tr_data$ID == "15714" & tr_data$Date >= '2018-12-22'),]
+
+# 17535
+eel17535 <- filter(tr_data, ID == "17535")
+tr_data <- tr_data[!(tr_data$ID == "17535" & tr_data$Date >= '2020-01-14'),]
+
+
+
 # Calculate total number of days and total distance
 tr_summary <- tr_data %>%
   group_by(ID) %>%
