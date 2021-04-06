@@ -4,19 +4,19 @@
 
 # Create dataset with the following columns: Date/Time Stamp,	Long,	Quality
 # Date from eel release until tag retrieval
-input1 <- data.frame(seq(as.Date("2019/12/14"), as.Date("2020/03/14"), "days")) # take day before retrieval, since exact moment of retrieval is unknown
+input1 <- data.frame(seq(as.Date("2020/12/15"), as.Date("2021/01/20"), "days")) # take day before retrieval, since exact moment of retrieval is unknown
 colnames(input1)[1] <- "Date/Time Stamp"
 
 
 # Interpolate between longitude of release and retrieval location
-input1$Long <- seq(2.757437, -2.516919, length.out = 92)
+input1$Long <- seq(2.757437, -1.62647, length.out = 37)
 
 # Add quality flag to longitude values
 # First and last line have highest certainty and therefore quality; these are flagged with '0'. Other get '5' (= worse quality)
 input1$Quality <- 5
 input1$Quality[1] <- 0
-input1$Quality[92] <- 0
+input1$Quality[37] <- 0
 
 
 # Write csv file
-write.csv(input1, "./data/interim/geolocation_input_files/input_A17535/EELA17535LONG.csv", row.names = FALSE)
+write.csv(input1, "./data/interim/geolocation_input_files/input_A17642/EELA17642LONG.csv", row.names = FALSE)
