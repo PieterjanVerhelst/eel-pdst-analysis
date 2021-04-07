@@ -13,7 +13,7 @@ Sys.timezone()
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensorlogs/sensor_A09424_21-06-2013.csv")
+sensordata <- read_csv("./data/interim/sensorlogs/sensor_A15789_22-06-2020.csv")
 
 
 # 2. Aggregate data ####
@@ -129,7 +129,7 @@ fig_rel_pop
 
 # 7. Create temperature and pressure plot from several days ####
 # Create subsets of several days
-subset <- filter(aggdata, datetime >= "2012-12-14 19:00:00", datetime <= "2012-12-14 23:00:00")
+subset <- filter(aggdata, datetime >= "2020-02-15 16:00:00", datetime <= "2020-02-15 21:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
