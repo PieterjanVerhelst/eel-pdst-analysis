@@ -13,21 +13,28 @@ Sys.timezone()
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensorlogs/sensor_A17537_05-05-2020.csv")
+sensordata <- read_csv("./data/interim/sensorlogs/sensor_A15799_23-12-2018.csv")
 
 
 # 2. Aggregate data ####
-sensordata$datetime <- dmy_hms(sensordata$datetime)
-#sensordata$datetime2 <- droplevels(cut(sensordata$datetime, breaks="hour"))   # 1 hour cut
-sensordata$datetime2 <- droplevels(cut(sensordata$datetime, breaks="5 min"))   # 5 min cut
+#sensordata$datetime <- dmy_hms(sensordata$datetime)
+#sensordata$datetime <- droplevels(cut(sensordata$datetime, breaks="hour"))   # 1 hour cut
+#sensordata$datetime <- droplevels(cut(sensordata$datetime, breaks="5 min"))   # 5 min cut
 
-aggdata <- aggregate(cbind(pressure, temperature) ~ datetime2, data=sensordata, FUN=mean, na.rm=TRUE) 
-aggdata$datetime2 <- ymd_hms(aggdata$datetime2)
+#aggdata <- aggregate(cbind(pressure, temperature) ~ datetime, data=sensordata, FUN=mean, na.rm=TRUE) 
+#aggdata$datetime <- ymd_hms(aggdata$datetime)
+
+
+# 2. Subsample data
+sensordata$datetime <- dmy_hms(sensordata$datetime)
+aggdata <- sensordata[seq(1, nrow(sensordata), 30), ]
+aggdata$track_tag_id <- NULL
+
 
 # Correct for Brussels Time zone UTC + 1
-aggdata$datetime2 <- aggdata$datetime2 - (60*60)
-#aggdata$datetime2 <- aggdata$datetime2 - (2*60*60)  # - 2 hours when UTC+2 (summer daylight saving time)
-aggdata$datetime2 <- as.POSIXct(aggdata$datetime2, "%Y-%m-%d %H:%M:%S", tz = "GMT")
+aggdata$datetime <- aggdata$datetime - (60*60)
+#aggdata$datetime <- aggdata$datetime - (2*60*60)  # - 2 hours when UTC+2 (summer daylight saving time)
+aggdata$datetime <- as.POSIXct(aggdata$datetime, "%Y-%m-%d %H:%M:%S", tz = "GMT")
 
 # Reverse depth
 aggdata$pressure <- aggdata$pressure * -1
@@ -42,10 +49,10 @@ pop <- as.POSIXct("2020-01-17 16:35:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
 
 
 # 4. Create temperature and pressure plot for total dataset ####
-fig_t_p <- ggplot(aggdata, aes(x = datetime2,
+fig_t_p <- ggplot(aggdata, aes(x = datetime,
                                y = temperature)) +
   geom_line(binaxis='x', size=1.0, binwidth = 1) +
-  geom_line(data = aggdata, aes(x = datetime2, y = pressure/2), size = 1.0, alpha = 0.5, colour = "purple") +
+  geom_line(data = aggdata, aes(x = datetime, y = pressure/2), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
   theme_minimal() +
@@ -66,12 +73,12 @@ fig_t_p
 
 
 # 5. Create temperature and pressure plot from release to retrieval date ####
-subset <- filter(aggdata, datetime2 >= as.Date(release)-1, datetime2 <= as.Date(retrieval)+1)
+subset <- filter(aggdata, datetime >= as.Date(release)-1, datetime <= as.Date(retrieval)+1)
 
-fig_rel_ret <- ggplot(subset, aes(x = datetime2,
+fig_rel_ret <- ggplot(subset, aes(x = datetime,
                                y = temperature)) +
   geom_line(binaxis='x', size=1.0, binwidth = 1) +
-  geom_line(data = subset, aes(x = datetime2, y = pressure/2), size = 1.0, alpha = 0.5, colour = "purple") +
+  geom_line(data = subset, aes(x = datetime, y = pressure/2), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
   theme_minimal() +
@@ -93,12 +100,12 @@ fig_rel_ret
 
 
 # 6. Create temperature and pressure plot from release to pop-off date ####
-subset <- filter(aggdata, datetime2 >= as.Date(release)-1, datetime2 <= as.Date(pop)+1)
+subset <- filter(aggdata, datetime >= as.Date(release)-1, datetime <= as.Date(pop)+1)
 
-fig_rel_pop <- ggplot(subset, aes(x = datetime2,
+fig_rel_pop <- ggplot(subset, aes(x = datetime,
                                   y = temperature)) +
   geom_line(binaxis='x', size=1.0, binwidth = 1) +
-  geom_line(data = subset, aes(x = datetime2, y = pressure/2), size = 1.0, alpha = 0.5, colour = "purple") +
+  geom_line(data = subset, aes(x = datetime, y = pressure/2), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
   theme_minimal() +
@@ -121,17 +128,17 @@ fig_rel_pop
 
 # 7. Create temperature and pressure plot from several days ####
 # Create subsets of several days
-subset <- filter(aggdata, datetime2 >= "2020-01-17 00:00:00", datetime2 <= "2020-01-20 00:00:00")
+subset <- filter(aggdata, datetime >= "2020-01-17 00:00:00", datetime <= "2020-01-20 00:00:00")
 
 # Create line every 24 hours
-gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime2[1], "day"), to= subset$datetime2[nrow(subset)], by = 86400)
-class(lubridate::floor_date(subset$datetime2[1], "day"))
+gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
+class(lubridate::floor_date(subset$datetime[1], "day"))
 
 # Create plot
-fig_subset_3days <- ggplot(subset, aes(x = datetime2,
+fig_subset_3days <- ggplot(subset, aes(x = datetime,
                                    y = temperature)) +
   geom_line(binaxis='x', size=1.0, binwidth = 1) +
-  geom_line(data = subset, aes(x = datetime2, y = pressure/2), size = 1.0, alpha = 0.5, colour = "purple") +
+  geom_line(data = subset, aes(x = datetime, y = pressure/2), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
   theme_minimal() +
