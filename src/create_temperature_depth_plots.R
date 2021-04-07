@@ -13,7 +13,7 @@ Sys.timezone()
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensorlogs/sensor_A15799_23-12-2018.csv")
+sensordata <- read_csv("./data/interim/sensorlogs/sensor_A17443_27-01-2020.csv")
 
 
 # 2. Aggregate data ####
@@ -43,9 +43,9 @@ aggdata$pressure <- aggdata$pressure * -1
 # 3. Set release and retrieval to create plots ####
 # For retrieval, take day before retrieval at 23:55
 # Note to put release date in UTC!
-release <- as.POSIXct("2019-12-17 17:10:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
-retrieval <- as.POSIXct("2020-03-10 23:55:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
-pop <- as.POSIXct("2020-01-17 16:35:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
+release <- as.POSIXct("2018-10-31 18:44:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
+retrieval <- as.POSIXct("2018-12-13 23:59:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
+pop <- as.POSIXct("2018-11-06 16:35:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
 
 
 # 4. Create temperature and pressure plot for total dataset ####
@@ -128,7 +128,7 @@ fig_rel_pop
 
 # 7. Create temperature and pressure plot from several days ####
 # Create subsets of several days
-subset <- filter(aggdata, datetime >= "2020-01-17 00:00:00", datetime <= "2020-01-20 00:00:00")
+subset <- filter(aggdata, datetime >= "2019-11-28 07:00:00", datetime <= "2019-11-28 14:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
