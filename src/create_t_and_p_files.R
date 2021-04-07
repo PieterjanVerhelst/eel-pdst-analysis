@@ -13,7 +13,7 @@ Sys.setenv(TZ='GMT')
 Sys.timezone()
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensorlogs/sensor_A17443_27-01-2020.csv")
+sensordata <- read_csv("./data/interim/sensorlogs/sensor_A09424_21-06-2013.csv")
 
 
 # 2. Aggregate data ####
@@ -27,7 +27,8 @@ sensordata <- read_csv("./data/interim/sensorlogs/sensor_A17443_27-01-2020.csv")
 
 # 2. Subsample data
 sensordata$datetime <- dmy_hms(sensordata$datetime)
-aggdata <- sensordata[seq(1, nrow(sensordata), 30), ]
+aggdata <- sensordata[seq(1, nrow(sensordata), 30), ]  # Subsample per 1 minute Belgian data
+#aggdata <- sensordata[seq(1, nrow(sensordata), 12), ]  # Subsample per 2 minutes German data
 aggdata$track_tag_id <- NULL
 
 # Correct for Brussels Time zone UTC + 1
@@ -41,8 +42,8 @@ aggdata$datetime <- as.POSIXct(aggdata$datetime, "%Y-%m-%d %H:%M:%S", tz = "GMT"
 
 # Set release and retrieval or pop off time (midday following popping event)
 # ! Make sure resease is in UTC instead of UTC+1 !
-release <- as.POSIXct("2019-11-02 17:15:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
-retrieval <- as.POSIXct("2019-12-05 23:59:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
+release <- as.POSIXct("2012-11-22 16:30:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
+retrieval <- as.POSIXct("2012-12-14 20:12:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
 
 
 # 3. Subset from release to retrieval date ####
@@ -78,15 +79,15 @@ colnames(press)[2] <- "Depth"
 plot(press$Date, press$Depth)
 # Select date: moment of release - 15 min and pop-off moment (moment it was certainly at the surface)
 subset2 <- filter(aggdata, 
-                  datetime == as.POSIXct("2019-11-02 17:00:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") |
-                  datetime == as.POSIXct("2019-11-28 09:29:00", "%Y-%m-%d %H:%M:%S", tz = "GMT"))
+                  datetime == as.POSIXct("2012-11-22 16:14:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") |
+                  datetime == as.POSIXct("2012-12-14 20:12:00", "%Y-%m-%d %H:%M:%S", tz = "GMT"))
 plot(subset2$datetime, subset2$pressure)
 abline(lm(subset2$pressure ~ subset2$datetime))
 lm(subset2$pressure ~ subset2$datetime)  # To get coefficient and estimates
 # depth = (2.322e-05 * date)  -3.587e+04
 
 press$numericdate <- as.numeric(press$Date)
-press$regression <- ( 1.690e-06           *press$numericdate)     -2.657e+03
+press$regression <- (  -3.290e-07            *press$numericdate)   +   4.453e+02     
 press$corrected_depth <- press$Depth-press$regression
 
 
@@ -110,8 +111,8 @@ press <- rename(press, Depth = corrected_depth)
 
 
 # 7. Write csv files ####
-write.csv(temp, "./data/interim/geolocation_input_files/input_A17443/EELA17443TEMP.csv", row.names = FALSE)
-write.csv(press, "./data/interim/geolocation_input_files/input_A17443/EELA17443PRES.csv", row.names = FALSE)
+write.csv(temp, "./data/interim/geolocation_input_files/input_A09424/EELA09424TEMP.csv", row.names = FALSE)
+write.csv(press, "./data/interim/geolocation_input_files/input_A09424/EELA09424PRES.csv", row.names = FALSE)
 
 
 
