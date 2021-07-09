@@ -337,16 +337,24 @@ plot(glm_model)
 dev.off()
 
 # GLMM
+
+# Create subset per country
+be <- filter(tr_data, Country == "Belgium")
+de <- filter(tr_data, Country == "Germany")
+
+
 # 1. lmer() from lme4 package
 # Allows to calculate variance explained by random effects
-mixed.lmer <- lmer(Distance ~ Lon + Lat + Country + (1|ID), data = tr_data)
+#mixed.lmer <- lmer(Distance ~ Lon + Lat + Country + (1|ID), data = tr_data)
+mixed.lmer <- lmer(Distance ~ Lon + Lat + (1|ID), data = de)
 summary(mixed.lmer)
 # variance explained by the random effect 'ID' (= individual variability)
-46.17/(46.17+79.53)
+17.49/(17.49+58.63)
 
 # 2. lme() from nlme package
 # Gives p-values
-mixed <- lme(Distance ~ Lon + Lat + Country, random = ~1|ID, data = tr_data)
+#mixed <- lme(Distance ~ Lon + Lat + Country, random = ~1|ID, data = tr_data)
+mixed <- lme(Distance ~ Lon + Lat, random = ~1|ID, data = de)
 summary(mixed)
 anova(mixed)
 
