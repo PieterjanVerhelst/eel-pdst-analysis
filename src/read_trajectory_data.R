@@ -8,7 +8,7 @@ library(tidyverse)
 
 
 # Read in trajectory data ####
-tr_data <-  list.files(path = "./data/external/trajectory_data/",
+tr_data <-  list.files(path = "./data/external/trajectory_data/individual_files/",
              pattern = "*.csv", 
              full.names = T) %>% 
   map_df(~read_csv(., col_types = cols(.default = "c"))) 
