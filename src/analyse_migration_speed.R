@@ -6,6 +6,7 @@
 library(car)
 library(lme4)
 library(nlme)
+library(lubridate)
 
 
 # Load file with trajectory distances for all eels
@@ -14,11 +15,11 @@ source("./src/read_trajectory_data.R")
 
 # Set columns in according formats
 tr_data$ID <- as.factor(tr_data$ID)
-tr_data$Date <- as.Date(tr_data$Date)
+tr_data$Date <- dmy(tr_data$Date)
 tr_data$Distance <- as.numeric(tr_data$Distance)
 
 
-# Remove predation days
+# Remove predation days if tag was inside predator
 # 15714
 eel15714 <- filter(tr_data, ID == "15714")
 tr_data <- tr_data[!(tr_data$ID == "15714" & tr_data$Date >= '2018-12-22'),]
@@ -26,6 +27,22 @@ tr_data <- tr_data[!(tr_data$ID == "15714" & tr_data$Date >= '2018-12-22'),]
 # 17535
 eel17535 <- filter(tr_data, ID == "17535")
 tr_data <- tr_data[!(tr_data$ID == "17535" & tr_data$Date >= '2020-01-14'),]
+
+# 17547
+eel17547 <- filter(tr_data, ID == "17547")
+tr_data <- tr_data[!(tr_data$ID == "17547" & tr_data$Date >= '2021-01-10'),]
+
+# 17635
+eel17635 <- filter(tr_data, ID == "17635")
+tr_data <- tr_data[!(tr_data$ID == "17635" & tr_data$Date >= '2021-01-22'),]
+
+# 17668  --> complete track will be removed due to corrupt sensor values
+#eel17668 <- filter(tr_data, ID == "17668")
+#tr_data <- tr_data[!(tr_data$ID == "17668" & tr_data$Date >= '2021-01-22'),]
+
+# 175132
+eel175132 <- filter(tr_data, ID == "175132")
+tr_data <- tr_data[!(tr_data$ID == "175132" & tr_data$Date >= '2021-01-08'),]
 
 
 
@@ -45,11 +62,15 @@ tr_summary$ID <- factor(tr_summary$ID)
 unique(tr_summary$ID)
 
 
-# Remove 2 eels
+# Remove 4 eels
 # 9355 does not have a net distance displacement of >= 100 km. It did have a total track of >= 100 km. Check with geolocation plots
 # 17533 is unlikely an eel based on vertical movement pattern. Needs further checking
+# 17668 has corrupt sensor values (due to whale predation?) so no reliable trajectory could be constructed
+# 17652 seems to be predated after a week so data after that point are not from an eel
 tr_summary <- filter(tr_summary, ID != 9355)
 tr_summary <- filter(tr_summary, ID != 17533)
+tr_summary <- filter(tr_summary, ID != 17668)
+tr_summary <- filter(tr_summary, ID != 17652)
 tr_summary$ID <- factor(tr_summary$ID)
 unique(tr_summary$ID)
 
