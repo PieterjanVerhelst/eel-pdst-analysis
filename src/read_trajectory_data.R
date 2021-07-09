@@ -8,11 +8,15 @@ library(tidyverse)
 
 
 # Read in trajectory data ####
-tr_data <-  list.files(path = "./data/external/trajectory_data/",
-             pattern = "*.csv", 
-             full.names = T) %>% 
-  map_df(~read_csv(., col_types = cols(.default = "c"))) 
 
+# 1. For separate files (note these are not up to date!)
+#tr_data <-  list.files(path = "./data/external/trajectory_data/individual_files/",
+#             pattern = "*.csv", 
+#             full.names = T) %>% 
+#  map_df(~read_csv(., col_types = cols(.default = "c"))) 
+
+# 2. For a single file containing all eel tracks
+tr_data <- read_csv("./data/external/trajectory_data/eel_trajectories.csv")
 
 
 # Select columns
