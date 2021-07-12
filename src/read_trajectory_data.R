@@ -26,6 +26,7 @@ tr_data <- rename(tr_data, Distance = MPL.Hori_Dist_km,
                   Lon = MPL.Avg.Lon)
 
 
-# Remove NA
+# Set NA to zero
 sum(is.na(tr_data$Distance))
-tr_data <- na.omit(tr_data) 
+tr_data$Distance[is.na(tr_data$Distance)] <- 0
+
