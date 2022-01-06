@@ -165,9 +165,9 @@ parameters$UTC <-  factor(parameters$UTC)
 
 
 # Temporarily remove 2 PSAT eels
-parameters <- parameters %>%
-  filter(ID != c('112061')) %>%
-  filter(ID != c('112064'))
+#parameters <- parameters %>%
+#  filter(ID != c('112061')) %>%
+#  filter(ID != c('112064'))
 
 
 # 3. Aggregate data per 5 min  or 60 min ####
