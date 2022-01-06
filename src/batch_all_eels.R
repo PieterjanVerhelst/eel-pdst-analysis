@@ -16,10 +16,16 @@ library(broom) # run regression per grouping variable (in 'Correct for depth dri
 
 # 1. Read in data ####
 # Belgian eels
-eel_A16031 <- read_csv("./data/interim/sensorlogs/sensor_A16031_08-11-2019.csv")
+
+eel_A15805 <- read_csv("./data/interim/sensorlogs/sensor_A15805_03-04-2019.csv")
+eel_A15730 <- read_csv("./data/interim/sensorlogs/sensor_A15730_15-01-2019.csv")
+eel_A15757 <- read_csv("./data/interim/sensorlogs/sensor_A15757_11-12-2018.csv")
+eel_A15700 <- read_csv("./data/interim/sensorlogs/sensor_A15700_10-01-2019.csv")
 eel_A15714 <- read_csv("./data/interim/sensorlogs/sensor_A15714_13-02-2019.csv")
-eel_A15777 <- read_csv("./data/interim/sensorlogs/sensor_A15777_12-11-2019.csv")
+eel_A16031 <- read_csv("./data/interim/sensorlogs/sensor_A16031_08-11-2019.csv")
 eel_A15706 <- read_csv("./data/interim/sensorlogs/sensor_A15706_01-08-2019.csv")
+eel_A15981 <- read_csv("./data/interim/sensorlogs/sensor_A15981_06-02-2020.csv")
+eel_A15777 <- read_csv("./data/interim/sensorlogs/sensor_A15777_12-11-2019.csv")
 eel_A17443 <- read_csv("./data/interim/sensorlogs/sensor_A17443_27-01-2020.csv")
 eel_A17499 <- read_csv("./data/interim/sensorlogs/sensor_A17499_20-02-2020.csv")
 eel_A17513 <- read_csv("./data/interim/sensorlogs/sensor_A17513_20-02-2020.csv")
@@ -33,34 +39,38 @@ eel_A17538 <- read_csv("./data/interim/sensorlogs/sensor_A17538_05-05-2020.csv")
 eel_A17537 <- read_csv("./data/interim/sensorlogs/sensor_A17537_05-05-2020.csv")
 eel_A17510 <- read_csv("./data/interim/sensorlogs/sensor_A17510_22-06-2020.csv")
 eel_A15789 <- read_csv("./data/interim/sensorlogs/sensor_A15789_22-06-2020.csv")
-
-# German eels
-eel_A09359 <- read_csv("./data/interim/sensorlogs/sensor_A09359_11-12-2012.csv")
-eel_A09359$track_tag_id <- "A09359"
-eel_A09349 <- read_csv("./data/interim/sensorlogs/sensor_A09349_07-01-2013_2.csv")
-eel_A09349$track_tag_id <- "A09349"
-eel_A09358 <- read_csv("./data/interim/sensorlogs/sensor_A09358_26-11-2012.csv")
-eel_A09358$track_tag_id <- "A09358"
-eel_A09374 <- read_csv("./data/interim/sensorlogs/sensor_A09374_09-01-2013.csv")
-eel_A09374$track_tag_id <- "A09374"
-eel_A09377 <- read_csv("./data/interim/sensorlogs/sensor_A09377_18-04-2013_2.csv")
-eel_A09377$track_tag_id <- "A09377"
-eel_A09393 <- read_csv("./data/interim/sensorlogs/sensor_A09393_02-08-2013.csv")
-eel_A09393$track_tag_id <- "A09393"
-eel_A09411 <- read_csv("./data/interim/sensorlogs/sensor_A09411_07-03-13.csv")
-eel_A09411$track_tag_id <- "A09411"
-eel_A09423 <- read_csv("./data/interim/sensorlogs/sensor_A09423_11-12-2012.csv")
-eel_A09423$track_tag_id <- "A09423"
-eel_A09424 <- read_csv("./data/interim/sensorlogs/sensor_A09424_21-06-2013.csv")
-eel_A09424$track_tag_id <- "A09424"
-
+eel_A17521 <- read_csv("./data/interim/sensorlogs/sensor_A17521_23-09-2020.csv")
+eel_A17535 <- read_csv("./data/interim/sensorlogs/sensor_A17535_09-09-2020.csv")
+eel_A17653 <- read_csv("./data/interim/sensorlogs/sensor_A17653_30-12-2020.csv")
+eel_A15730_2 <- read_csv("./data/interim/sensorlogs/sensor_A15730_09-03-2021.csv")
+eel_A15700_2 <- read_csv("./data/interim/sensorlogs/sensor_A15700_09-03-2021.csv")
+eel_A17646 <- read_csv("./data/interim/sensorlogs/sensor_A17646_24-01-2021.csv")
+eel_A17642 <- read_csv("./data/interim/sensorlogs/sensor_A17642_11-02-2021.csv")
+eel_A17658 <- read_csv("./data/interim/sensorlogs/sensor_A17658_11-02-2021.csv")
+eel_A17525_2 <- read_csv("./data/interim/sensorlogs/sensor_A17525_22-02-2021.csv")
+eel_A17492_2 <- read_csv("./data/interim/sensorlogs/sensor_A17492_11-03-2021.csv")
+eel_A17518_2 <- read_csv("./data/interim/sensorlogs/sensor_A17518_11-03-2021.csv")
+eel_A17638 <- read_csv("./data/interim/sensorlogs/sensor_A17638_13-03-2021.csv")
+eel_A17634 <- read_csv("./data/interim/sensorlogs/sensor_A17634_19-03-2021.csv")
+eel_A17547 <- read_csv("./data/interim/sensorlogs/sensor_A17547_19-03-2021.csv")
+eel_A17635 <- read_csv("./data/interim/sensorlogs/sensor_A17635_14-04-2021.csv")
+eel_A17487 <- read_csv("./data/interim/sensorlogs/sensor_A17487_15-04-2021.csv")
+eel_A17499_2 <- read_csv("./data/interim/sensorlogs/sensor_A17499_15-04-2021.csv")
+eel_A17663 <- read_csv("./data/interim/sensorlogs/sensor_A17663_14-05-2021.csv")
+eel_A17513_2 <- read_csv("./data/interim/sensorlogs/sensor_A17513_17-05-2021.csv")
+eel_A17648 <- read_csv("./data/interim/sensorlogs/sensor_A17648_25-06-2021.csv")
 
 
 # Combine all datasets ####
-all <- do.call("rbind", list(eel_A16031,
+all <- do.call("rbind", list(eel_A15805,
+                             eel_A15730,
+                             eel_A15757,
+                             eel_A15700,
                              eel_A15714,
-                             eel_A15777,
+                             eel_A16031,
                              eel_A15706,
+                             eel_A15981,
+                             eel_A15777,
                              eel_A17443,
                              eel_A17499,
                              eel_A17513,
@@ -74,24 +84,41 @@ all <- do.call("rbind", list(eel_A16031,
                              eel_A17537,
                              eel_A17510,
                              eel_A15789,
-                             eel_A09359,
-                             eel_A09349,
-                             eel_A09358,
-                             eel_A09374,
-                             eel_A09377,
-                             eel_A09393,
-                             eel_A09411,
-                             eel_A09423,
-                             eel_A09424))
+                             eel_A17521,
+                             eel_A17535,
+                             eel_A17653,
+                             eel_A15730_2,
+                             eel_A15700_2,
+                             eel_A17646,
+                             eel_A17642,
+                             eel_A17658,
+                             eel_A17525_2,
+                             eel_A17492_2,
+                             eel_A17518_2,
+                             eel_A17638,
+                             eel_A17634,
+                             eel_A17547,
+                             eel_A17635,
+                             eel_A17487,
+                             eel_A17499_2,
+                             eel_A17663,
+                             eel_A17513_2,
+                             eel_A17648
+))
 
 all <- all %>%
   rename(ID = track_tag_id)
 
 # Remove seperate files
-rm(eel_A16031,
+rm(eel_A15805,
+   eel_A15730,
+   eel_A15757,
+   eel_A15700,
    eel_A15714,
-   eel_A15777,
+   eel_A16031,
    eel_A15706,
+   eel_A15981,
+   eel_A15777,
    eel_A17443,
    eel_A17499,
    eel_A17513,
@@ -105,15 +132,26 @@ rm(eel_A16031,
    eel_A17537,
    eel_A17510,
    eel_A15789,
-   eel_A09359,
-   eel_A09349,
-   eel_A09358,
-   eel_A09374,
-   eel_A09377,
-   eel_A09393,
-   eel_A09411,
-   eel_A09423,
-   eel_A09424)
+   eel_A17521,
+   eel_A17535,
+   eel_A17653,
+   eel_A15730_2,
+   eel_A15700_2,
+   eel_A17646,
+   eel_A17642,
+   eel_A17658,
+   eel_A17525_2,
+   eel_A17492_2,
+   eel_A17518_2,
+   eel_A17638,
+   eel_A17634,
+   eel_A17547,
+   eel_A17635,
+   eel_A17487,
+   eel_A17499_2,
+   eel_A17663,
+   eel_A17513_2,
+   eel_A17648)
 
 
 # 2. Read in parameter file ####
