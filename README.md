@@ -26,7 +26,6 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 	+ `data_circadian.csv`: batch_processed_eels.csv with circadian phases.
 	+ `data_circadian_tidal.csv`: data_circadian.csv with tidal data.
 	+ `data_depth_diff.csv`: batch processed file for which the depth difference is calculated between minima and maxima.
-	+ `summary_tracks.csv`: average, SD, min and max km per day per eel, total distance tracked, and total days tracked, overall migration speed and migration direction.
 
 * `/external:`
 	+ `/geolocation_input_files`: input files for the geolocation model per eel with lat and lon of release and retrieval or pop-off location
@@ -67,7 +66,6 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 10. batch_all_eels.R: Create sensor log file with all eels for analysis, taking into account time settings (UTC), pressure drift and redundant data (e.g. data when not on the shelf, during DVM and predation). Also link eel metadata and the trajectory data (coordinates) obtained via geolocation model to the sensor file.
 	+ Generate `batch_processed_eels_5min.csv` in `interim` folder
 	+ Generate `batch_processed_eels_1hour.csv` in `interim` folder
-	+ Generate `batch_processed_eels_5min_totaltrack.csv` in `interim` folder: batch processed file containing the tracks untill the pop-off time.
 11. link_circadian.R: Link circadian phases to the dataset
 	+ Generate `data_circadian_5min.csv` in `interim` folder
 	+ Generate `data_circadian_1hour.csv` in `interim` folder
