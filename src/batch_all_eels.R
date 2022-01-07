@@ -315,12 +315,12 @@ all <- all %>%
 
 
 # 8. Merge eel metadata to dataset
-eel <- read.csv("./data/external/eel_metadata.csv")
-eel$ID <- factor(eel$ID)
-eel$Direction <- factor(eel$Direction)
-eel$Country <- factor(eel$Country)
+#eel <- read.csv("./data/external/eel_metadata.csv")
+#eel$ID <- factor(eel$ID)
+#eel$Direction <- factor(eel$Direction)
+#eel$Country <- factor(eel$Country)
 
-all <- left_join(all, eel, by = "ID")
+#all <- left_join(all, eel, by = "ID")
 
 
 # 9. Create column 'Date' and remove ID prefix
