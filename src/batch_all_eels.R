@@ -331,10 +331,13 @@ all$ID <- factor(all$ID)
 
 
 # 10. Load trajectory dataset with coordinates ####
-tr_data <-  list.files(path = "./data/external/trajectory_data/",
-                       pattern = "*.csv", 
-                       full.names = T) %>% 
-  map_df(~read_csv(., col_types = cols(.default = "c"))) 
+#tr_data <-  list.files(path = "./data/external/trajectory_data/",
+#                       pattern = "*.csv", 
+#                       full.names = T) %>% 
+#  map_df(~read_csv(., col_types = cols(.default = "c"))) 
+
+tr_data <- read_csv("./data/external/trajectory_data/eel_trajectories.csv")
+
 
 # Select columns
 tr_data <- dplyr::select(tr_data, ID, Date, MPL.Avg.Lat, MPL.Avg.Lon, Med.Lat, Med.Lon)
