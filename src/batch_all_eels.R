@@ -43,21 +43,28 @@ eel_A17521 <- read_csv("./data/interim/sensorlogs/sensor_A17521_23-09-2020.csv")
 eel_A17535 <- read_csv("./data/interim/sensorlogs/sensor_A17535_09-09-2020.csv")
 eel_A17653 <- read_csv("./data/interim/sensorlogs/sensor_A17653_30-12-2020.csv")
 eel_A15730_2 <- read_csv("./data/interim/sensorlogs/sensor_A15730_09-03-2021.csv")
+eel_A15730_2$track_tag_id <- "A15730_2"
 eel_A15700_2 <- read_csv("./data/interim/sensorlogs/sensor_A15700_09-03-2021.csv")
+eel_A15700_2$track_tag_id <- "A15700_2"
 eel_A17646 <- read_csv("./data/interim/sensorlogs/sensor_A17646_24-01-2021.csv")
 eel_A17642 <- read_csv("./data/interim/sensorlogs/sensor_A17642_11-02-2021.csv")
 eel_A17658 <- read_csv("./data/interim/sensorlogs/sensor_A17658_11-02-2021.csv")
 eel_A17525_2 <- read_csv("./data/interim/sensorlogs/sensor_A17525_22-02-2021.csv")
+eel_A17525_2$track_tag_id <- "A17525_2"
 eel_A17492_2 <- read_csv("./data/interim/sensorlogs/sensor_A17492_11-03-2021.csv")
+eel_A17492_2$track_tag_id <- "A17492_2"
 eel_A17518_2 <- read_csv("./data/interim/sensorlogs/sensor_A17518_11-03-2021.csv")
+eel_A17518_2$track_tag_id <- "A17518_2"
 eel_A17638 <- read_csv("./data/interim/sensorlogs/sensor_A17638_13-03-2021.csv")
 eel_A17634 <- read_csv("./data/interim/sensorlogs/sensor_A17634_19-03-2021.csv")
 eel_A17547 <- read_csv("./data/interim/sensorlogs/sensor_A17547_19-03-2021.csv")
 eel_A17635 <- read_csv("./data/interim/sensorlogs/sensor_A17635_14-04-2021.csv")
 eel_A17487 <- read_csv("./data/interim/sensorlogs/sensor_A17487_15-04-2021.csv")
 eel_A17499_2 <- read_csv("./data/interim/sensorlogs/sensor_A17499_15-04-2021.csv")
+eel_A17499_2$track_tag_id <- "eel_A17499_2"
 eel_A17663 <- read_csv("./data/interim/sensorlogs/sensor_A17663_14-05-2021.csv")
 eel_A17513_2 <- read_csv("./data/interim/sensorlogs/sensor_A17513_17-05-2021.csv")
+eel_A17513_2$track_tag_id <- "eel_A17513_2"
 eel_A17648 <- read_csv("./data/interim/sensorlogs/sensor_A17648_25-06-2021.csv")
 
 
