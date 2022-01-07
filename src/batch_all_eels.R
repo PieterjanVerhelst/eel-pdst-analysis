@@ -194,8 +194,8 @@ all$datetime <- all$datetime - 3600
 # Check for time zone correction
 all$time_diff <- all$datetime_local_zone - all$datetime
 unique(all$time_diff)
-all$time_diff <- NULL             # Remove redunant column
-all$datetime_local_zone <- NULL   # Remove redunant column
+all$time_diff <- NULL             # Remove redundant column
+all$datetime_local_zone <- NULL   # Remove redundant column
 
 
 # 4. Correct for depth drift ####
