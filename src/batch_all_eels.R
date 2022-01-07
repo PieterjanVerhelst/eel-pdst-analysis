@@ -108,6 +108,7 @@ all <- do.call("rbind", list(eel_A15805,
 
 all <- all %>%
   rename(ID = track_tag_id)
+all$ID <- factor(all$ID)
 
 # Remove seperate files
 rm(eel_A15805,
@@ -171,26 +172,35 @@ parameters$UTC <-  factor(parameters$UTC)
 
 
 # 3. Aggregate data per 5 min  or 60 min ####
-all <- all %>%
-  group_by(ID) %>%
-  fill(temperature) %>%   # Fill temperature NA's with previous measured value
-  mutate(datetime = dmy_hms(datetime))
+#all <- all %>%
+#  group_by(ID) %>%
+#  fill(temperature) %>%   # Fill temperature NA's with previous measured value
+#  mutate(datetime = dmy_hms(datetime))
   
-all$datetime2 <- droplevels(cut(all$datetime, breaks="5 min"))   # 5 min cut
+#all$datetime2 <- droplevels(cut(all$datetime, breaks="5 min"))   # 5 min cut
 #all$datetime2 <- droplevels(cut(all$datetime, breaks="60 min"))   # 60 min cut
 
-all <- all %>%
-  group_by(ID, datetime2) %>%
-  summarise(pressure = mean(pressure),            # Calculate mean pressure
-            temperature = mean(temperature))      # Calculate mean temperature
+#all <- all %>%
+#  group_by(ID, datetime2) %>%
+#  summarise(pressure = mean(pressure),            # Calculate mean pressure
+#            temperature = mean(temperature))      # Calculate mean temperature
 
-all$datetime2 <- ymd_hms(all$datetime2)
+#all$datetime2 <- ymd_hms(all$datetime2)
+
+
+
+
+# 3. Subsample data per 5 min ####
+all$datetime <- dmy_hms(all$datetime)
+
+all <- all %>% group_by(ID) %>%
+  slice(seq(1, n(), by = 150))
 
 
 # 4. Time zone correction ####
 all <- left_join(all, parameters, by = "ID") %>%
-  mutate(datetime = ifelse(UTC == "-1", (datetime2 - (60*60)), 
-                            ifelse(UTC == "-2", datetime2 - (2*60*60))))
+  mutate(datetime = ifelse(UTC == "-1", (datetime - (60*60)), 
+                            ifelse(UTC == "-2", datetime - (2*60*60))))
 all$datetime <- as.POSIXct(all$datetime, origin='1970-01-01 00:00:00')
 all$time_diff <- all$datetime2 - all$datetime    # Check for time zone correction
 
