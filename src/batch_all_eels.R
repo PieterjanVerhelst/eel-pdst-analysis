@@ -419,6 +419,18 @@ tr_data <- filter(tr_data, ID == "15805" |
                     ID == "17648" )
 tr_data$ID <- factor(tr_data$ID) # rerun 'factor()' so the number of levels is set accurately
 
+# Change IDs of some eels/PDSTs
+tr_data$ID <- plyr::revalue(tr_data$ID, 
+                            c("175132"="17513_2", 
+                              "157002"="15700_2",
+                              "174922"="17492",
+                              "157302"="15730_2",
+                              "175252"="17525_2",
+                              "174922021"="17492_2",
+                              "174992"="17499_2",
+                              "175182"="17518_2"))
+
+
 
 # 11. Merge datasets ####
 all <- left_join(x = all, y = tr_data, by=c("ID","Date"))
