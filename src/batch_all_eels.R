@@ -178,33 +178,8 @@ parameters$UTC <-  factor(parameters$UTC)
 #  filter(ID != c('112064'))
 
 
-# 3. Aggregate data per 5 min  or 60 min ####
-#all <- all %>%
-#  group_by(ID) %>%
-#  fill(temperature) %>%   # Fill temperature NA's with previous measured value
-#  mutate(datetime = dmy_hms(datetime))
-  
-#all$datetime2 <- droplevels(cut(all$datetime, breaks="5 min"))   # 5 min cut
-#all$datetime2 <- droplevels(cut(all$datetime, breaks="60 min"))   # 60 min cut
 
-#all <- all %>%
-#  group_by(ID, datetime2) %>%
-#  summarise(pressure = mean(pressure),            # Calculate mean pressure
-#            temperature = mean(temperature))      # Calculate mean temperature
-
-#all$datetime2 <- ymd_hms(all$datetime2)
-
-
-
-
-# 3. Subsample data per 5 min ####
-all$datetime <- dmy_hms(all$datetime)
-
-all <- all %>% group_by(ID) %>%
-  slice(seq(1, n(), by = 150))
-
-
-# 4. Time zone correction ####
+# 3. Time zone correction ####
 #all <- left_join(all, parameters, by = "ID") %>%
 #  mutate(datetime = ifelse(UTC == "-1", (datetime - (60*60)), 
 #                            ifelse(UTC == "-2", datetime - (2*60*60))))
@@ -212,6 +187,7 @@ all <- all %>% group_by(ID) %>%
 #all$time_diff <- all$datetime2 - all$datetime    # Check for time zone correction
 
 # All Belgian eels in same time zone, so simply datetime - 1 hour for all data
+all$datetime <- dmy_hms(all$datetime)
 all$datetime_local_zone <- all$datetime
 all$datetime <- all$datetime - 3600
 
@@ -221,9 +197,11 @@ unique(all$time_diff)
 all$time_diff <- NULL             # Remove redunant column
 all$datetime_local_zone <- NULL   # Remove redunant column
 
-# 5. Correct for depth drift ####
+
+# 4. Correct for depth drift ####
 
 # Select rows with bank datetime and popoff datetime + 15 minutes (= when tag was at atmospheric pressure)
+all <- left_join(all, parameters, by = "ID")
 bank_popoff <- all %>%
   group_by(ID) %>%
   filter(datetime == bank_datetime | datetime == popoff_datetime,
@@ -277,9 +255,37 @@ all <- all %>%
 all$corrected_depth2 <- all$corrected_depth2 * -1
 
 
+
+
+
+
+# 5. Aggregate data per 5 min  or 60 min ####
+#all <- all %>%
+#  group_by(ID) %>%
+#  fill(temperature) %>%   # Fill temperature NA's with previous measured value
+#  mutate(datetime = dmy_hms(datetime))
+
+#all$datetime2 <- droplevels(cut(all$datetime, breaks="5 min"))   # 5 min cut
+#all$datetime2 <- droplevels(cut(all$datetime, breaks="60 min"))   # 60 min cut
+
+#all <- all %>%
+#  group_by(ID, datetime2) %>%
+#  summarise(pressure = mean(pressure),            # Calculate mean pressure
+#            temperature = mean(temperature))      # Calculate mean temperature
+
+#all$datetime2 <- ymd_hms(all$datetime2)
+
+
+
+# 5. Subsample data per 5 min ####
+all <- all %>% group_by(ID) %>%
+  slice(seq(1, n(), by = 150))
+
+
+
 # 6. Remove data before release and
 # - till DVM
-# - till one hour before predatino
+# - till one hour before predation
 # - 15 minutes before popoff time
 # --> Hence, select data on continental shelf
 all <- all %>%
