@@ -348,7 +348,7 @@ tr_data <- rename(tr_data,
                   geoloc_med_lon = Med.Lon)
 
 # Process columns
-tr_data$Date <- as.Date(tr_data$Date)
+tr_data$Date <- dmy(tr_data$Date)
 tr_data$ID <- factor(tr_data$ID)
 
 # Remove double dates per eel (ID)
