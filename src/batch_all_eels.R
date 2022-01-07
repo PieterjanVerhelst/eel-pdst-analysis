@@ -205,12 +205,20 @@ all <- all %>% group_by(ID) %>%
 
 
 # 4. Time zone correction ####
-all <- left_join(all, parameters, by = "ID") %>%
-  mutate(datetime = ifelse(UTC == "-1", (datetime - (60*60)), 
-                            ifelse(UTC == "-2", datetime - (2*60*60))))
-all$datetime <- as.POSIXct(all$datetime, origin='1970-01-01 00:00:00')
-all$time_diff <- all$datetime2 - all$datetime    # Check for time zone correction
+#all <- left_join(all, parameters, by = "ID") %>%
+#  mutate(datetime = ifelse(UTC == "-1", (datetime - (60*60)), 
+#                            ifelse(UTC == "-2", datetime - (2*60*60))))
+#all$datetime <- as.POSIXct(all$datetime, origin='1970-01-01 00:00:00')
+#all$time_diff <- all$datetime2 - all$datetime    # Check for time zone correction
 
+# All Belgian eels in same time zone, so simply datetime - 1 hour for all data
+all$datetime_local_zone <- all$datetime
+all$datetime <- all$datetime - 3600
+
+all$time_diff <- all$datetime_local_zone - all$datetime    # Check for time zone correction
+unique(all$time_diff)
+all$time_diff <- NULL             # Remove redunant column
+all$datetime_local_zone <- NULL   # Remove redunant column
 
 # 5. Correct for depth drift ####
 
