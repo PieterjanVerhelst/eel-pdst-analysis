@@ -1,6 +1,6 @@
 # Link circadian phases to the dataset
 # By Pieterjan Verhelst and Damiano Oldoni
-# Pieterjan.Verhelst@UGent.be, damiano.oldoni@inbo.be
+# Pieterjan.Verhelst@inbo.be, damiano.oldoni@inbo.be
 
 
 
@@ -158,11 +158,11 @@ data_circ <-
 
 
 # Rearrange columns
-data_circ <- select(data_circ, ID, datetime, numericdate, Country, Direction, Length, Weight, Rel_lat, Rel_long, corrected_depth, temperature, Date, geoloc_avg_lat, geoloc_avg_lon, geoloc_med_lat, geoloc_med_lon, sunrise, sunset, previous_sunset, next_sunrise, start_sunmoment, next_sunmoment, night_day)
+data_circ <- select(data_circ, ID, datetime, numericdate, corrected_depth, temperature, Date, geoloc_avg_lat, geoloc_avg_lon, geoloc_med_lat, geoloc_med_lon, sunrise, sunset, previous_sunset, next_sunrise, start_sunmoment, next_sunmoment, night_day)
 
 
 # 5. write csv ####
-#write.csv(data_circ, "./data/interim/data_circadian_5min.csv")
-#write_csv(data_circ, "./data/interim/data_circadian_1hour.csv")
+write.csv(data_circ, "./data/interim/data_circadian_5min.csv")
+write_csv(data_circ, "./data/interim/data_circadian_1hour.csv")
 
 

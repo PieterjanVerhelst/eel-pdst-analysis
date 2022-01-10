@@ -442,8 +442,8 @@ all$geoloc_avg_lon <- as.numeric(all$geoloc_avg_lon)
 
 
 # 12. Write csv file
-#write.csv(all, "./data/interim/batch_processed_eels_5min.csv")
-#write.csv(all, "./data/interim/batch_processed_eels_1hour.csv")
+write.csv(all, "./data/interim/batch_processed_eels_5min.csv")
+write.csv(all, "./data/interim/batch_processed_eels_1hour.csv")
 
 
 
