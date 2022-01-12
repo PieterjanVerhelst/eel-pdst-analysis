@@ -18,12 +18,12 @@ library(lubridate)
 # 1. Load dataset with all eels ####
 data <- read_csv("./data/interim/data_circadian_5min.csv")
 
-data$X1 <- NULL
+data$...1 <- NULL
 data$ID <- factor(data$ID)
 
 
 # 2. Load tidal data ####
-tidal_list_names <- list.files(path = "./data/external/tidal_data_john_aldridge/",
+tidal_list_names <- list.files(path = "./data/external/tidal_data_lianne_harrison/",
                     pattern = "*.dat", 
                     full.names = T)
 
@@ -36,7 +36,7 @@ tidal_list <- lapply(tidal_list_names, function(x) {
 tidal <- data.table::rbindlist(tidal_list)
 
 # Format columns
-tidal$ID <- str_replace(tidal$source, "./data/external/tidal_data_john_aldridge/eel_", "") 
+tidal$ID <- str_replace(tidal$source, "./data/external/tidal_data_lianne_harrison/eel_", "") 
 tidal$ID <- str_replace(tidal$ID, ".dat", "") 
 tidal$ID <- factor(tidal$ID)
 tidal$source_file <- NULL

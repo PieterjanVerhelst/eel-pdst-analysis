@@ -31,7 +31,8 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 	+ `/geolocation_input_files`: input files for the geolocation model per eel with lat and lon of release and retrieval or pop-off location
 	+ `/trajectory_data`: output from geolocation model with calculated daily lat and lon, and daily summary on temperature and depth (files obtained by David Righton)
 	+ `/dvm_noon`: Equation of time applied to files with the calculated noon, based on the DVM behaviour, to calculate coordinates
-	+ `/tidal_data_john_aldridge`: .dat files containing information on tidal direction and current strength
+	+ `/tidal_data_john_aldridge`: .dat files obtained by John Aldridge (CEFAS) containing information on tidal direction and current strength
+	+ `/tidal_data_lianne_harrison`: .dat files obtained by Lianne Harrison (CEFAS) containing information on tidal direction and current strength
 	+ `parameters.csv`: file containing the parameters to batch process the sensor files
 		+ `start_datetime`: moment eel was released (GMT)
 		+ `end_datetime`: end point of data of interest; in this case when eel is on the continental shelf (GMT)
@@ -69,7 +70,7 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 11. link_circadian.R: Link circadian phases to the dataset
 	+ Generate `data_circadian_5min.csv` in `interim` folder
 	+ Generate `data_circadian_1hour.csv` in `interim` folder
-12. link_tidal.R: Link tidal data to the dataset (tidal data obtained via John Aldridge (CEFAS, UK))
+12. link_tidal.R: Link tidal data to the dataset (tidal data obtained via Lianne Harrison (CEFAS, UK))
 	+ Generate `data_circadian_tidal_5min.csv` in `interim` folder
 	+ Generate `data_circadian_tidal_1hour.csv` in `interim` folder
 13. link_moon.R: Link illuminated moon fraction data to the dataset
