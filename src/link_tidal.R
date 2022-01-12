@@ -54,9 +54,66 @@ tidal <- tidal %>%
 tidal$datetime <- paste(tidal$date, tidal$time)
 tidal$datetime <- dmy_hms(tidal$datetime)
 
+# Adjust ID names
+tidal$ID <- recode_factor(tidal$ID, 
+                           "157002" = "15700_2",
+                           "157302" = "15730_2",
+                           "174922" = "17492",
+                           "174922021" = "17492_2",
+                           "174992" = "17499_2",
+                           "175132" = "17513_2",
+                           "175182" = "17518_2",
+                           "175252" = "17525_2",
+                           "176522" = "17652_2")
+
 # set tidal dataset to dataframe
 tidal <- as.data.frame(tidal)
 
+# Select relevant eels
+tidal <- filter(tidal, ID == "15805" |
+                    ID == "15730" |
+                    ID == "15757" |
+                    ID == "15700" |
+                    ID == "15714" |
+                    ID == "16031" |
+                    ID == "15706" |
+                    ID == "15981" |
+                    ID == "15777" |
+                    ID == "17443" |
+                    ID == "17499" |
+                    ID == "17513" |
+                    ID == "17534" |
+                    ID == "17526" |
+                    ID == "17522" |
+                    ID == "17492" |
+                    ID == "17508" |
+                    ID == "17536" |
+                    ID == "17538" |
+                    ID == "17537" |
+                    ID == "17510" |
+                    ID == "15789" |
+                    ID == "17521" |
+                    ID == "17535" |
+                    ID == "17653" |
+                    ID == "15730_2" |
+                    ID == "15700_2" |
+                    ID == "17646" |
+                    ID == "17642" |
+                    ID == "17658" |
+                    ID == "17525_2" |
+                    ID == "17492_2" |
+                    ID == "17518_2" |
+                    ID == "17638" |
+                    ID == "17634" |
+                    ID == "17547" |
+                    ID == "17635" |
+                    ID == "17487" |
+                    ID == "17499_2" |
+                    ID == "17663" |
+                    ID == "17513_2" |
+                    ID == "17648" )
+
+tidal$ID <- factor(tidal$ID) 
 
 # 3. Link tidal data to dataset ####
 # Set hourly resolution
@@ -94,7 +151,12 @@ data_tidal <- rename(data_tidal, datetime = datetime.x)
 data_tidal$datetime.y <- NULL
 data_tidal$date <- NULL
 data_tidal$time <- NULL
-
+data_tidal$sunrise <- NULL
+data_tidal$sunset <- NULL
+data_tidal$previous_sunset <- NULL
+data_tidal$next_sunrise <- NULL
+data_tidal$start_sunmoment <- NULL
+data_tidal$next_sunmoment <- NULL
 
 
 # 4. write csv ####
