@@ -151,12 +151,6 @@ data_tidal <- rename(data_tidal, datetime = datetime.x)
 data_tidal$datetime.y <- NULL
 data_tidal$date <- NULL
 data_tidal$time <- NULL
-data_tidal$sunrise <- NULL
-data_tidal$sunset <- NULL
-data_tidal$previous_sunset <- NULL
-data_tidal$next_sunrise <- NULL
-data_tidal$start_sunmoment <- NULL
-data_tidal$next_sunmoment <- NULL
 
 
 # 4. write csv ####
