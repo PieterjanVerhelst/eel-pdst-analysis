@@ -19,7 +19,7 @@ library(suncalc)
 # 1. Load sensor dataset with all eels ####
 data_circ <- read_csv("./data/interim/batch_processed_eels_5min.csv")
 
-data_circ$X1 <- NULL
+data_circ$...1 <- NULL
 data_circ$ID <- factor(data_circ$ID)
 
 
