@@ -31,7 +31,8 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 	+ `/geolocation_input_files`: input files for the geolocation model per eel with lat and lon of release and retrieval or pop-off location
 	+ `/trajectory_data`: output from geolocation model with calculated daily lat and lon, and daily summary on temperature and depth (files obtained by David Righton)
 	+ `/dvm_noon`: Equation of time applied to files with the calculated noon, based on the DVM behaviour, to calculate coordinates
-	+ `/tidal_data_john_aldridge`: .dat files obtained by John Aldridge (CEFAS) containing information on tidal direction and current strength
+	+ `/tidal_old_files`: .dat files with incorrect 2018 tidal data. Note that the part in 2019 of 3 eels is correct (obtained by Lianne Harrison (CEFAS))
+	+ `/tidal_2018`: .dat files with correct 2018 (tidal obtained by Lianne Harrison (CEFAS))
 	+ `/tidal_data_lianne_harrison`: .dat files obtained by Lianne Harrison (CEFAS) containing information on tidal direction and current strength
 	+ `parameters.csv`: file containing the parameters to batch process the sensor files
 		+ `start_datetime`: moment eel was released (GMT)

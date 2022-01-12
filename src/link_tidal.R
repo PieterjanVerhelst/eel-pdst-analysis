@@ -23,6 +23,56 @@ data$ID <- factor(data$ID)
 
 
 # 2. Load tidal data ####
+
+# Load old tidal data with both 2018 and 2019 data
+# Remove 2018 data that is not correct
+tidal_list_names <- list.files(path = "./data/external/tidal_old_files/",
+                               pattern = "*.dat", 
+                               full.names = T)
+
+tidal_list <- lapply(tidal_list_names, function(x) {
+  out <- data.table::fread(x, header = FALSE)
+  out$source_file <- x
+  return(out)
+})
+
+tidal <- data.table::rbindlist(tidal_list)
+
+
+tidal$V1 <- dmy(tidal$V1)
+tidal$year <- year(tidal$V1)
+tidal <- filter(tidal, year == 2019)
+
+tidal$source_file <- str_replace(tidal$source_file, "./data/external/tidal_old_files/eel_", "") 
+tidal$source_file <- str_replace(tidal$source_file, ".dat", "")
+
+
+# Load correct 2018 data
+tidal_list_names <- list.files(path = "./data/external/tidal_2018/",
+                               pattern = "*.dat", 
+                               full.names = T)
+
+tidal_list <- lapply(tidal_list_names, function(x) {
+  out <- data.table::fread(x, header = FALSE)
+  out$source_file <- x
+  return(out)
+})
+
+tidal2 <- data.table::rbindlist(tidal_list)
+
+tidal2$V1 <- dmy(tidal2$V1)
+tidal2$year <- year(tidal2$V1)
+
+tidal2$source_file <- str_replace(tidal2$source_file, "./data/external/tidal_2018/eel_", "") 
+tidal2$source_file <- str_replace(tidal2$source_file, "_new.dat", "")
+
+
+# Bind datasets together
+tidal2 <- rbind(tidal, tidal2)
+
+
+
+# Load rest of the tidal data
 tidal_list_names <- list.files(path = "./data/external/tidal_data_lianne_harrison/",
                     pattern = "*.dat", 
                     full.names = T)
@@ -34,6 +84,15 @@ tidal_list <- lapply(tidal_list_names, function(x) {
 })
 
 tidal <- data.table::rbindlist(tidal_list)
+
+tidal$V1 <- dmy(tidal$V1)
+
+# Merge both tidal datasets
+tidal2$year <- NULL
+tidal <- rbind(tidal, tidal2)
+
+
+
 
 # Format columns
 tidal$ID <- str_replace(tidal$source, "./data/external/tidal_data_lianne_harrison/eel_", "") 
@@ -52,7 +111,9 @@ tidal <- tidal %>%
          direction = V8)
 
 tidal$datetime <- paste(tidal$date, tidal$time)
-tidal$datetime <- dmy_hms(tidal$datetime)
+tidal$datetime <- ymd_hms(tidal$datetime)
+
+
 
 # Adjust ID names
 tidal$ID <- recode_factor(tidal$ID, 
@@ -66,7 +127,7 @@ tidal$ID <- recode_factor(tidal$ID,
                            "175252" = "17525_2",
                            "176522" = "17652_2")
 
-# set tidal dataset to dataframe
+# Set tidal dataset to dataframe
 tidal <- as.data.frame(tidal)
 
 # Select relevant eels
