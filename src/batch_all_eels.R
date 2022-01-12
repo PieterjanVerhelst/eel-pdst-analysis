@@ -61,10 +61,10 @@ eel_A17547 <- read_csv("./data/interim/sensorlogs/sensor_A17547_19-03-2021.csv")
 eel_A17635 <- read_csv("./data/interim/sensorlogs/sensor_A17635_14-04-2021.csv")
 eel_A17487 <- read_csv("./data/interim/sensorlogs/sensor_A17487_15-04-2021.csv")
 eel_A17499_2 <- read_csv("./data/interim/sensorlogs/sensor_A17499_15-04-2021.csv")
-eel_A17499_2$track_tag_id <- "eel_A17499_2"
+eel_A17499_2$track_tag_id <- "A17499_2"
 eel_A17663 <- read_csv("./data/interim/sensorlogs/sensor_A17663_14-05-2021.csv")
 eel_A17513_2 <- read_csv("./data/interim/sensorlogs/sensor_A17513_17-05-2021.csv")
-eel_A17513_2$track_tag_id <- "eel_A17513_2"
+eel_A17513_2$track_tag_id <- "A17513_2"
 eel_A17648 <- read_csv("./data/interim/sensorlogs/sensor_A17648_25-06-2021.csv")
 
 
