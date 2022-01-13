@@ -179,7 +179,12 @@ tidal$ID <- factor(tidal$ID)
 # 3. Link tidal data to dataset ####
 # Set hourly resolution
 data$datehour <- lubridate::floor_date(data$datetime, "hour")
-tidal$datehour <- lubridate::floor_date(tidal$datetime, "hour")
+
+# For the tidal dataset, use round instead of floor because otherwise duplicates in datehour arise
+#tidal$datehour <- lubridate::floor_date(tidal$datetime, "hour")
+tidal$datehour <- format(round(tidal$datetime, units="hours"), format="%Y-%m-%d %H:%M:%S")
+tidal$datehour <- ymd_hms(tidal$datehour)
+
 
 # Remove double dates per eel (ID) from tidal dataset
 #tidal <- tidal[!duplicated(tidal[c('ID','datehour')]),] 
