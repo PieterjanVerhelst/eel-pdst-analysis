@@ -125,7 +125,7 @@ noaa <- map2_dfr(station_codes,
                 names(station_codes),
                 get_data_noaa,
                 hourly_data = TRUE, 
-                years = 2018:2020,
+                years = 2018:2021,
                 path = noaa_path)
 
 # Reference code for one station
@@ -133,21 +133,10 @@ noaa <- map2_dfr(station_codes,
 # andrew <- select(andrew, station, date, latitude, longitude, atmos_pres, cl)
 
 # 3. Load dataset with all eels ####
-data <- read.csv("./data/interim/data_circadian_tidal_moon_1hour.csv")
+data <- read.csv("./data/interim/data_circadian_tidal_moon_5min.csv")
 data$X <- NULL
-data$X1 <- NULL
-data$X1_1 <- NULL
 data$ID <- factor(data$ID)
 data$datetime  <- as_datetime(data$datetime)
-data$Country <- factor(data$Country)
-
-# Filter German eels with temporal window 2012
-data <- filter(data, Country == "Germany")
-summary(data$datetime)
-
-# Filter Belgian eels with temporal window 2018:2021
-data <- filter(data, Country == "Belgium")
-summary(data$datetime)
 
 # Filter 1 animal for testing
 #data <- filter(data, ID == "16031")
@@ -261,17 +250,9 @@ data <-
 data
 
 
-# 4. Set data as German or Belgian ####
-german <- data
-belgian <- data
 
-
-# Bind rows to merge german and belgian dataset
-data <- rbind(german, belgian)
-
-
-# 5. write csv ####
-#write.csv(data, "./data/interim/data_circadian_tidal_moon_cloud_5min.csv")
-#write.csv(data, "./data/interim/data_circadian_tidal_moon_cloud_1hour.csv")
+# 4. write csv ####
+write.csv(data, "./data/interim/data_circadian_tidal_moon_cloud_5min.csv")
+write.csv(data, "./data/interim/data_circadian_tidal_moon_cloud_1hour.csv")
 
 
