@@ -10,15 +10,16 @@ library(lubridate)
 
 
 # 1. Import data ####
-data <- read_csv("./data/interim/data_circadian_tidal_moon_cloud_5min.csv",
+data <- read_csv("./data/interim/data_circadian_tidal_moon_5min.csv",
                  na = "", 
-                 col_types = list(sunrise = col_datetime(),
-                                  previous_sunset = col_datetime(),
-                                  next_sunrise = col_datetime(),
-                                  next_sunmoment = col_datetime(),
+                 col_types = list(U = col_double(),
+                                  V = col_double(),
+                                  speed = col_double(),
                                   direction = col_double()),          # set direction as numeric
                  guess_max = 100000)
 
+data$...1 <- NULL
+data$ID <- factor(data$ID)
 
 # 2. Find minima and maxima ####
 data <-
