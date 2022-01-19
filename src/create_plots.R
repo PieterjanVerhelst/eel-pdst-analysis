@@ -14,12 +14,22 @@ library(lubridate)
 
 # Import data
 data <- read_csv("./data/interim/data_circadian_tidal_moon_5min.csv",
+                 na = "", 
                  col_types = list(sunrise = col_datetime(),
                                   previous_sunset = col_datetime(),
+                                  sunset = col_datetime(),
+                                  sunrise = col_datetime(),
                                   next_sunrise = col_datetime(),
                                   next_sunmoment = col_datetime(),
+                                  U = col_double(),
+                                  V = col_double(),
+                                  speed = col_double(),
                                   direction = col_double()),          # set direction as numeric
                  guess_max = 100000)
+
+
+data$...1 <- NULL
+data$ID <- factor(data$ID)
 
 data <-
   data %>%
@@ -28,8 +38,8 @@ data <-
 
 # Create subset of several days for plot
 subset <- filter(data,
-                 ID == "17534",
-                 datetime >= "2019-12-10 00:00:00", datetime <= "2020-01-05 00:00:00")
+                 ID == "16031",
+                 datetime >= "2018-12-25 00:00:00", datetime <= "2018-12-30 00:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
