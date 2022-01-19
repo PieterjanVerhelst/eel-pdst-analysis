@@ -16,7 +16,11 @@ library(suncalc)
 
 # 1. Import data ####
 data <- read_csv("./data/interim/data_circadian_tidal_5min.csv",
-                 na = "",         
+                 col_types = list(sunrise = col_datetime(),
+                                  previous_sunset = col_datetime(),
+                                  next_sunrise = col_datetime(),
+                                  next_sunmoment = col_datetime(),
+                                  direction = col_double()),          # set direction as numeric
                  guess_max = 100000)
 
 data$...1 <- NULL

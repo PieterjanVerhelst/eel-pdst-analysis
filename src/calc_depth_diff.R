@@ -12,7 +12,11 @@ library(lubridate)
 # 1. Import data ####
 data <- read_csv("./data/interim/data_circadian_tidal_moon_5min.csv",
                  na = "", 
-                 col_types = list(U = col_double(),
+                 col_types = list(sunrise = col_datetime(),
+                                  previous_sunset = col_datetime(),
+                                  next_sunrise = col_datetime(),
+                                  next_sunmoment = col_datetime(),
+                                  U = col_double(),
                                   V = col_double(),
                                   speed = col_double(),
                                   direction = col_double()),          # set direction as numeric

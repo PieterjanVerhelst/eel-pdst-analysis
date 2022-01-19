@@ -158,7 +158,7 @@ data_circ <-
 
 
 # Rearrange columns
-data_circ <- select(data_circ, ID, datetime, numericdate, corrected_depth, temperature, Date, geoloc_avg_lat, geoloc_avg_lon, geoloc_med_lat, geoloc_med_lon, night_day)
+data_circ <- select(data_circ, ID, datetime, numericdate, corrected_depth, temperature, Date, geoloc_avg_lat, geoloc_avg_lon, geoloc_med_lat, geoloc_med_lon, sunrise, sunset, start_sunmoment, previous_sunset, next_sunrise, next_sunmoment, night_day)
 
 
 # 5. write csv ####
