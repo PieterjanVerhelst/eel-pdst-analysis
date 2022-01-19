@@ -91,7 +91,7 @@ data_min_max <- read_csv("./data/interim/data_depth_diff.csv",
 # Create subsets of several days
 subset <- filter(data_min_max,
                  ID == "16031",
-                 datetime >= "2019-02-07 00:00:00", datetime <= "2019-02-13 00:00:00")
+                 datetime >= "2018-12-25 00:00:00", datetime <= "2018-12-30 00:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
