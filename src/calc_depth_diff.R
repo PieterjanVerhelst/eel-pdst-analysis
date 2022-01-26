@@ -25,6 +25,12 @@ data <- read_csv("./data/interim/data_circadian_tidal_moon_5min.csv",
 data$...1 <- NULL
 data$ID <- factor(data$ID)
 
+# Arrange data set according to tag ID and datetime, so min and max are calculated accordingly
+data <-
+  data %>%
+  arrange(ID, datetime)
+
+
 # 2. Find minima and maxima ####
 data <-
   data %>%
