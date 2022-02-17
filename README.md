@@ -85,3 +85,8 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 16. create_plots.R: Create plots for data exploration
 17. visualise_tracking_data.R: Visualise tracking data as animated gif using `moveVis` R-package. The output is stored in `data\output\`.
 
+
+### R Markdown
+
+* `/markdown:` Folder containing R markdown files.
+
