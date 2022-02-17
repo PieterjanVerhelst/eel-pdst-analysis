@@ -1,0 +1,434 @@
+---
+title: "Vertical movement analysis"
+author: "Pieterjan Verhelst (pieterjan.verhelst@inbo.be)"
+date: "17-2-2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background
+Eels were tracked from the Belgian coast (Nieuwpoort) through the North Sea as they migrate to their spawning grounds in the Atlantic Ocean. See [our article](https://www.nature.com/articles/s41598-021-04052-7) for the migration routes. In brief, the routes were modeled through geolocation modelling based on logged data on temperature and depth obtained by data loggers that were externally attached to the eels. For more info on the method, we refer to the aforementioned article. In general, we found that the eels can take 2 routes: a northern route over the UK or a southern route through the English Channel.
+
+Now that we analysed the horizontal movement patterns (i.e. the migration routes), we want to analyse the vertical movement patterns. This can provide information on how eels orient themselves or move in a bio-energetic efficient way. Two of our key questions is if the eels have a circadian pattern in their vertical movement and if they apply selective tidal stream transport (STST). It is known that eels apply a diel vertical migration pattern in the Atlantic Ocean: they dive to depths of ca. 800 m during daytime, but swim at depths of ca. 200 m during night time (see [this article](https://www.science.org/doi/abs/10.1126/science.1178120)). However, it is unknown if eels show this or another pattern on the shallow continental shelf. Considering STST, this mode of transport has been illustrated for eels in [estuaries](https://www.sciencedirect.com/science/article/abs/pii/S0272771418304530). Since the North Sea and the English Channel have strong prevailing tidal currents, it is plausible that eels apply STST as well and hence behave differently during the ebbing and flooding tide.
+To gain more insight in the vertical movement pattern, we want to analyse the eel's swimming depth (**depth measurements every 5 minutes**) over time in relation to the next relevant explanatory variables, being:
+
++	**Eastward current velocity (m/s) U** *	    &rarr; Obtained from tidal model
++	**Northward current velocity (m/s) V** *    		&rarr; Obtained from tidal model
++	**Water temperature (°C)**		                	&rarr; Measured by data loggers
++	**Illuminated moon fraction (percentage)**    	&rarr; Obtained from suncalc R-package
++	**Day or night**					                      &rarr; Obtained from suncalc R-package
+
+*Water currents are calculated as eastward and northward velocity vectors. Based on these two vectors, current speed and direction can be calculated. Note that the direction is circular data (range: -180° - 180°) which is not easily handled by linear models, hence, I used the orthogonal vectors instead.
+Since the eels took 2 routes, I would split up the analysis for eels taking the southern route and eels taking the northern route.
+
+
+
+## Set time zone
+```{r}
+Sys.setenv(TZ='GMT')
+Sys.timezone()
+```
+
+
+## Load packages
+```{r}
+library(tidyverse)
+library(lubridate)
+library(mgcv)
+#library(splines) # for bs function
+#library(REdaS)
+library(car)
+#library(sjPlot)
+#library(EnvStats)
+library(pracma)
+library(nlme) # for gls()
+library(gridExtra)
+library(forecast) # for auto.arima() function
+library(tseries) # for Augmented Dickey-Fuller Test (adf.test())
+library(visreg)
+library(itsadug)
+```
+
+
+## Load dataset of 42 eels and set columns
+```{r}
+data <- read.csv("./data/interim/data_circadian_tidal_moon_5min.csv")
+data$ID <- factor(data$ID)
+data$datetime <- ymd_hms(data$datetime)
+data$night_day <- factor(data$night_day)
+data <- data %>%
+            rename(direction_x = U,
+                   direction_y = V)
+```
+
+## Subset 1 eel for testing
+```{r}
+subset <- filter(data, ID == "16031")
+
+```
+
+
+## ACF plot
+Create an autocorrelation function plot to explore the cyclic signals in the data. The horizontal blue lines in the plot indicate the confidence interval in the correlogram.
+First create plot for total dataset.
+
+```{r}
+forecast::Acf(subset$corrected_depth, type = c("correlation"), lag.max=max(dim(subset)), plot = TRUE)  
+```
+
+Next, create the ACF plot for the first 500 observations.
+```{r}
+forecast::Acf(subset$corrected_depth, type = c("correlation"), lag.max=500, plot = TRUE)
+```
+
+In the plot above, we see 2 cycles subsequently returning. The first is probably related to a tidal signal, as it occurs ca. every 12 hours at lag 144: (12 hours x 60 minutes) / 5 minutes = 144
+
+The second is probably related to a circadian rythm with a 24 h pattern at ca. lag 288: (24 hours x 60 minutes) / 5 minutes = 288
+
+To illustrate this, we added a green vertical line at lag 144 and a blue line at lag 288 to the plot.
+
+```{r}
+vals_list <- forecast::Acf(subset$corrected_depth, type = c("correlation"), lag.max=max(dim(subset)), plot = FALSE)
+plot(vals_list[[1]], xlim=c(0, 1000))
+abline(v = 144, col = "darkgreen")
+abline(v = 288, col = "darkblue")
+```
+
+## Depth data processing
+The depth sensors are not 100% accurate. Hence, it can occur that when an eel is swimming close to the surface, the depth sensor registers a value as if the eel would be above the surface. Since this is incorrect, we remove these cases, leading to a dataset with negative values only. Next, with a model with Gamma distribution in mind, we turn these values into positive ones.
+Side note: the depth sensors drift over time. A linear regression between the start of data logging (= when the tag was at zero atmospheric pressure) and the moment the tag surfaced (= when the tag was again at zero atmospheric pressure) was conducted at an earlier stage (to generate the trajectories). Hence the variable name 'corrected' depth.
+```{r}
+plot(subset$corrected_depth)
+```
+```{r}
+subset <- filter(subset, corrected_depth < 0)
+```
+```{r}
+plot(subset$corrected_depth)
+```
+```{r}
+summary(subset$corrected_depth)
+```
+```{r}
+subset$corrected_depth_abs <- abs(subset$corrected_depth)
+summary(subset$corrected_depth_abs)
+```
+
+## Add daily max depth
+```{r}
+subset2 <- subset %>%
+  group_by(ID, Date) %>%
+  summarise(max_depth = max(corrected_depth_abs))
+subset <- left_join(subset, subset2, by = c("ID","Date"))
+```
+
+
+# Add daily bathymetry based on the trajectory files obtained from the geolocation models
+
+```{r}
+# Link trajectory data (source trajectory data script)
+tr_data <- read_csv("./data/external/trajectory_data/eel_trajectories.csv")
+
+# Select columns
+tr_data <- dplyr::select(tr_data, ID, Date, Max_Depth)
+tr_data <- rename(tr_data, 
+                  max_depth_bathymetry = Max_Depth)
+
+# Process columns
+tr_data$Date <- dmy(tr_data$Date)
+tr_data$ID <- factor(tr_data$ID)
+
+# Remove double dates per eel (ID)
+#tr_data <- tr_data[!duplicated(tr_data[c('ID','Date')]),]
+tr_data <- tr_data %>%     # Add ID number to duplicate dates
+  group_by(ID, Date) %>%
+  add_tally()
+
+duplicates <- filter(tr_data, n == 2)   # Filter duplicate dates
+duplicates <- duplicates %>%             # Add ID number to distinguish between first and second duplicate
+  mutate(number_id = row_number())
+duplicates <- filter(duplicates, number_id == 2)  # Filter second duplicates
+
+tr_data <- filter(tr_data, n != 2)   # Remove duplicate dates from tracking dataset
+
+# Bind 'duplicates' dataset with second duplicates to tracking dataset
+tr_data <- ungroup(tr_data)
+tr_data$n <- NULL
+duplicates <- ungroup(duplicates)
+duplicates$n <- NULL
+duplicates$number_id <- NULL
+
+tr_data <- rbind(tr_data, duplicates)
+
+# Select relevant eels
+tr_data <- filter(tr_data, ID == "16031" )
+tr_data$ID <- factor(tr_data$ID) # rerun 'factor()' so the number of levels is set accurately
+
+subset$Date <- as.Date(subset$Date)
+subset <- left_join(subset, tr_data, by = c('ID', 'Date'))
+
+# Remove line with max depth bathymetry > 300 m --> remove location in deep sea
+subset$max_depth_bathymetry <- as.numeric(subset$max_depth_bathymetry)
+subset <- filter(subset, max_depth_bathymetry < 300)
+```
+
+
+Plot the daily depth range, the max depth and the max depth bathymetry. The latter 2 do not differ a lot because one of the assumptions in the geolocation model is that the eel's daily depth is the daily max bathymetry.
+
+```{r}
+par(mfrow=c(3,1))
+plot(subset$Date, subset$corrected_depth_abs)
+plot(subset$Date, subset$max_depth)
+plot(subset$Date, subset$max_depth_bathymetry)
+```
+
+## Exploratory plots
+### Vertical depth pattern over time
+```{r}
+ggplot(subset, aes(x = datetime,
+                                   y = -1*corrected_depth_abs)) +
+  geom_line() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  = "1 day") 
+```
+
+### Plot detail of vertical movement behaviour
+In this plot a distinctive behaviour can be observed between day and night; the vertical red line indicates midnight. During the daytime, the eels have a steady depth, while at night they have a higher vertical amplitude in the water column. Also, there are moments where the eel remains near the bottom which I think is attributed to the tides.
+```{r}
+subset2 <- filter(subset,datetime >= "2019-02-01 00:00:00", datetime <= "2019-02-06 00:00:00")
+
+# Create line every 24 hours
+gnu <-  seq.POSIXt(from = lubridate::floor_date(subset2$datetime[1], "day"), to= subset2$datetime[nrow(subset2)], by = 86400)
+class(lubridate::floor_date(subset2$datetime[1], "day"))
+```
+
+```{r}
+ggplot(subset2, aes(x = datetime,
+                                       y = -1*corrected_depth_abs)) +
+  geom_line() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  ="1 hour") +
+  geom_vline(xintercept=gnu, color = "red", size = 1) 
+```
+
+### Temperature over time
+```{r}
+ggplot(subset, aes(x = datetime,
+                                 y = temperature)) +
+  geom_line() +
+  theme_minimal() +
+  ylab("Temperature (°C))") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  = "1 day") 
+```
+
+### Plot detail of temperature
+
+```{r}
+subset2 <- filter(subset,datetime >= "2019-02-01 00:00:00", datetime <= "2019-02-06 00:00:00")
+
+# Create line every 24 hours
+gnu <-  seq.POSIXt(from = lubridate::floor_date(subset2$datetime[1], "day"), to= subset2$datetime[nrow(subset2)], by = 86400)
+class(lubridate::floor_date(subset2$datetime[1], "day"))
+
+# Create plot
+ggplot(subset2, aes(x = datetime,
+                                   y = temperature)) +
+  geom_line() +
+  theme_minimal() +
+  ylab("Temperature (°C))") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  ="1 hour") +
+  geom_vline(xintercept=gnu, color = "red", size = 1) 
+```
+
+### Plot depth over temperature
+```{r}
+ggplot(subset, aes(x = temperature,
+                                 y = -1*corrected_depth_abs)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Temperature (°C)") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) 
+```
+
+### Plot bathymetry over time
+```{r}
+ggplot(subset, aes(x = datetime,
+                                 y = -1* max_depth_bathymetry)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  = "1 day") 
+```
+
+### Plot vertical depth pattern over bathymetry
+```{r}
+ggplot(subset, aes(x = max_depth_bathymetry,
+                                 y = -1*corrected_depth_abs)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) 
+```
+
+### Plot vertical depth pattern over eastward current velocity vector
+```{r}
+ggplot(subset, aes(x = direction_x,
+                                       y = -1*corrected_depth_abs)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Eastward current velocity (m/s)") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14))
+```
+
+### Plot vertical depth pattern over northward current velocity vector
+```{r}
+ggplot(subset, aes(x = direction_y,
+                                   y = -1*corrected_depth_abs)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Northward current velocity (m/s)") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) 
+```
+
+### Plot vertical depth pattern over day and night
+Note that there is not a big difference because the depth range between day and night is equal, but the pattern is not.
+```{r}
+ggplot(subset, aes(x = night_day,
+                                   y = -1*corrected_depth_abs)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Circadian phases") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) 
+```
+
+### Plot vertical depth pattern over illuminated moon phase
+```{r}
+ggplot(subset, aes(x = 100*moon_fraction,
+                                   y = -1*corrected_depth_abs)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Illuminated moon phase (%)") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) 
+```
+
+## Centralise and normalise exploratory variables
+For model construction, the exploratory variables need to be cenralised and normalised by substracting the median of each value and dividing it by the interquantile range
+
+```{r}
+# direction_x
+summary(subset$direction_x)
+iqr <- 0.312  - (-0.284 )   #3rd QU - 1st Qu
+subset$direction_x_centre <- (subset$direction_x - median(subset$direction_x))/iqr
+
+# direction_y
+summary(subset$direction_y)
+iqr <- 0.199 - (-0.172)   #3rd QU - 1st Qu
+subset$direction_y_centre <- (subset$direction_y - median(subset$direction_y))/iqr
+
+# Temperature
+summary(subset$temperature)
+iqr <- 10.688  - (9.281)   #3rd QU - 1st Qu
+subset$temperature_centre <- (subset$temperature - median(subset$temperature))/iqr
+
+# Moon
+summary(subset$moon_fraction)
+iqr <- 0.7963852  - (0.1299340)   #3rd QU - 1st Qu
+subset$moon_fraction_centre <- (subset$moon_fraction - median(subset$moon_fraction))/iqr
+
+# Max depth bathymetry
+summary(subset$max_depth_bathymetry)
+iqr <-  64.36  - 34.41   #3rd QU - 1st Qu
+subset$max_depth_bathymetry_centre <- (subset$max_depth_bathymetry - median(subset$max_depth_bathymetry))/iqr
+
+```
+
+
+## Detrend the response variable
+In case it would be needed, the respone variable is detrended by subtracting a value by the previous value.
+```{r}
+subset <- subset %>% 
+  group_by(ID) %>%
+  arrange(datetime) %>%
+  mutate(diff_depth = corrected_depth_abs - lag(corrected_depth_abs))
+
+```
+```{r}
+par(mfrow=c(2,1))
+plot(subset$datetime, subset$corrected_depth_abs)
+plot(subset$datetime, subset$diff_depth)
+```
+
+Check ACF & PACF plot if data is stationary
+```{r}
+forecast::Acf(subset$diff_depth, type = c("correlation"), lag.max=20, plot = TRUE)
+```
+
+```{r}
+forecast::Pacf(subset$diff_depth, lag.max=20, plot = TRUE)
+```
+
+## Conduct ARIMA model
+
+```{r}
+fit <- Arima(subset$corrected_depth_abs, order=c(8,1,0))
+fit
+```
+
+```{r}
+checkresiduals(fit)
+```
+

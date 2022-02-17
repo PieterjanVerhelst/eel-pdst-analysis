@@ -6,6 +6,11 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 
 
 
+### R Markdown
+
+R Markdown files and forthcoming HTML files with code and output.
+
+
 ### Data
 
 * `/raw:`
@@ -86,7 +91,4 @@ Pop-off data storage tags (pDSTs) log data (e.g. water temperature and pressure)
 17. visualise_tracking_data.R: Visualise tracking data as animated gif using `moveVis` R-package. The output is stored in `data\output\`.
 
 
-### R Markdown
-
-* `/markdown:` Folder containing R markdown files.
 
