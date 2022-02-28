@@ -55,7 +55,7 @@ library(itsadug)
 
 ## Load dataset of 42 eels and set columns
 ```{r}
-data <- read.csv("./data/interim/data_circadian_tidal_moon_5min.csv")
+data <- read.csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv")
 data$ID <- factor(data$ID)
 data$datetime <- ymd_hms(data$datetime)
 data$night_day <- factor(data$night_day)
