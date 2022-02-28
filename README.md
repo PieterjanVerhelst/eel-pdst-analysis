@@ -80,8 +80,8 @@ R Markdown files and forthcoming HTML files with code and output.
 12. link_tidal.R: Link tidal data to the dataset (tidal data obtained via Lianne Harrison (CEFAS, UK))
 	+ Generate `data_circadian_tidal_5min.csv` in `interim` folder
 	+ Generate `data_circadian_tidal_1hour.csv` in `interim` folder
-13. link_moon.R: Link illuminated moon fraction data to the dataset
-	+ Generate `data_circadian_tidal_moon_5min.csv` in `interim` folder
+13. link_moon_sun.R: Link illuminated moon fraction, sun position and sun azimuth data to the dataset
+	+ Generate `data_circadian_tidal_moon_sun_5min.csv` in `interim` folder
 	+ Generate `data_circadian_tidal_moon_1hour.csv` in `interim` folder
 14. calc_depth_diff.R: calculate depth difference between minima and maxima
 	+ Generate `data_depth_diff.csv` in `interim` folder
