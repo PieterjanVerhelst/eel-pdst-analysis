@@ -30,7 +30,7 @@ R Markdown files and forthcoming HTML files with code and output.
 	+ `batch_processed_eels_5min.csv`: file with all eels for analysis aggregated over 1 min period and with corrected pressure values.
 	+ `data_circadian_5min.csv`: batch_processed_eels.csv with circadian phases.
 	+ `data_circadian_tidal_5min.csv`: data_circadian.csv with tidal data.
-	+ `data_circadian_tidal_moon_sun_5min.csv`: data_circadian_tidal.csv with moon illumination fraction, sun position and sun azimuth data.
+	+ `data_circadian_tidal_moon_sun_5min.csv`: data_circadian_tidal.csv with moon illumination fraction, sun altitude and sun azimuth data.
 	+ `data_depth_diff.csv`: batch processed file for which the depth difference is calculated between minima and maxima.
 	+ `data_hourly_migrations.csv`: batch processed file with the number of vertical migrations per hour together with hourly summarised environmental data
 
@@ -81,7 +81,7 @@ R Markdown files and forthcoming HTML files with code and output.
 12. link_tidal.R: Link tidal data to the dataset (tidal data obtained via Lianne Harrison (CEFAS, UK))
 	+ Generate `data_circadian_tidal_5min.csv` in `interim` folder
 	+ Generate `data_circadian_tidal_1hour.csv` in `interim` folder
-13. link_moon_sun.R: Link illuminated moon fraction, sun position and sun azimuth data to the dataset
+13. link_moon_sun.R: Link illuminated moon fraction, sun altitude and sun azimuth data to the dataset
 	+ Generate `data_circadian_tidal_moon_sun_5min.csv` in `interim` folder
 	+ Generate `data_circadian_tidal_moon_1hour.csv` in `interim` folder
 14. calc_depth_diff.R: calculate depth difference between minima and maxima
