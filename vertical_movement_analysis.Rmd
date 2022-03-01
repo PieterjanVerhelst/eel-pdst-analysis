@@ -185,6 +185,14 @@ plot(subset$Date, subset$max_depth)
 plot(subset$Date, subset$max_depth_bathymetry)
 ```
 
+
+## Calculate the relative depth
+```{r}
+subset$rel_depth <- subset$corrected_depth_abs / subset$max_depth_bathymetry
+plot(subset$Date, subset$rel_depth)
+```
+
+
 ## Exploratory plots
 ### Vertical depth pattern over time
 ```{r}
@@ -204,7 +212,7 @@ ggplot(subset, aes(x = datetime,
 ### Plot detail of vertical movement behaviour
 In this plot a distinctive behaviour can be observed between day and night; the vertical red line indicates midnight. During the daytime, the eels have a steady depth, while at night they have a higher vertical amplitude in the water column. Also, there are moments where the eel remains near the bottom which I think is attributed to the tides.
 ```{r}
-subset2 <- filter(subset,datetime >= "2019-02-01 00:00:00", datetime <= "2019-02-06 00:00:00")
+subset2 <- filter(subset,datetime >= "2019-02-01 00:00:00", datetime <= "2019-02-11 00:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset2$datetime[1], "day"), to= subset2$datetime[nrow(subset2)], by = 86400)
@@ -217,6 +225,37 @@ ggplot(subset2, aes(x = datetime,
   geom_line() +
   theme_minimal() +
   ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  ="1 hour") +
+  geom_vline(xintercept=gnu, color = "red", size = 1) 
+```
+
+### Relative depth over time 
+```{r}
+ggplot(subset, aes(x = datetime,
+                                   y = -1*rel_depth)) +
+  geom_line() +
+  theme_minimal() +
+  ylab("Relative depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  = "1 day") 
+```
+
+### Plot detail of relative depth
+```{r}
+ggplot(subset2, aes(x = datetime,
+                                       y = -1*rel_depth)) +
+  geom_line() +
+  theme_minimal() +
+  ylab("Relative depth (m)") +
   xlab("Date") +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
@@ -244,13 +283,6 @@ ggplot(subset, aes(x = datetime,
 ### Plot detail of temperature
 
 ```{r}
-subset2 <- filter(subset,datetime >= "2019-02-01 00:00:00", datetime <= "2019-02-06 00:00:00")
-
-# Create line every 24 hours
-gnu <-  seq.POSIXt(from = lubridate::floor_date(subset2$datetime[1], "day"), to= subset2$datetime[nrow(subset2)], by = 86400)
-class(lubridate::floor_date(subset2$datetime[1], "day"))
-
-# Create plot
 ggplot(subset2, aes(x = datetime,
                                    y = temperature)) +
   geom_line() +
@@ -265,19 +297,33 @@ ggplot(subset2, aes(x = datetime,
   geom_vline(xintercept=gnu, color = "red", size = 1) 
 ```
 
-### Plot depth over temperature
+### Plot relative depth over temperature
 ```{r}
 ggplot(subset, aes(x = temperature,
-                                 y = -1*corrected_depth_abs)) +
+                                 y = -1*rel_depth)) +
   geom_point() +
   theme_minimal() +
-  ylab("Depth (m)") +
+  ylab("Relative depth (m)") +
   xlab("Temperature (°C)") +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.text.x = element_text(hjust = 1)) +
   theme(axis.text = element_text(size = 12),
         axis.title = element_text(size = 14)) 
 ```
+### Plot detail relative depth over temperature
+```{r}
+ggplot(subset2, aes(x = temperature,
+                                 y = -1*rel_depth)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Relative depth (m)") +
+  xlab("Temperature (°C)") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) 
+```
+
 
 ### Plot bathymetry over time
 ```{r}
@@ -308,13 +354,13 @@ ggplot(subset, aes(x = max_depth_bathymetry,
         axis.title = element_text(size = 14)) 
 ```
 
-### Plot vertical depth pattern over eastward current velocity vector
+### Plot relative depth over eastward current velocity vector
 ```{r}
 ggplot(subset, aes(x = direction_x,
-                                       y = -1*corrected_depth_abs)) +
+                                       y = -1*rel_depth)) +
   geom_point() +
   theme_minimal() +
-  ylab("Depth (m)") +
+  ylab("Relative depth (m)") +
   xlab("Eastward current velocity (m/s)") +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
@@ -322,13 +368,28 @@ ggplot(subset, aes(x = direction_x,
         axis.title = element_text(size = 14))
 ```
 
-### Plot vertical depth pattern over northward current velocity vector
+### Plot detail relative depth over eastward current velocity vector
+
 ```{r}
-ggplot(subset, aes(x = direction_y,
-                                   y = -1*corrected_depth_abs)) +
+ggplot(subset2, aes(x = direction_x,
+                                       y = -1*rel_depth)) +
   geom_point() +
   theme_minimal() +
-  ylab("Depth (m)") +
+  ylab("Relative depth (m)") +
+  xlab("Eastward current velocity (m/s)") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14))
+```
+
+### Plot relative depth over northward current velocity vector
+```{r}
+ggplot(subset, aes(x = direction_y,
+                                   y = -1*rel_depth)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Relative depth (m)") +
   xlab("Northward current velocity (m/s)") +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
@@ -336,14 +397,30 @@ ggplot(subset, aes(x = direction_y,
         axis.title = element_text(size = 14)) 
 ```
 
-### Plot vertical depth pattern over day and night
+### Plot detail relative depth over northward current velocity vector
+```{r}
+ggplot(subset2, aes(x = direction_y,
+                                   y = -1*rel_depth)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Relative depth (m)") +
+  xlab("Northward current velocity (m/s)") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) 
+```
+
+
+
+### Plot relative depth pattern over day and night
 Note that there is not a big difference because the depth range between day and night is equal, but the pattern is not.
 ```{r}
 ggplot(subset, aes(x = night_day,
-                                   y = -1*corrected_depth_abs)) +
+                                   y = -1*rel_depth)) +
   geom_point() +
   theme_minimal() +
-  ylab("Depth (m)") +
+  ylab("Relative depth (m)") +
   xlab("Circadian phases") +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
@@ -351,19 +428,88 @@ ggplot(subset, aes(x = night_day,
         axis.title = element_text(size = 14)) 
 ```
 
-### Plot vertical depth pattern over illuminated moon phase
+### Plot relative depth pattern over illuminated moon phase
 ```{r}
 ggplot(subset, aes(x = 100*moon_fraction,
-                                   y = -1*corrected_depth_abs)) +
+                                   y = -1*rel_depth)) +
   geom_point() +
   theme_minimal() +
-  ylab("Depth (m)") +
+  ylab("Relative depth (m)") +
   xlab("Illuminated moon phase (%)") +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   theme(axis.text = element_text(size = 12),
         axis.title = element_text(size = 14)) 
 ```
+### Plot detail relative depth pattern over illuminated moon phase
+```{r}
+ggplot(subset2, aes(x = 100*moon_fraction,
+                                   y = -1*rel_depth)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Relative depth (m)") +
+  xlab("Illuminated moon phase (%)") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) 
+```
+
+### Plot relative depth pattern over sun altitude
+```{r}
+ggplot(subset, aes(x = sun_altitude,
+                                   y = -1*rel_depth)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Relative depth (m)") +
+  xlab("Sun altitude (radians)") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) 
+```
+### Plot detail relative depth pattern over sun altitude
+```{r}
+ggplot(subset2, aes(x = sun_altitude,
+                                   y = -1*rel_depth)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Relative depth (m)") +
+  xlab("Sun altitude (radians)") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) 
+```
+
+### Plot relative depth pattern over sun azimuth
+
+```{r}
+ggplot(subset, aes(x = sun_azimuth,
+                                   y = -1*rel_depth)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Relative depth (m)") +
+  xlab("Sun azimuth (radians)") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) 
+```
+### Plot detail relative depth pattern over sun azimuth
+```{r}
+ggplot(subset2, aes(x = sun_azimuth,
+                                   y = -1*rel_depth)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("Relative depth (m)") +
+  xlab("Sun azimuth (radians)") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) 
+```
+
 
 ## Centralise and normalise exploratory variables
 For model construction, the exploratory variables need to be cenralised and normalised by substracting the median of each value and dividing it by the interquantile range
@@ -381,13 +527,23 @@ subset$direction_y_centre <- (subset$direction_y - median(subset$direction_y))/i
 
 # Temperature
 summary(subset$temperature)
-iqr <- 10.688  - (9.281)   #3rd QU - 1st Qu
+iqr <- 10.688  - (9.266 )   #3rd QU - 1st Qu
 subset$temperature_centre <- (subset$temperature - median(subset$temperature))/iqr
 
-# Moon
+# Moon illumination
 summary(subset$moon_fraction)
-iqr <- 0.7963852  - (0.1299340)   #3rd QU - 1st Qu
+iqr <- 0.7966425   - (0.1311380)   #3rd QU - 1st Qu
 subset$moon_fraction_centre <- (subset$moon_fraction - median(subset$moon_fraction))/iqr
+
+# Sun altitude
+summary(subset$sun_altitude)
+iqr <- 0.1584   - (-0.7657)   #3rd QU - 1st Qu
+subset$sun_altitude_centre <- (subset$sun_altitude - median(subset$sun_altitude))/iqr
+
+# Sun azimuth
+summary(subset$sun_azimuth)
+iqr <- 1.322311    - (-1.326227)   #3rd QU - 1st Qu
+subset$sun_azimuth_centre <- (subset$sun_azimuth - median(subset$sun_azimuth))/iqr
 
 # Max depth bathymetry
 summary(subset$max_depth_bathymetry)
@@ -398,27 +554,27 @@ subset$max_depth_bathymetry_centre <- (subset$max_depth_bathymetry - median(subs
 
 
 ## Detrend the response variable
-In case it would be needed, the respone variable is detrended by subtracting a value by the previous value.
+In case it would be needed, the response variable is detrended by subtracting a value by the previous value.
 ```{r}
 subset <- subset %>% 
   group_by(ID) %>%
   arrange(datetime) %>%
-  mutate(diff_depth = corrected_depth_abs - lag(corrected_depth_abs))
+  mutate(diff_rel_depth = rel_depth - lag(rel_depth))
 
 ```
 ```{r}
 par(mfrow=c(2,1))
-plot(subset$datetime, subset$corrected_depth_abs)
-plot(subset$datetime, subset$diff_depth)
+plot(subset$datetime, subset$rel_depth)
+plot(subset$datetime, subset$diff_rel_depth)
 ```
 
 Check ACF & PACF plot if data is stationary
 ```{r}
-forecast::Acf(subset$diff_depth, type = c("correlation"), lag.max=20, plot = TRUE)
+forecast::Acf(subset$diff_rel_depth, type = c("correlation"), lag.max=20, plot = TRUE)
 ```
 
 ```{r}
-forecast::Pacf(subset$diff_depth, lag.max=20, plot = TRUE)
+forecast::Pacf(subset$diff_rel_depth, lag.max=20, plot = TRUE)
 ```
 
 ## Conduct ARIMA model
