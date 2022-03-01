@@ -582,6 +582,7 @@ Next, a GLMM TMB model was applied to a subset of 5 eels with a similar migratio
 
 ### Load packages
 ```{r}
+library(lme4)
 library(glmmTMB)
 ```
 
@@ -708,12 +709,12 @@ For model construction, the exploratory variables need to be cenralised and norm
 # direction_x
 summary(subset$direction_x)
 iqr <- 0.280  - (-0.252)   #3rd QU - 1st Qu
-subset$direction_x_centre <- (subset$direction_x - median(subset$direction_x))/iqr
+subset$direction_x_centre <- (subset$direction_x - median(subset$direction_x, na.rm = TRUE))/iqr
 
 # direction_y
 summary(subset$direction_y)
 iqr <- 0.209 - (-0.176)   #3rd QU - 1st Qu
-subset$direction_y_centre <- (subset$direction_y - median(subset$direction_y))/iqr
+subset$direction_y_centre <- (subset$direction_y - median(subset$direction_y, na.rm = TRUE))/iqr
 
 # Temperature
 summary(subset$temperature)
@@ -742,6 +743,62 @@ subset$max_depth_bathymetry_centre <- (subset$max_depth_bathymetry - median(subs
 
 ```
 
+### Construct GLMM TMB with AR1 covariance structure
+```{r}
+subset <- subset %>%
+  arrange(ID, datetime) %>%
+  group_by(ID) %>%
+  mutate(times = factor(row_number()))
+```
 
+
+The response variable 'rel_depth' contains values > 1. Still need to figure out why. Untill then, I just remove the values > 1
+```{r}
+summary(subset$rel_depth)
+subset <- filter(subset, rel_depth < 1)
+summary(subset$rel_depth)
+```
+
+
+```{r}
+model_glmer <- glmer(rel_depth ~ direction_x_centre +
+                   direction_y_centre +
+                   moon_fraction_centre +
+                   sun_altitude_centre +
+                   sun_azimuth_centre +
+                 (1|ID),
+                 data = subset,
+                 family = beta_family(),
+                 na.action = na.omit)
+summary(model_glmer)
+```
+
+
+```{r}
+model_tmb <- glmmTMB(rel_depth ~ direction_x_centre +
+                   direction_y_centre +
+                   moon_fraction_centre +
+                   sun_altitude_centre +
+                   sun_azimuth_centre,
+                 data = subset,
+                 family = beta_family(),
+                 na.action = na.omit)
+summary(model_tmb)
+```
+
+
+
+
+```{r}
+model_tmb_ar1 <- glmmTMB(rel_depth ~ direction_x_centre +
+                   direction_y_centre +
+                   moon_fraction_centre +
+                   sun_altitude_centre +
+                   sun_azimuth_centre +
+                 ar1(times + 0 | ID),
+                 family = beta_family(),
+                 data = subset)
+
+```
 
 
