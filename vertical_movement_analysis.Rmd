@@ -32,7 +32,6 @@ Sys.setenv(TZ='GMT')
 Sys.timezone()
 ```
 
-
 ## Load packages
 ```{r}
 library(tidyverse)
@@ -577,14 +576,172 @@ forecast::Acf(subset$diff_rel_depth, type = c("correlation"), lag.max=20, plot =
 forecast::Pacf(subset$diff_rel_depth, lag.max=20, plot = TRUE)
 ```
 
-## Conduct ARIMA model
+## Conduct GLMM TMB model
 
+Next, a GLMM TMB model was applied to a subset of 5 eels with a similar migration path (through the Channel). I want to apply this complex model first on only a few fish before scaling up the complexity. For more info on the method implementation, see [this website](https://cran.r-project.org/web/packages/glmmTMB/vignettes/covstruct.html). The [glmmTMB ](https://cran.r-project.org/web/packages/glmmTMB/vignettes/glmmTMB.pdf) R-package was used.
+
+### Load packages
 ```{r}
-fit <- Arima(subset$corrected_depth_abs, order=c(8,1,0))
-fit
+library(glmmTMB)
+```
+
+### Subset 5 eels for testing
+```{r}
+subset <- filter(data, ID == "16031" |
+                   ID == "17535" |
+                   ID == "17536" |
+                   ID == "15777" |
+                   ID == "17510")
+
+subset$ID <- factor(subset$ID)
+unique(subset$ID)
+
+```
+
+### Remove data from eel 17535 when it was in the Atlantic Ocean
+For this study I am interested in the vertical movement behaviour on the contintental shelf. The vertical behaviour in oceanic conditions has already been described.
+```{r}
+subset <- subset[!(subset$ID == "17535" & subset$datetime > '2020-01-11 00:00:00'),]
+```
+
+
+### Depth data processing
+```{r}
+plot(subset$corrected_depth)
+```
+```{r}
+subset <- filter(subset, corrected_depth < 0)
+```
+```{r}
+plot(subset$corrected_depth)
 ```
 
 ```{r}
-checkresiduals(fit)
+subset$corrected_depth_abs <- abs(subset$corrected_depth)
+summary(subset$corrected_depth_abs)
 ```
+
+### Add daily max depth
+```{r}
+subset2 <- subset %>%
+  group_by(ID, Date) %>%
+  summarise(max_depth = max(corrected_depth_abs))
+subset <- left_join(subset, subset2, by = c("ID","Date"))
+```
+
+
+### Add daily bathymetry based on the trajectory files obtained from the geolocation models
+
+```{r}
+# Link trajectory data (source trajectory data script)
+tr_data <- read_csv("./data/external/trajectory_data/eel_trajectories.csv")
+
+# Select columns
+tr_data <- dplyr::select(tr_data, ID, Date, Max_Depth)
+tr_data <- rename(tr_data, 
+                  max_depth_bathymetry = Max_Depth)
+
+# Process columns
+tr_data$Date <- dmy(tr_data$Date)
+tr_data$ID <- factor(tr_data$ID)
+
+# Remove double dates per eel (ID)
+#tr_data <- tr_data[!duplicated(tr_data[c('ID','Date')]),]
+tr_data <- tr_data %>%     # Add ID number to duplicate dates
+  group_by(ID, Date) %>%
+  add_tally()
+
+duplicates <- filter(tr_data, n == 2)   # Filter duplicate dates
+duplicates <- duplicates %>%             # Add ID number to distinguish between first and second duplicate
+  mutate(number_id = row_number())
+duplicates <- filter(duplicates, number_id == 2)  # Filter second duplicates
+
+tr_data <- filter(tr_data, n != 2)   # Remove duplicate dates from tracking dataset
+
+# Bind 'duplicates' dataset with second duplicates to tracking dataset
+tr_data <- ungroup(tr_data)
+tr_data$n <- NULL
+duplicates <- ungroup(duplicates)
+duplicates$n <- NULL
+duplicates$number_id <- NULL
+
+tr_data <- rbind(tr_data, duplicates)
+
+# Select relevant eels
+tr_data <- filter(tr_data, ID == "16031" |
+                   ID == "17535" |
+                   ID == "17536" |
+                   ID == "15777" |
+                   ID == "17510")
+
+tr_data$ID <- factor(tr_data$ID) # rerun 'factor()' so the number of levels is set accurately
+
+subset$Date <- as.Date(subset$Date)
+subset <- left_join(subset, tr_data, by = c('ID', 'Date'))
+
+# Remove line with max depth bathymetry > 300 m --> remove location in deep sea
+subset$max_depth_bathymetry <- as.numeric(subset$max_depth_bathymetry)
+subset <- filter(subset, max_depth_bathymetry < 300)
+```
+
+
+Plot the daily depth range, the max depth and the max depth bathymetry. The latter 2 do not differ a lot because one of the assumptions in the geolocation model is that the eel's daily depth is the daily max bathymetry.
+
+```{r}
+par(mfrow=c(3,1))
+plot(subset$Date, subset$corrected_depth_abs)
+plot(subset$Date, subset$max_depth)
+plot(subset$Date, subset$max_depth_bathymetry)
+```
+
+
+### Calculate the relative depth
+```{r}
+subset$rel_depth <- subset$corrected_depth_abs / subset$max_depth_bathymetry
+plot(subset$Date, subset$rel_depth)
+```
+
+### Centralise and normalise exploratory variables
+For model construction, the exploratory variables need to be cenralised and normalised by substracting the median of each value and dividing it by the interquantile range
+
+```{r}
+# direction_x
+summary(subset$direction_x)
+iqr <- 0.280  - (-0.252)   #3rd QU - 1st Qu
+subset$direction_x_centre <- (subset$direction_x - median(subset$direction_x))/iqr
+
+# direction_y
+summary(subset$direction_y)
+iqr <- 0.209 - (-0.176)   #3rd QU - 1st Qu
+subset$direction_y_centre <- (subset$direction_y - median(subset$direction_y))/iqr
+
+# Temperature
+summary(subset$temperature)
+iqr <- 11.688  - (9.484)   #3rd QU - 1st Qu
+subset$temperature_centre <- (subset$temperature - median(subset$temperature))/iqr
+
+# Moon illumination
+summary(subset$moon_fraction)
+iqr <- 0.7872764   - (0.1450092)   #3rd QU - 1st Qu
+subset$moon_fraction_centre <- (subset$moon_fraction - median(subset$moon_fraction))/iqr
+
+# Sun altitude
+summary(subset$sun_altitude)
+iqr <- 0.1394    - (-0.7882)   #3rd QU - 1st Qu
+subset$sun_altitude_centre <- (subset$sun_altitude - median(subset$sun_altitude))/iqr
+
+# Sun azimuth
+summary(subset$sun_azimuth)
+iqr <- 1.313353  - (-1.306655)   #3rd QU - 1st Qu
+subset$sun_azimuth_centre <- (subset$sun_azimuth - median(subset$sun_azimuth))/iqr
+
+# Max depth bathymetry
+summary(subset$max_depth_bathymetry)
+iqr <-  101.87  - 32.81   #3rd QU - 1st Qu
+subset$max_depth_bathymetry_centre <- (subset$max_depth_bathymetry - median(subset$max_depth_bathymetry))/iqr
+
+```
+
+
+
 
