@@ -743,7 +743,7 @@ subset$max_depth_bathymetry_centre <- (subset$max_depth_bathymetry - median(subs
 
 ```
 
-### Construct GLMM TMB with AR1 covariance structure
+### Construct GLMM with AR1 covariance structure
 ```{r}
 subset <- subset %>%
   arrange(ID, datetime) %>%
@@ -759,7 +759,8 @@ subset <- filter(subset, rel_depth < 1)
 summary(subset$rel_depth)
 ```
 
-
+#### glmer from lme4 package
+When running the glme() function, it gives an error. Not sure why, but based on fora searches it might have to do with the data complexity and/or size.
 ```{r}
 model_glmer <- glmer(rel_depth ~ direction_x_centre +
                    direction_y_centre +
@@ -773,7 +774,8 @@ model_glmer <- glmer(rel_depth ~ direction_x_centre +
 summary(model_glmer)
 ```
 
-
+#### glmmTMB from the glmmTMB package
+The function glmmTMB() runs when no AR1 construct is implemented.
 ```{r}
 model_tmb <- glmmTMB(rel_depth ~ direction_x_centre +
                    direction_y_centre +
@@ -786,8 +788,7 @@ model_tmb <- glmmTMB(rel_depth ~ direction_x_centre +
 summary(model_tmb)
 ```
 
-
-
+When the AR1 term is added, a memory error occurs. This is probably due to the fact that this function is rather viable for datasets up to 100k (see [documentation](https://m-clark.github.io/posts/2019-10-20-big-mixed-models/))
 
 ```{r}
 model_tmb_ar1 <- glmmTMB(rel_depth ~ direction_x_centre +
@@ -800,5 +801,10 @@ model_tmb_ar1 <- glmmTMB(rel_depth ~ direction_x_centre +
                  data = subset)
 
 ```
+
+#### bam from the mgcv package
+The function bam from the mgcv package is designed for large datasets.
+
+
 
 
