@@ -752,7 +752,7 @@ subset <- subset %>%
 ```
 
 
-The response variable 'rel_depth' contains values > 1. Still need to figure out why. Untill then, I just remove the values > 1
+The response variable 'rel_depth' contains values > 1. Still need to figure out why. Until then, I just remove the values > 1
 ```{r}
 summary(subset$rel_depth)
 subset <- filter(subset, rel_depth < 1)
