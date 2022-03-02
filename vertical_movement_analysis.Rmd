@@ -811,7 +811,7 @@ When the AR1 term is added, a memory error occurs. This is probably due to the f
 
 Returns the following error:
 ```{r}
-Error: cannot allocate vector of size 4.8 Gb
+#Error: cannot allocate vector of size 4.8 Gb
 ```
 
 #### bam from the mgcv package
