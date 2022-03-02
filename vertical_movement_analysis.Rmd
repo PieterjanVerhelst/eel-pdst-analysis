@@ -853,10 +853,12 @@ Calculate rho (= acf value) which can be fed into the bam_model for model optimi
 However, this results in an error for a model of the beta family.
 ```{r}
 # Calculate Rho, the autocorrelation value of a specific lag
-valRho <- acf(resid(bam_model), plot=TRUE)$acf[2]
-
+#valRho <- acf(resid(bam_model), plot=TRUE)$acf[2]
 ```
 
+```{r}
+#Error in plot.window(...) : need finite 'ylim' values
+```
 
 Show summary of the model
 ```{r}
