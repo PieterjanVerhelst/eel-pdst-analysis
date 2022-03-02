@@ -576,9 +576,9 @@ forecast::Acf(subset$diff_rel_depth, type = c("correlation"), lag.max=20, plot =
 forecast::Pacf(subset$diff_rel_depth, lag.max=20, plot = TRUE)
 ```
 
-## Conduct GLMM TMB model
+## Conduct model on a subset of 5 eels
 
-Next, a GLMM TMB model was applied to a subset of 5 eels with a similar migration path (through the Channel). I want to apply this complex model first on only a few fish before scaling up the complexity. For more info on the method implementation, see [this website](https://cran.r-project.org/web/packages/glmmTMB/vignettes/covstruct.html). The [glmmTMB ](https://cran.r-project.org/web/packages/glmmTMB/vignettes/glmmTMB.pdf) R-package was used.
+Next, a model was applied to a subset of 5 eels with a similar migration path (through the Channel). I want to apply this complex model first on only a few fish before scaling up the complexity. 
 
 ### Load packages
 ```{r}
@@ -743,7 +743,7 @@ subset$max_depth_bathymetry_centre <- (subset$max_depth_bathymetry - median(subs
 
 ```
 
-### Construct GLMM with AR1 covariance structure
+### Construct model with AR1 covariance structure
 ```{r}
 subset <- subset %>%
   arrange(ID, datetime) %>%
@@ -760,22 +760,29 @@ summary(subset$rel_depth)
 ```
 
 #### glmer from lme4 package
-When running the glme() function, it gives an error. Not sure why, but based on fora searches it might have to do with the data complexity and/or size.
+When running the glmer() function, it gives an error. Not sure why, but based on fora searches it might have to do with the data complexity and/or size.
 ```{r}
-model_glmer <- glmer(rel_depth ~ direction_x_centre +
-                   direction_y_centre +
-                   moon_fraction_centre +
-                   sun_altitude_centre +
-                   sun_azimuth_centre +
-                 (1|ID),
-                 data = subset,
-                 family = beta_family(),
-                 na.action = na.omit)
-summary(model_glmer)
+#model_glmer <- glmer(rel_depth ~ direction_x_centre +
+#                   direction_y_centre +
+#                   moon_fraction_centre +
+#                   sun_altitude_centre +
+#                   sun_azimuth_centre +
+#                 (1|ID),
+#                 data = subset,
+#                 family = beta_family(),
+#                 na.action = na.omit)
+#summary(model_glmer)
+```
+
+Returns the following error:
+```{r}
+#  Error in (function (fr, X, reTrms, family, nAGQ = 1L, verbose = 0L, maxit = 100L, : 
+#(maxstephalfit) PIRLS step-halvings failed to reduce deviance in pwrssUpdate
 ```
 
 #### glmmTMB from the glmmTMB package
 The function glmmTMB() runs when no AR1 construct is implemented.
+For more info on the method implementation, see [this website](https://cran.r-project.org/web/packages/glmmTMB/vignettes/covstruct.html). The [glmmTMB ](https://cran.r-project.org/web/packages/glmmTMB/vignettes/glmmTMB.pdf) R-package was used.
 ```{r}
 model_tmb <- glmmTMB(rel_depth ~ direction_x_centre +
                    direction_y_centre +
@@ -791,20 +798,70 @@ summary(model_tmb)
 When the AR1 term is added, a memory error occurs. This is probably due to the fact that this function is rather viable for datasets up to 100k (see [documentation](https://m-clark.github.io/posts/2019-10-20-big-mixed-models/))
 
 ```{r}
-model_tmb_ar1 <- glmmTMB(rel_depth ~ direction_x_centre +
+#model_tmb_ar1 <- glmmTMB(rel_depth ~ direction_x_centre +
+#                   direction_y_centre +
+#                   moon_fraction_centre +
+#                   sun_altitude_centre +
+#                   sun_azimuth_centre +
+#                 ar1(times + 0 | ID),
+#                 family = beta_family(),
+#                 data = subset)
+
+```
+
+Returns the following error:
+```{r}
+Error: cannot allocate vector of size 4.8 Gb
+```
+
+#### bam from the mgcv package
+The function bam from the mgcv package is designed for large datasets (see [documentation](https://m-clark.github.io/posts/2019-10-20-big-mixed-models/)).
+
+To implement the AR1 strucgture in the model, select the first record per eel and flag as true.
+```{r}
+# Select first record per eel and flag as 'TRUE'
+t.first <- subset[match(unique(subset$ID), subset$ID),]
+t.first <- select(t.first, ID, datetime)
+t.first$start.event <- TRUE
+
+# Merge with dataset
+subset <- left_join(subset, t.first, by = c("ID", "datetime"))
+
+# Set NA as FALSE
+subset[c("start.event")][is.na(subset[c("start.event")])] <- FALSE
+
+```
+
+
+```{r}
+# Run gamm model with autocorrelation argument
+
+# Full model
+bam_model <- bam(rel_depth ~ direction_x_centre +
                    direction_y_centre +
                    moon_fraction_centre +
                    sun_altitude_centre +
                    sun_azimuth_centre +
-                 ar1(times + 0 | ID),
-                 family = beta_family(),
-                 data = subset)
+                   s(ID, bs="re"),
+                 family = beta_family(), data = subset, discrete = TRUE,
+                 AR.start=subset$start.event, rho=0.90,
+                 na.action = na.omit)
 
 ```
 
-#### bam from the mgcv package
-The function bam from the mgcv package is designed for large datasets.
+Calculate rho (= acf value) which can be fed into the bam_model for model optimisation.
+However, this results in an error for a model of the beta family.
+```{r}
+# Calculate Rho, the autocorrelation value of a specific lag
+valRho <- acf(resid(bam_model), plot=TRUE)$acf[2]
 
+```
+
+
+Show summary of the model
+```{r}
+summary(bam_model)
+```
 
 
 
