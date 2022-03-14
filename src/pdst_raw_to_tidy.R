@@ -1,7 +1,7 @@
 #
 # pdst sensor read functionalities
 # 
-# Van Hoey S. 2019
+# Van Hoey S., Oldoni D., 2019-2022
 # Lifewatch INBO
 # 
 

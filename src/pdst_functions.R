@@ -55,7 +55,7 @@ library(dplyr)
 #'     * xx_name for the sensor data, i.e. name of the variable
 #'     
 pdst_get_data_blocks_info <- function(filename) {
-
+  
   pdst_con <- file(filename, "r")
   header_it <- ireadLines(pdst_con)
   line <- nextElem(header_it)
@@ -108,13 +108,9 @@ pdst_get_data_blocks_info <- function(filename) {
     col_names_original <- str_to_lower(str_split(daylog_header_line, pattern = ",", 
                                                  simplify = TRUE))
     col_names <- str_replace_all(col_names_original, " ", "_")
-    for (i in seq(3, 11, 2)) {
-      col_names <- append(col_names, paste(col_names[i], "decimal", sep = "_"), 
-                          after = i)  
-    }
     daylog_col_names <- col_names
   }
-
+  
   daylog <- list('daylog_skip' = daylog_skip, 
                  'daylog_length' = daylog_length,
                  'daylog_col_names' = daylog_col_names)
@@ -176,32 +172,16 @@ pdst_get_data_blocks_info <- function(filename) {
 #' @examples
 pdst_read_daylog <- function(filename, daylog_skip, daylog_length, 
                              daylog_col_names) {
-
+  
   col_types <- cols(
-    .default = col_character(),
+    .default = col_double(),
     mission_day = col_integer(),
     date = col_date("%d/%m/%Y")
   )
   track_day_log_data <- read_csv(filename, skip = daylog_skip, 
                                  col_names = daylog_col_names, 
                                  n_max = daylog_length, 
-                                 col_types = col_types) # 
-  # combine columns and decimal counterpart to number column
-  decimal_values <- track_day_log_data %>% 
-    select(matches("decimal")) %>%
-    gather(key = "variable_name", value = "decimal_value") %>%
-    select(decimal_value)
-  track_daylog_df <- track_day_log_data %>% 
-    select(-matches("decimal"), -mission_day, -date) %>%
-    tibble::rowid_to_column() %>%
-    gather(key = "variable_name", value = "value", -rowid) %>%
-    bind_cols(decimal_values) %>%
-    unite(value, value, decimal_value, sep = '.') %>%
-    mutate(value = parse_number(value)) %>%
-    spread(key = variable_name, value = value) %>%
-    select(-rowid) %>%
-    bind_cols(track_day_log_data %>% select(mission_day, date))
- 
+                                 col_types = col_types)
   return(track_day_log_data) 
 }
 
@@ -251,17 +231,20 @@ pdst_read_file <- function(filename) {
                                     data_info$daylog$daylog_col_names) %>%
       mutate(track_tag_id = data_info$track_tag_id)    
   }
-
+  
   # read sensor data
+  message("Read sensor data: pressure.")
   pressure_data <- pdst_read_sensor(filename, 
                                     data_info$pressure$pressure_skip,
                                     data_info$pressure$pressure_length,
                                     "pressure")
+  message("Read sensor data: temperature.")
   temp_data <- pdst_read_sensor(filename, 
                                 data_info$temperature$temp_skip,
                                 data_info$temperature$temp_length,
                                 "temperature")
   # combine sensor data
+  message("Combine sensor data.")
   sensor_data <- full_join(pressure_data, temp_data, by = "datetime") %>%
     mutate(track_tag_id = data_info$track_tag_id)
   
@@ -269,13 +252,3 @@ pdst_read_file <- function(filename) {
               "daylog" = daylog_data, 
               "sensor" = sensor_data))
 }
-
-
-
-
-
-
-
-
-
-
