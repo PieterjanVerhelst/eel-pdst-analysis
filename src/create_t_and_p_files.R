@@ -13,7 +13,7 @@ Sys.setenv(TZ='GMT')
 Sys.timezone()
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensorlogs/sensor_A17461_03-03-2022.csv")
+sensordata <- read_csv("./data/interim/sensorlogs/sensor_A17538_08-03-2022.csv")
 
 
 # 2. Aggregate data ####
@@ -42,8 +42,8 @@ aggdata$datetime <- as.POSIXct(aggdata$datetime, "%Y-%m-%d %H:%M:%S", tz = "GMT"
 
 # Set release and retrieval or pop off time (midday following popping event)
 # ! Make sure resease is in UTC instead of UTC+1 !
-release <- as.POSIXct("2020-12-25 12:10:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
-retrieval <- as.POSIXct("2021-12-10 23:59:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
+release <- as.POSIXct("2020-12-24 12:50:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
+retrieval <- as.POSIXct("2021-08-11 23:59:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
 
 
 # 3. Subset from release to retrieval date ####
@@ -80,14 +80,14 @@ plot(press$Date, press$Depth)
 # Select date: moment of release - 15 min and pop-off moment (moment it was certainly at the surface)
 subset2 <- filter(aggdata, 
                   datetime == as.POSIXct("2020-12-25 11:55:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") |
-                  datetime == as.POSIXct("2021-01-22 22:05:00", "%Y-%m-%d %H:%M:%S", tz = "GMT"))
+                  datetime == as.POSIXct("2021-01-24 20:23:00", "%Y-%m-%d %H:%M:%S", tz = "GMT"))
 plot(subset2$datetime, subset2$pressure)
 abline(lm(subset2$pressure ~ subset2$datetime))
 lm(subset2$pressure ~ subset2$datetime)  # To get coefficient and estimates
 # depth = (2.322e-05 * date)  -3.587e+04
 
 press$numericdate <- as.numeric(press$Date)
-press$regression <- (  1.181e-05           *press$numericdate)   -1.899e+04
+press$regression <- (  -2.288e-06          *press$numericdate)   + 3.686e+03
 press$corrected_depth <- press$Depth-press$regression
 
 
@@ -111,8 +111,8 @@ press <- rename(press, Depth = corrected_depth)
 
 
 # 7. Write csv files ####
-write.csv(temp, "./data/interim/geolocation_input_files/input_A17461/EELA17461TEMP.csv", row.names = FALSE)
-write.csv(press, "./data/interim/geolocation_input_files/input_A17461/EELA17461PRES.csv", row.names = FALSE)
+write.csv(temp, "./data/interim/geolocation_input_files/input_A17538_2/EELA17538TEMP.csv", row.names = FALSE)
+write.csv(press, "./data/interim/geolocation_input_files/input_A17538_2/EELA17538PRES.csv", row.names = FALSE)
 
 
 
