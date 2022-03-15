@@ -13,7 +13,7 @@ Sys.setenv(TZ='GMT')
 Sys.timezone()
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensorlogs/sensor_A17543_03-03-2022.csv")
+sensordata <- read_csv("./data/interim/sensorlogs/sensor_A17463_09-10-2020.csv")
 
 
 # 2. Aggregate data ####
@@ -42,8 +42,8 @@ aggdata$datetime <- as.POSIXct(aggdata$datetime, "%Y-%m-%d %H:%M:%S", tz = "GMT"
 
 # Set release and retrieval or pop off time (midday following popping event)
 # ! Make sure resease is in UTC instead of UTC+1 !
-release <- as.POSIXct("2020-12-24 12:50:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
-retrieval <- as.POSIXct("2021-11-29 23:59:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
+release <- as.POSIXct("2019-11-19 16:43:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
+retrieval <- as.POSIXct("2020-09-19 23:59:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
 
 
 # 3. Subset from release to retrieval date ####
@@ -79,15 +79,15 @@ colnames(press)[2] <- "Depth"
 plot(press$Date, press$Depth)
 # Select date: moment of release - 15 min and pop-off moment (moment it was certainly at the surface)
 subset2 <- filter(aggdata, 
-                  datetime == as.POSIXct("2020-12-25 11:55:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") |
-                  datetime == as.POSIXct("2021-02-16 11:40:00", "%Y-%m-%d %H:%M:%S", tz = "GMT"))
+                  datetime == as.POSIXct("2019-11-19 16:28:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") |
+                  datetime == as.POSIXct("2020-03-22 20:53:00", "%Y-%m-%d %H:%M:%S", tz = "GMT"))
 plot(subset2$datetime, subset2$pressure)
 abline(lm(subset2$pressure ~ subset2$datetime))
 lm(subset2$pressure ~ subset2$datetime)  # To get coefficient and estimates
 # depth = (2.322e-05 * date)  -3.587e+04
 
 press$numericdate <- as.numeric(press$Date)
-press$regression <- (  -8.737e-07    *press$numericdate)   + 1.408e+03
+press$regression <- ( 2.516e-06    *press$numericdate)   - 3.957e+03  
 press$corrected_depth <- press$Depth-press$regression
 
 
@@ -111,8 +111,8 @@ press <- rename(press, Depth = corrected_depth)
 
 
 # 7. Write csv files ####
-write.csv(temp, "./data/interim/geolocation_input_files/input_A17543/EELA17543TEMP.csv", row.names = FALSE)
-write.csv(press, "./data/interim/geolocation_input_files/input_A17543/EELA17543PRES.csv", row.names = FALSE)
+write.csv(temp, "./data/interim/geolocation_input_files/input_A17463/EELA17463TEMP.csv", row.names = FALSE)
+write.csv(press, "./data/interim/geolocation_input_files/input_A17463/EELA17463PRES.csv", row.names = FALSE)
 
 
 
