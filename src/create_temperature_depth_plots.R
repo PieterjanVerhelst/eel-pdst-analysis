@@ -13,7 +13,7 @@ Sys.timezone()
 
 
 # 1. Read in sensor data ####
-sensordata <- read_csv("./data/interim/sensorlogs/sensor_A17538_08-03-2022.csv")
+sensordata <- read_csv("./data/interim/sensorlogs/sensor_A17543_03-03-2022.csv")
 
 
 # 2. Aggregate data ####
@@ -45,8 +45,8 @@ aggdata$pressure <- aggdata$pressure * -1
 # For retrieval, take day before retrieval at 23:55
 # Note to put release date in UTC!
 release <- as.POSIXct("2020-12-24 12:50:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
-retrieval <- as.POSIXct("2021-08-11 23:59:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
-pop <- as.POSIXct("2021-01-24 20:23:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
+retrieval <- as.POSIXct("2021-11-29 23:59:00", "%Y-%m-%d %H:%M:%S", tz = "GMT") # Take day before retrieval, since exact moment of retrieval is unknown
+pop <- as.POSIXct("2021-02-16 11:40:00", "%Y-%m-%d %H:%M:%S", tz = "GMT")
 
 
 # 4. Create temperature and pressure plot for total dataset ####
@@ -129,7 +129,7 @@ fig_rel_pop
 
 # 7. Create temperature and pressure plot from several days ####
 # Create subsets of several days
-subset <- filter(aggdata, datetime >= "2021-01-23 00:00:00", datetime <= "2021-01-25 00:00:00")
+subset <- filter(aggdata, datetime >= "2021-02-16 00:00:00", datetime <= "2021-02-17 00:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
