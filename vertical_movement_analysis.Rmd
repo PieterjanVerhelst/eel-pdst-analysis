@@ -720,24 +720,27 @@ plot(data_5eels$Date, data_5eels$rel_depth)
 
 
 ```{r}
+# Remove rows with NA values
+data_5eels <- na.omit(data_5eels)
 
-#plot(data_5eels$sun_altitude)
+# Classify sun_altitude as rising or setting sun
 data_5eels$sun_class <- NA
-for (i in 2:dim(data_5eels)[1]){
-  if (data_5eels$sun_altitude[i] > data_5eels$sun_altitude[i-1]){
-    data_5eels$sun_class[i] = "rising"
-  } else{
-    data_5eels$sun_class[i] = "setting"
-  }}
+  for (i in 2:dim(data_5eels)[1]){
+    if (data_5eels$sun_altitude[i] > data_5eels$sun_altitude[i-1]){
+      data_5eels$sun_class[i] = "rising"
+    } else{
+      data_5eels$sun_class[i] = "setting"
+    }}
 
-
+# Set as factor
 data_5eels$sun_class <- factor(data_5eels$sun_class)
 
+# Remove first line of each eel, since that "sun_class" value is incorrect. The for-loop does not take into account different eels, but runs over the complete dataset.
+data_5eels <- data_5eels %>%
+  group_by(ID) %>%
+  slice(-1)
+
 ```
-
-
-
-
 
 
 ## Scale variables
@@ -768,19 +771,12 @@ summary(data_5eels$sun_azimuth)
 
 ### Construct model with AR1 covariance structure
 ```{r}
-subset <- subset %>%
+data_5eels <- data_5eels %>%
   arrange(ID, datetime) %>%
   group_by(ID) %>%
   mutate(times = factor(row_number()))
 ```
 
-
-The response variable 'rel_depth' contains values > 1. Still need to figure out why. Until then, I just remove the values > 1
-```{r}
-summary(subset$rel_depth)
-subset <- filter(subset, rel_depth < 1)
-summary(subset$rel_depth)
-```
 
 #### glmer from lme4 package
 When running the glmer() function, it gives an error. Not sure why, but based on fora searches it might have to do with the data complexity and/or size.
@@ -791,7 +787,7 @@ When running the glmer() function, it gives an error. Not sure why, but based on
 #                   sun_altitude_centre +
 #                   sun_azimuth_centre +
 #                 (1|ID),
-#                 data = subset,
+#                 data = data_5eels,
 #                 family = beta_family(),
 #                 na.action = na.omit)
 #summary(model_glmer)
@@ -806,16 +802,23 @@ Returns the following error:
 #### glmmTMB from the glmmTMB package
 The function glmmTMB() runs when no AR1 construct is implemented.
 For more info on the method implementation, see [this website](https://cran.r-project.org/web/packages/glmmTMB/vignettes/covstruct.html). The [glmmTMB ](https://cran.r-project.org/web/packages/glmmTMB/vignettes/glmmTMB.pdf) R-package was used.
+
+Update: I included the positive corrected_depth values, hence, the rel_depth now contains negative values so a model with beta-distribution is unable to run.
 ```{r}
-model_tmb <- glmmTMB(rel_depth ~ direction_x_centre +
-                   direction_y_centre +
-                   moon_fraction_centre +
-                   sun_altitude_centre +
-                   sun_azimuth_centre,
-                 data = subset,
-                 family = beta_family(),
-                 na.action = na.omit)
-summary(model_tmb)
+summary(data_5eels$rel_depth)
+```
+
+
+```{r}
+#model_tmb <- glmmTMB(rel_depth ~ direction_x +
+#                   direction_y +
+#                   moon_fraction +
+#                   sun_altitude +
+#                   sun_azimuth,
+#                 data = data_5eels,
+#                 family = beta_family(),
+#                 na.action = na.omit)
+#summary(model_tmb)
 ```
 
 When the AR1 term is added, a memory error occurs. This is probably due to the fact that this function is rather viable for datasets up to 100k (see [documentation](https://m-clark.github.io/posts/2019-10-20-big-mixed-models/))
@@ -843,15 +846,15 @@ The function bam from the mgcv package is designed for large datasets (see [docu
 To implement the AR1 strucgture in the model, select the first record per eel and flag as true.
 ```{r}
 # Select first record per eel and flag as 'TRUE'
-t.first <- subset[match(unique(subset$ID), subset$ID),]
+t.first <- data_5eels[match(unique(data_5eels$ID), data_5eels$ID),]
 t.first <- select(t.first, ID, datetime)
 t.first$start.event <- TRUE
 
 # Merge with dataset
-subset <- left_join(subset, t.first, by = c("ID", "datetime"))
+data_5eels <- left_join(data_5eels, t.first, by = c("ID", "datetime"))
 
 # Set NA as FALSE
-subset[c("start.event")][is.na(subset[c("start.event")])] <- FALSE
+data_5eels[c("start.event")][is.na(data_5eels[c("start.event")])] <- FALSE
 
 ```
 
@@ -860,14 +863,16 @@ subset[c("start.event")][is.na(subset[c("start.event")])] <- FALSE
 # Run gamm model with autocorrelation argument
 
 # Full model
-bam_model <- bam(rel_depth ~ direction_x_centre +
-                   direction_y_centre +
-                   moon_fraction_centre +
-                   sun_altitude_centre +
-                   sun_azimuth_centre +
+bam_model <- bam(rel_depth ~ direction_x +
+                   direction_y +
+                   moon_fraction +
+                   sun_altitude +
+                   sun_azimuth +
+                   sun_class +
                    s(ID, bs="re"),
-                 family = beta_family(), data = subset, discrete = TRUE,
-                 AR.start=subset$start.event, rho=0.90,
+                 family = gaussian(), data = data_5eels, discrete = TRUE,
+                 #AR.start=subset$start.event, 
+                 rho=0.90,
                  na.action = na.omit)
 
 ```
