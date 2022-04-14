@@ -577,7 +577,7 @@ summary(data_1eel$sun_azimuth)
 ## Detrend the response variable
 In case it would be needed, the response variable is detrended by subtracting a value by the previous value.
 ```{r}
-subset <- subset %>% 
+data_1eel <- data_1eel %>% 
   group_by(ID) %>%
   arrange(datetime) %>%
   mutate(diff_rel_depth = rel_depth - lag(rel_depth))
@@ -585,17 +585,17 @@ subset <- subset %>%
 ```
 ```{r}
 par(mfrow=c(2,1))
-plot(subset$datetime, subset$rel_depth)
-plot(subset$datetime, subset$diff_rel_depth)
+plot(data_1eel$datetime, data_1eel$rel_depth)
+plot(data_1eel$datetime, data_1eel$diff_rel_depth)
 ```
 
 Check ACF & PACF plot if data is stationary
 ```{r}
-forecast::Acf(subset$diff_rel_depth, type = c("correlation"), lag.max=20, plot = TRUE)
+forecast::Acf(data_1eel$diff_rel_depth, type = c("correlation"), lag.max=20, plot = TRUE)
 ```
 
 ```{r}
-forecast::Pacf(subset$diff_rel_depth, lag.max=20, plot = TRUE)
+forecast::Pacf(data_1eel$diff_rel_depth, lag.max=20, plot = TRUE)
 ```
 
 ## Conduct model on a subset of 5 eels
