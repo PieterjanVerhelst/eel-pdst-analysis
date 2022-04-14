@@ -20,6 +20,8 @@ To gain more insight in the vertical movement pattern, we want to analyse the ee
 +	**Water temperature (°C)**		                	&rarr; Measured by data loggers
 +	**Illuminated moon fraction (percentage)**    	&rarr; Obtained from suncalc R-package
 +	**Day or night**					                      &rarr; Obtained from suncalc R-package
++	**Sun altitude**					                      &rarr; Obtained from suncalc R-package
++	**Sun azimuth**					                      &rarr; Obtained from suncalc R-package
 
 *Water currents are calculated as eastward and northward velocity vectors. Based on these two vectors, current speed and direction can be calculated. Note that the direction is circular data (range: -180° - 180°) which is not easily handled by linear models, hence, I used the orthogonal vectors instead.
 Since the eels took 2 routes, I would split up the analysis for eels taking the southern route and eels taking the northern route.
@@ -65,7 +67,7 @@ data <- data %>%
 
 ## Subset 1 eel for testing
 ```{r}
-subset <- filter(data, ID == "16031")
+data_1eel <- filter(data, ID == "16031")
 
 ```
 
@@ -75,12 +77,12 @@ Create an autocorrelation function plot to explore the cyclic signals in the dat
 First create plot for total dataset.
 
 ```{r}
-forecast::Acf(subset$corrected_depth, type = c("correlation"), lag.max=max(dim(subset)), plot = TRUE)  
+forecast::Acf(data_1eel$corrected_depth, type = c("correlation"), lag.max=max(dim(data_1eel)), plot = TRUE)  
 ```
 
 Next, create the ACF plot for the first 500 observations.
 ```{r}
-forecast::Acf(subset$corrected_depth, type = c("correlation"), lag.max=500, plot = TRUE)
+forecast::Acf(data_1eel$corrected_depth, type = c("correlation"), lag.max=500, plot = TRUE)
 ```
 
 In the plot above, we see 2 cycles subsequently returning. The first is probably related to a tidal signal, as it occurs ca. every 12 hours at lag 144: (12 hours x 60 minutes) / 5 minutes = 144
@@ -90,7 +92,7 @@ The second is probably related to a circadian rythm with a 24 h pattern at ca. l
 To illustrate this, we added a green vertical line at lag 144 and a blue line at lag 288 to the plot.
 
 ```{r}
-vals_list <- forecast::Acf(subset$corrected_depth, type = c("correlation"), lag.max=max(dim(subset)), plot = FALSE)
+vals_list <- forecast::Acf(data_1eel$corrected_depth, type = c("correlation"), lag.max=max(dim(data_1eel)), plot = FALSE)
 plot(vals_list[[1]], xlim=c(0, 1000))
 abline(v = 144, col = "darkgreen")
 abline(v = 288, col = "darkblue")
@@ -100,28 +102,28 @@ abline(v = 288, col = "darkblue")
 The depth sensors are not 100% accurate. Hence, it can occur that when an eel is swimming close to the surface, the depth sensor registers a value as if the eel would be above the surface. Since this is incorrect, we remove these cases, leading to a dataset with negative values only. Next, with a model with Gamma distribution in mind, we turn these values into positive ones.
 Side note: the depth sensors drift over time. A linear regression between the start of data logging (= when the tag was at zero atmospheric pressure) and the moment the tag surfaced (= when the tag was again at zero atmospheric pressure) was conducted at an earlier stage (to generate the trajectories). Hence the variable name 'corrected' depth.
 ```{r}
-plot(subset$corrected_depth)
+plot(data_1eel$corrected_depth)
 ```
 ```{r}
-subset <- filter(subset, corrected_depth < 0)
+subset <- filter(data_1eel, corrected_depth < 0)
 ```
 ```{r}
-plot(subset$corrected_depth)
+plot(data_1eel$corrected_depth)
 ```
 ```{r}
-summary(subset$corrected_depth)
+summary(data_1eel$corrected_depth)
 ```
 ```{r}
-subset$corrected_depth_abs <- abs(subset$corrected_depth)
-summary(subset$corrected_depth_abs)
+data_1eel$corrected_depth_abs <- abs(data_1eel$corrected_depth)
+summary(data_1eel$corrected_depth_abs)
 ```
 
 ## Add daily max depth
 ```{r}
-subset2 <- subset %>%
+data_max_depth <- data_1eel %>%
   group_by(ID, Date) %>%
-  summarise(max_depth = max(corrected_depth_abs))
-subset <- left_join(subset, subset2, by = c("ID","Date"))
+  summarise(max_depth = max(corrected_depth))
+data_1eel <- left_join(data_1eel, data_max_depth, by = c("ID","Date"))
 ```
 
 
@@ -166,12 +168,12 @@ tr_data <- rbind(tr_data, duplicates)
 tr_data <- filter(tr_data, ID == "16031" )
 tr_data$ID <- factor(tr_data$ID) # rerun 'factor()' so the number of levels is set accurately
 
-subset$Date <- as.Date(subset$Date)
-subset <- left_join(subset, tr_data, by = c('ID', 'Date'))
+data_1eel$Date <- as.Date(data_1eel$Date)
+data_1eel <- left_join(data_1eel, tr_data, by = c('ID', 'Date'))
 
 # Remove line with max depth bathymetry > 300 m --> remove location in deep sea
-subset$max_depth_bathymetry <- as.numeric(subset$max_depth_bathymetry)
-subset <- filter(subset, max_depth_bathymetry < 300)
+data_1eel$max_depth_bathymetry <- as.numeric(data_1eel$max_depth_bathymetry)
+data_1eel <- filter(data_1eel, max_depth_bathymetry < 300)
 ```
 
 
@@ -179,24 +181,24 @@ Plot the daily depth range, the max depth and the max depth bathymetry. The latt
 
 ```{r}
 par(mfrow=c(3,1))
-plot(subset$Date, subset$corrected_depth_abs)
-plot(subset$Date, subset$max_depth)
-plot(subset$Date, subset$max_depth_bathymetry)
+plot(data_1eel$Date, data_1eel$corrected_depth_abs)
+plot(data_1eel$Date, data_1eel$max_depth)
+plot(data_1eel$Date, data_1eel$max_depth_bathymetry)
 ```
 
 
 ## Calculate the relative depth
 ```{r}
-subset$rel_depth <- subset$corrected_depth_abs / subset$max_depth_bathymetry
-plot(subset$Date, subset$rel_depth)
+data_1eel$rel_depth <- data_1eel$corrected_depth / data_1eel$max_depth_bathymetry
+plot(data_1eel$Date, data_1eel$rel_depth)
 ```
 
 
 ## Exploratory plots
 ### Vertical depth pattern over time
 ```{r}
-ggplot(subset, aes(x = datetime,
-                                   y = -1*corrected_depth_abs)) +
+ggplot(data_1eel, aes(x = datetime,
+                                   y = -1*corrected_depth)) +
   geom_line() +
   theme_minimal() +
   ylab("Depth (m)") +
@@ -211,16 +213,16 @@ ggplot(subset, aes(x = datetime,
 ### Plot detail of vertical movement behaviour
 In this plot a distinctive behaviour can be observed between day and night; the vertical red line indicates midnight. During the daytime, the eels have a steady depth, while at night they have a higher vertical amplitude in the water column. Also, there are moments where the eel remains near the bottom which I think is attributed to the tides.
 ```{r}
-subset2 <- filter(subset,datetime >= "2019-02-01 00:00:00", datetime <= "2019-02-11 00:00:00")
+data_1eel_10days <- filter(data_1eel,datetime >= "2019-02-01 00:00:00", datetime <= "2019-02-11 00:00:00")
 
 # Create line every 24 hours
-gnu <-  seq.POSIXt(from = lubridate::floor_date(subset2$datetime[1], "day"), to= subset2$datetime[nrow(subset2)], by = 86400)
-class(lubridate::floor_date(subset2$datetime[1], "day"))
+gnu <-  seq.POSIXt(from = lubridate::floor_date(data_1eel_10days$datetime[1], "day"), to= data_1eel_10days$datetime[nrow(data_1eel_10days)], by = 86400)
+class(lubridate::floor_date(data_1eel_10days$datetime[1], "day"))
 ```
 
 ```{r}
-ggplot(subset2, aes(x = datetime,
-                                       y = -1*corrected_depth_abs)) +
+ggplot(data_1eel_10days, aes(x = datetime,
+                                       y = corrected_depth)) +
   geom_line() +
   theme_minimal() +
   ylab("Depth (m)") +
@@ -235,8 +237,8 @@ ggplot(subset2, aes(x = datetime,
 
 ### Relative depth over time 
 ```{r}
-ggplot(subset, aes(x = datetime,
-                                   y = -1*rel_depth)) +
+ggplot(data_1eel, aes(x = datetime,
+                                   y = rel_depth)) +
   geom_line() +
   theme_minimal() +
   ylab("Relative depth (m)") +
@@ -250,8 +252,8 @@ ggplot(subset, aes(x = datetime,
 
 ### Plot detail of relative depth
 ```{r}
-ggplot(subset2, aes(x = datetime,
-                                       y = -1*rel_depth)) +
+ggplot(data_1eel_10days, aes(x = datetime,
+                                       y = rel_depth)) +
   geom_line() +
   theme_minimal() +
   ylab("Relative depth (m)") +
@@ -266,7 +268,7 @@ ggplot(subset2, aes(x = datetime,
 
 ### Temperature over time
 ```{r}
-ggplot(subset, aes(x = datetime,
+ggplot(data_1eel, aes(x = datetime,
                                  y = temperature)) +
   geom_line() +
   theme_minimal() +
@@ -282,7 +284,7 @@ ggplot(subset, aes(x = datetime,
 ### Plot detail of temperature
 
 ```{r}
-ggplot(subset2, aes(x = datetime,
+ggplot(data_1eel_10days, aes(x = datetime,
                                    y = temperature)) +
   geom_line() +
   theme_minimal() +
@@ -298,8 +300,8 @@ ggplot(subset2, aes(x = datetime,
 
 ### Plot relative depth over temperature
 ```{r}
-ggplot(subset, aes(x = temperature,
-                                 y = -1*rel_depth)) +
+ggplot(data_1eel, aes(x = temperature,
+                                 y = rel_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Relative depth (m)") +
@@ -311,8 +313,8 @@ ggplot(subset, aes(x = temperature,
 ```
 ### Plot detail relative depth over temperature
 ```{r}
-ggplot(subset2, aes(x = temperature,
-                                 y = -1*rel_depth)) +
+ggplot(data_1eel_10days, aes(x = temperature,
+                                 y = rel_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Relative depth (m)") +
@@ -326,7 +328,7 @@ ggplot(subset2, aes(x = temperature,
 
 ### Plot bathymetry over time
 ```{r}
-ggplot(subset, aes(x = datetime,
+ggplot(data_1eel, aes(x = datetime,
                                  y = -1* max_depth_bathymetry)) +
   geom_point() +
   theme_minimal() +
@@ -341,8 +343,8 @@ ggplot(subset, aes(x = datetime,
 
 ### Plot vertical depth pattern over bathymetry
 ```{r}
-ggplot(subset, aes(x = max_depth_bathymetry,
-                                 y = -1*corrected_depth_abs)) +
+ggplot(data_1eel, aes(x = max_depth_bathymetry,
+                                 y = corrected_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Depth (m)") +
@@ -355,8 +357,8 @@ ggplot(subset, aes(x = max_depth_bathymetry,
 
 ### Plot relative depth over eastward current velocity vector
 ```{r}
-ggplot(subset, aes(x = direction_x,
-                                       y = -1*rel_depth)) +
+ggplot(data_1eel, aes(x = direction_x,
+                                       y = rel_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Relative depth (m)") +
@@ -370,8 +372,8 @@ ggplot(subset, aes(x = direction_x,
 ### Plot detail relative depth over eastward current velocity vector
 
 ```{r}
-ggplot(subset2, aes(x = direction_x,
-                                       y = -1*rel_depth)) +
+ggplot(data_1eel_10days, aes(x = direction_x,
+                                       y = rel_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Relative depth (m)") +
@@ -384,8 +386,8 @@ ggplot(subset2, aes(x = direction_x,
 
 ### Plot relative depth over northward current velocity vector
 ```{r}
-ggplot(subset, aes(x = direction_y,
-                                   y = -1*rel_depth)) +
+ggplot(data_1eel, aes(x = direction_y,
+                                   y = rel_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Relative depth (m)") +
@@ -398,8 +400,8 @@ ggplot(subset, aes(x = direction_y,
 
 ### Plot detail relative depth over northward current velocity vector
 ```{r}
-ggplot(subset2, aes(x = direction_y,
-                                   y = -1*rel_depth)) +
+ggplot(data_1eel_10days, aes(x = direction_y,
+                                   y = rel_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Relative depth (m)") +
@@ -415,8 +417,8 @@ ggplot(subset2, aes(x = direction_y,
 ### Plot relative depth pattern over day and night
 Note that there is not a big difference because the depth range between day and night is equal, but the pattern is not.
 ```{r}
-ggplot(subset, aes(x = night_day,
-                                   y = -1*rel_depth)) +
+ggplot(data_1eel, aes(x = night_day,
+                                   y = rel_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Relative depth (m)") +
@@ -429,8 +431,8 @@ ggplot(subset, aes(x = night_day,
 
 ### Plot relative depth pattern over illuminated moon phase
 ```{r}
-ggplot(subset, aes(x = 100*moon_fraction,
-                                   y = -1*rel_depth)) +
+ggplot(data_1eel, aes(x = 100*moon_fraction,
+                                   y = rel_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Relative depth (m)") +
@@ -442,8 +444,8 @@ ggplot(subset, aes(x = 100*moon_fraction,
 ```
 ### Plot detail relative depth pattern over illuminated moon phase
 ```{r}
-ggplot(subset2, aes(x = 100*moon_fraction,
-                                   y = -1*rel_depth)) +
+ggplot(data_1eel_10days, aes(x = 100*moon_fraction,
+                                   y = rel_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Relative depth (m)") +
@@ -456,8 +458,8 @@ ggplot(subset2, aes(x = 100*moon_fraction,
 
 ### Plot relative depth pattern over sun altitude
 ```{r}
-ggplot(subset, aes(x = sun_altitude,
-                                   y = -1*rel_depth)) +
+ggplot(data_1eel, aes(x = sun_altitude,
+                                   y = rel_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Relative depth (m)") +
@@ -469,8 +471,8 @@ ggplot(subset, aes(x = sun_altitude,
 ```
 ### Plot detail relative depth pattern over sun altitude
 ```{r}
-ggplot(subset2, aes(x = sun_altitude,
-                                   y = -1*rel_depth)) +
+ggplot(data_1eel_10days, aes(x = sun_altitude,
+                                   y = rel_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Relative depth (m)") +
@@ -484,8 +486,8 @@ ggplot(subset2, aes(x = sun_altitude,
 ### Plot relative depth pattern over sun azimuth
 
 ```{r}
-ggplot(subset, aes(x = sun_azimuth,
-                                   y = -1*rel_depth)) +
+ggplot(data_1eel, aes(x = sun_azimuth,
+                                   y = rel_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Relative depth (m)") +
@@ -497,8 +499,8 @@ ggplot(subset, aes(x = sun_azimuth,
 ```
 ### Plot detail relative depth pattern over sun azimuth
 ```{r}
-ggplot(subset2, aes(x = sun_azimuth,
-                                   y = -1*rel_depth)) +
+ggplot(data_1eel_10days, aes(x = sun_azimuth,
+                                   y = rel_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Relative depth (m)") +
