@@ -548,9 +548,9 @@ For model construction, the exploratory variables need to be cenralised and norm
 
 ```{r}
 # direction_x
-summary(subset$direction_x)
+summary(data_1eel$direction_x)
 iqr <- 0.312  - (-0.284 )   #3rd QU - 1st Qu
-subset$direction_x_centre <- (subset$direction_x - median(subset$direction_x))/iqr
+data_1eel$direction_x_centre <- (data_1eel$direction_x - median(data_1eel$direction_x))/iqr
 
 # direction_y
 summary(subset$direction_y)
