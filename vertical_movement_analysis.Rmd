@@ -162,7 +162,7 @@ data_1eel <- left_join(data_1eel, tr_data, by = c('ID', 'Date'))
 
 # Remove line with max depth bathymetry > 300 m --> remove location in deep sea
 data_1eel$max_depth_bathymetry <- -1*(as.numeric(data_1eel$max_depth_bathymetry))
-data_1eel <- filter(data_1eel, max_depth_bathymetry < 300)
+data_1eel <- filter(data_1eel, max_depth_bathymetry >= -300)
 ```
 
 
@@ -175,19 +175,10 @@ plot(data_1eel$Date, data_1eel$max_depth)
 plot(data_1eel$Date, data_1eel$max_depth_bathymetry)
 ```
 
-Remove the max depth bathymetry at ca. 600 m depth. I am interested in the vertical movement behaviour on the continental shelf, which is max 300 m deep. Hence, a bathymetry of ca. 600 m indicates the eel was in the Atlantic Ocean beyond the shelf
-```{r}
-data_1eel <- filter(data_1eel, max_depth_bathymetry >= -300)
-
-par(mfrow=c(3,1))
-plot(data_1eel$Date, data_1eel$corrected_depth)
-plot(data_1eel$Date, data_1eel$max_depth)
-plot(data_1eel$Date, data_1eel$max_depth_bathymetry)
-```
 
 ## Calculate the relative depth
 ```{r, fig.cap = "Plot of the relative depth for 1 eel."}
-data_1eel$rel_depth <- data_1eel$corrected_depth / data_1eel$max_depth_bathymetry
+data_1eel$rel_depth <- data_1eel$corrected_depth / data_1eel$max_depth
 plot(data_1eel$Date, data_1eel$rel_depth, col = rgb(red = 0.5, green = 0.5, blue = 0.5, alpha = 0.4))
 ```
 
@@ -325,9 +316,9 @@ ggplot(data_1eel_10days, aes(x = temperature,
 
 
 ### Plot bathymetry over time
-```{r, fig.cap = "Daily max bathymetry (obtained via geolocation) for 1 eel."}
+```{r, fig.cap = "Daily max depth for 1 eel."}
 ggplot(data_1eel, aes(x = datetime,
-                                 y = max_depth_bathymetry)) +
+                                 y = max_depth)) +
   geom_point() +
   theme_minimal() +
   ylab("Depth (m)") +
@@ -340,8 +331,8 @@ ggplot(data_1eel, aes(x = datetime,
 ```
 
 ### Plot vertical depth pattern over bathymetry
-```{r, fig.cap = "Vertical movement pattern over the daily max bathymetry for 1 eel."}
-ggplot(data_1eel, aes(x = max_depth_bathymetry,
+```{r, fig.cap = "Vertical movement pattern over the daily max depth for 1 eel."}
+ggplot(data_1eel, aes(x = max_depth,
                                  y = corrected_depth)) +
   geom_point() +
   theme_minimal() +
@@ -490,9 +481,9 @@ ggplot(data_1eel_10days, aes(x = sun_altitude,
 data_1eel$sun_class <- NA
 for (i in 2:dim(data_1eel)[1]){
   if (data_1eel$sun_altitude[i] > data_1eel$sun_altitude[i-1]){
-    data_1eel$sun_class[i] = "sunrise"
+    data_1eel$sun_class[i] = "rising"
   } else{
-    data_1eel$sun_class[i] = "sunset"
+    data_1eel$sun_class[i] = "setting"
   }}
 
 
