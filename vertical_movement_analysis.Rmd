@@ -102,13 +102,13 @@ abline(v = 288, col = "darkblue")
 The depth sensors are not 100% accurate. Hence, it can occur that when an eel is swimming close to the surface, the depth sensor registers a value as if the eel would be above the surface. Since this is incorrect, we remove these cases, leading to a dataset with negative values only. Next, with a model with Gamma distribution in mind, we turn these values into positive ones.
 Side note: the depth sensors drift over time. A linear regression between the start of data logging (= when the tag was at zero atmospheric pressure) and the moment the tag surfaced (= when the tag was again at zero atmospheric pressure) was conducted at an earlier stage (to generate the trajectories). Hence the variable name 'corrected' depth.
 ```{r}
-plot(data_1eel$corrected_depth)
+plot(data_1eel$corrected_depth, col = rgb(red = 0.5, green = 0.5, blue = 0.5, alpha = 0.2))
 ```
 ```{r}
 subset <- filter(data_1eel, corrected_depth < 0)
 ```
 ```{r}
-plot(data_1eel$corrected_depth)
+plot(data_1eel$corrected_depth, col = rgb(red = 0.5, green = 0.5, blue = 0.5, alpha = 0.2))
 ```
 ```{r}
 summary(data_1eel$corrected_depth)
@@ -190,7 +190,7 @@ plot(data_1eel$Date, data_1eel$max_depth_bathymetry)
 ## Calculate the relative depth
 ```{r}
 data_1eel$rel_depth <- data_1eel$corrected_depth / data_1eel$max_depth_bathymetry
-plot(data_1eel$Date, data_1eel$rel_depth)
+plot(data_1eel$Date, data_1eel$rel_depth, col = rgb(red = 0.5, green = 0.5, blue = 0.5, alpha = 0.4))
 ```
 
 
@@ -251,7 +251,7 @@ ggplot(data_1eel, aes(x = datetime,
 ```
 
 ### Plot detail of relative depth
-```{r}
+```{r, fig.cap = "relative depth"}
 ggplot(data_1eel_10days, aes(x = datetime,
                                        y = rel_depth)) +
   geom_line() +
@@ -302,7 +302,7 @@ ggplot(data_1eel_10days, aes(x = datetime,
 ```{r}
 ggplot(data_1eel, aes(x = temperature,
                                  y = rel_depth)) +
-  geom_point() +
+  geom_point(alpha = 0.1) +
   theme_minimal() +
   ylab("Relative depth (m)") +
   xlab("Temperature (°C)") +
@@ -359,7 +359,7 @@ ggplot(data_1eel, aes(x = max_depth_bathymetry,
 ```{r}
 ggplot(data_1eel, aes(x = direction_x,
                                        y = rel_depth)) +
-  geom_point() +
+  geom_point(alpha = 0.1) +
   theme_minimal() +
   ylab("Relative depth (m)") +
   xlab("Eastward current velocity (m/s)") +
@@ -388,7 +388,7 @@ ggplot(data_1eel_10days, aes(x = direction_x,
 ```{r}
 ggplot(data_1eel, aes(x = direction_y,
                                    y = rel_depth)) +
-  geom_point() +
+  geom_point(alpha = 0.1) +
   theme_minimal() +
   ylab("Relative depth (m)") +
   xlab("Northward current velocity (m/s)") +
@@ -419,7 +419,7 @@ Note that there is not a big difference because the depth range between day and 
 ```{r}
 ggplot(data_1eel, aes(x = night_day,
                                    y = rel_depth)) +
-  geom_point() +
+  geom_point(alpha = 0.1) +
   theme_minimal() +
   ylab("Relative depth (m)") +
   xlab("Circadian phases") +
@@ -433,7 +433,7 @@ ggplot(data_1eel, aes(x = night_day,
 ```{r}
 ggplot(data_1eel, aes(x = 100*moon_fraction,
                                    y = rel_depth)) +
-  geom_point() +
+  geom_point(alpha = 0.2) +
   theme_minimal() +
   ylab("Relative depth (m)") +
   xlab("Illuminated moon phase (%)") +
@@ -460,7 +460,7 @@ ggplot(data_1eel_10days, aes(x = 100*moon_fraction,
 ```{r}
 ggplot(data_1eel, aes(x = sun_altitude,
                                    y = rel_depth)) +
-  geom_point() +
+  geom_point(alpha = 0.2) +
   theme_minimal() +
   ylab("Relative depth (m)") +
   xlab("Sun altitude (radians)") +
@@ -488,7 +488,7 @@ ggplot(data_1eel_10days, aes(x = sun_altitude,
 ```{r}
 ggplot(data_1eel, aes(x = sun_azimuth,
                                    y = rel_depth)) +
-  geom_point() +
+  geom_point(alpha = 0.2) +
   theme_minimal() +
   ylab("Relative depth (m)") +
   xlab("Sun azimuth (radians)") +
