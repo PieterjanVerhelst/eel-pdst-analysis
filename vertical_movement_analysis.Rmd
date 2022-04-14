@@ -477,7 +477,6 @@ ggplot(data_1eel_10days, aes(x = sun_altitude,
 ### Plot relative depth pattern over sun class i.e. sunset or sunrise
 
 ```{r}
-
 #plot(data_1eel$sun_altitude)
 data_1eel$sun_class <- NA
 for (i in 2:dim(data_1eel)[1]){
@@ -535,8 +534,8 @@ ggplot(data_1eel_10days, aes(x = sun_azimuth,
 ```
 
 
-## Centralise and normalise exploratory variables
-For model construction, the exploratory variables need to be cenralised and normalised by substracting the median of each value and dividing it by the interquantile range
+## Scale variables
+For model construction, the exploratory variables need to be scaled. Max value should be between 0.5 - 5. 
 
 ```{r}
 # direction_x
@@ -610,50 +609,43 @@ library(glmmTMB)
 
 ### Subset 5 eels for testing
 ```{r}
-subset <- filter(data, ID == "16031" |
+data_5eels <- filter(data, ID == "16031" |
                    ID == "17535" |
                    ID == "17536" |
                    ID == "15777" |
                    ID == "17510")
 
-subset$ID <- factor(subset$ID)
-unique(subset$ID)
+data_5eels$ID <- factor(data_5eels$ID)
+unique(data_5eels$ID)
 
 ```
 
 ### Remove data from eel 17535 when it was in the Atlantic Ocean
 For this study I am interested in the vertical movement behaviour on the contintental shelf. The vertical behaviour in oceanic conditions has already been described.
 ```{r}
-subset <- subset[!(subset$ID == "17535" & subset$datetime > '2020-01-11 00:00:00'),]
+data_5eels <- data_5eels[!(data_5eels$ID == "17535" & data_5eels$datetime > '2020-01-11 00:00:00'),]
 ```
 
 
 ### Depth data processing
 ```{r}
-plot(subset$corrected_depth)
-```
-```{r}
-subset <- filter(subset, corrected_depth < 0)
-```
-```{r}
-plot(subset$corrected_depth)
+plot(data_5eels$corrected_depth)
 ```
 
-```{r}
-subset$corrected_depth_abs <- abs(subset$corrected_depth)
-summary(subset$corrected_depth_abs)
-```
+
 
 ### Add daily max depth
 ```{r}
-subset2 <- subset %>%
+max_depth <- data_5eels %>%
   group_by(ID, Date) %>%
-  summarise(max_depth = max(corrected_depth_abs))
-subset <- left_join(subset, subset2, by = c("ID","Date"))
+  summarise(max_depth = min(corrected_depth))
+data_5eels <- left_join(data_5eels, max_depth, by = c("ID","Date"))
 ```
 
 
 ### Add daily bathymetry based on the trajectory files obtained from the geolocation models
+
+Note that I will not use this, but leave the code as is just in case.
 
 ```{r}
 # Link trajectory data (source trajectory data script)
@@ -699,12 +691,12 @@ tr_data <- filter(tr_data, ID == "16031" |
 
 tr_data$ID <- factor(tr_data$ID) # rerun 'factor()' so the number of levels is set accurately
 
-subset$Date <- as.Date(subset$Date)
-subset <- left_join(subset, tr_data, by = c('ID', 'Date'))
+data_5eels$Date <- as.Date(data_5eels$Date)
+data_5eels <- left_join(data_5eels, tr_data, by = c('ID', 'Date'))
 
 # Remove line with max depth bathymetry > 300 m --> remove location in deep sea
-subset$max_depth_bathymetry <- as.numeric(subset$max_depth_bathymetry)
-subset <- filter(subset, max_depth_bathymetry < 300)
+#data_5eels$max_depth_bathymetry <- as.numeric(data_5eels$max_depth_bathymetry)
+#data_5eels <- filter(data_5eels, max_depth_bathymetry >= -300)
 ```
 
 
@@ -712,56 +704,65 @@ Plot the daily depth range, the max depth and the max depth bathymetry. The latt
 
 ```{r}
 par(mfrow=c(3,1))
-plot(subset$Date, subset$corrected_depth_abs)
-plot(subset$Date, subset$max_depth)
-plot(subset$Date, subset$max_depth_bathymetry)
+plot(data_5eels$Date, data_5eels$corrected_depth)
+plot(data_5eels$Date, data_5eels$max_depth)
+plot(data_5eels$Date, data_5eels$max_depth_bathymetry)
 ```
 
 
 ### Calculate the relative depth
 ```{r}
-subset$rel_depth <- subset$corrected_depth_abs / subset$max_depth_bathymetry
-plot(subset$Date, subset$rel_depth)
+data_5eels$rel_depth <- data_5eels$corrected_depth / data_5eels$max_depth
+plot(data_5eels$Date, data_5eels$rel_depth)
 ```
 
-### Centralise and normalise exploratory variables
-For model construction, the exploratory variables need to be cenralised and normalised by substracting the median of each value and dividing it by the interquantile range
+### Create factor indicating if the sun is rising or setting
+
+
+```{r}
+
+#plot(data_5eels$sun_altitude)
+data_5eels$sun_class <- NA
+for (i in 2:dim(data_5eels)[1]){
+  if (data_5eels$sun_altitude[i] > data_5eels$sun_altitude[i-1]){
+    data_5eels$sun_class[i] = "rising"
+  } else{
+    data_5eels$sun_class[i] = "setting"
+  }}
+
+
+data_5eels$sun_class <- factor(data_5eels$sun_class)
+
+```
+
+
+
+
+
+
+## Scale variables
+For model construction, the exploratory variables need to be scaled. Max value should be between 0.5 - 5. 
+
 
 ```{r}
 # direction_x
-summary(subset$direction_x)
-iqr <- 0.280  - (-0.252)   #3rd QU - 1st Qu
-subset$direction_x_centre <- (subset$direction_x - median(subset$direction_x, na.rm = TRUE))/iqr
+summary(data_5eels$direction_x)
 
 # direction_y
-summary(subset$direction_y)
-iqr <- 0.209 - (-0.176)   #3rd QU - 1st Qu
-subset$direction_y_centre <- (subset$direction_y - median(subset$direction_y, na.rm = TRUE))/iqr
+summary(data_5eels$direction_y)
 
 # Temperature
-summary(subset$temperature)
-iqr <- 11.688  - (9.484)   #3rd QU - 1st Qu
-subset$temperature_centre <- (subset$temperature - median(subset$temperature))/iqr
+summary(data_5eels$temperature)
+data_5eels$temperature_scaled <- data_5eels$temperature / 10
 
 # Moon illumination
-summary(subset$moon_fraction)
-iqr <- 0.7872764   - (0.1450092)   #3rd QU - 1st Qu
-subset$moon_fraction_centre <- (subset$moon_fraction - median(subset$moon_fraction))/iqr
+summary(data_5eels$moon_fraction)
 
 # Sun altitude
-summary(subset$sun_altitude)
-iqr <- 0.1394    - (-0.7882)   #3rd QU - 1st Qu
-subset$sun_altitude_centre <- (subset$sun_altitude - median(subset$sun_altitude))/iqr
+summary(data_5eels$sun_altitude)
 
 # Sun azimuth
-summary(subset$sun_azimuth)
-iqr <- 1.313353  - (-1.306655)   #3rd QU - 1st Qu
-subset$sun_azimuth_centre <- (subset$sun_azimuth - median(subset$sun_azimuth))/iqr
-
-# Max depth bathymetry
-summary(subset$max_depth_bathymetry)
-iqr <-  101.87  - 32.81   #3rd QU - 1st Qu
-subset$max_depth_bathymetry_centre <- (subset$max_depth_bathymetry - median(subset$max_depth_bathymetry))/iqr
+summary(data_5eels$sun_azimuth)
 
 ```
 
