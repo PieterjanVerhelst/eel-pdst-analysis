@@ -541,38 +541,35 @@ For model construction, the exploratory variables need to be cenralised and norm
 ```{r}
 # direction_x
 summary(data_1eel$direction_x)
-iqr <- 0.312  - (-0.284 )   #3rd QU - 1st Qu
-data_1eel$direction_x_centre <- (data_1eel$direction_x - median(data_1eel$direction_x))/iqr
+#iqr <- 0.312  - (-0.284 )   #3rd QU - 1st Qu
+#data_1eel$direction_x_centre <- (data_1eel$direction_x - median(data_1eel$direction_x))/iqr
 
 # direction_y
-summary(subset$direction_y)
-iqr <- 0.199 - (-0.172)   #3rd QU - 1st Qu
-subset$direction_y_centre <- (subset$direction_y - median(subset$direction_y))/iqr
+summary(data_1eel$direction_y)
+#iqr <- 0.199 - (-0.172)   #3rd QU - 1st Qu
+#data_1eel$direction_y_centre <- (data_1eel$direction_y - median(data_1eel$direction_y))/iqr
 
 # Temperature
-summary(subset$temperature)
-iqr <- 10.688  - (9.266 )   #3rd QU - 1st Qu
-subset$temperature_centre <- (subset$temperature - median(subset$temperature))/iqr
+summary(data_1eel$temperature)
+#iqr <- 10.688  - (9.266 )   #3rd QU - 1st Qu
+#data_1eel$temperature_centre <- (data_1eel$temperature - median(data_1eel$temperature))/iqr
+data_1eel$temperature_scaled <- data_1eel$temperature / 10
 
 # Moon illumination
-summary(subset$moon_fraction)
-iqr <- 0.7966425   - (0.1311380)   #3rd QU - 1st Qu
-subset$moon_fraction_centre <- (subset$moon_fraction - median(subset$moon_fraction))/iqr
+summary(data_1eel$moon_fraction)
+#iqr <- 0.7966425   - (0.1311380)   #3rd QU - 1st Qu
+#data_1eel$moon_fraction_centre <- (data_1eel$moon_fraction - median(data_1eel$moon_fraction))/iqr
 
 # Sun altitude
-summary(subset$sun_altitude)
-iqr <- 0.1584   - (-0.7657)   #3rd QU - 1st Qu
-subset$sun_altitude_centre <- (subset$sun_altitude - median(subset$sun_altitude))/iqr
+summary(data_1eel$sun_altitude)
+#iqr <- 0.1584   - (-0.7657)   #3rd QU - 1st Qu
+#data_1eel$sun_altitude_centre <- (data_1eel$sun_altitude - median(data_1eel$sun_altitude))/iqr
 
 # Sun azimuth
-summary(subset$sun_azimuth)
-iqr <- 1.322311    - (-1.326227)   #3rd QU - 1st Qu
-subset$sun_azimuth_centre <- (subset$sun_azimuth - median(subset$sun_azimuth))/iqr
+summary(data_1eel$sun_azimuth)
+#iqr <- 1.322311    - (-1.326227)   #3rd QU - 1st Qu
+#data_1eel$sun_azimuth_centre <- (data_1eel$sun_azimuth - median(subset$sun_azimuth))/iqr
 
-# Max depth bathymetry
-summary(subset$max_depth_bathymetry)
-iqr <-  64.36  - 34.41   #3rd QU - 1st Qu
-subset$max_depth_bathymetry_centre <- (subset$max_depth_bathymetry - median(subset$max_depth_bathymetry))/iqr
 
 ```
 
