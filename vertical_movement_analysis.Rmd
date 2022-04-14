@@ -177,6 +177,7 @@ plot(data_1eel$Date, data_1eel$max_depth_bathymetry)
 
 
 ## Calculate the relative depth
+Eels are known to reside near the bottom. Therefore, it can be reasonably assumed that the daily max swimming depth corresponds with the max daily bathymetry. Hence, the relative depth is calculated as the swimming depth divided by the max depth of that day.
 ```{r, fig.cap = "Plot of the relative depth for 1 eel."}
 data_1eel$rel_depth <- data_1eel$corrected_depth / data_1eel$max_depth
 plot(data_1eel$Date, data_1eel$rel_depth, col = rgb(red = 0.5, green = 0.5, blue = 0.5, alpha = 0.4))
