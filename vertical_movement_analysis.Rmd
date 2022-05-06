@@ -863,11 +863,11 @@ data_5eels[c("start.event")][is.na(data_5eels[c("start.event")])] <- FALSE
 # Run gamm model with autocorrelation argument
 
 # Full model
-bam_model <- bam(rel_depth ~ direction_x +
-                   direction_y +
-                   moon_fraction +
-                   sun_altitude +
-                   sun_azimuth +
+bam_model <- bam(rel_depth ~ s(direction_x) +
+                   s(direction_y) +
+                   s(moon_fraction) +
+                   s(sun_altitude) +
+                   s(sun_azimuth) +
                    sun_class +
                    s(ID, bs="re"),
                  family = gaussian(), data = data_5eels, discrete = TRUE,
@@ -893,5 +893,10 @@ Show summary of the model
 summary(bam_model)
 ```
 
+Check the model
+```{r}
+par(mfrow = c(2, 2))
+gam.check(bam_model)
+```
 
 
