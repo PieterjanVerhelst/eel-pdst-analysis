@@ -23,7 +23,7 @@ To gain more insight in the vertical movement pattern, we want to analyse the ee
 +	**Sun altitude**					                      &rarr; Obtained from suncalc R-package
 +	**Sun azimuth**					                      &rarr; Obtained from suncalc R-package
 
-*Water currents are calculated as eastward and northward velocity vectors. Based on these two vectors, current speed and direction can be calculated. Note that the direction is circular data (range: -180° - 180°) which is not easily handled by linear models, hence, I used the orthogonal vectors instead.
+*Water currents are calculated as eastward and northward velocity vectors. 
 Since the eels took 2 routes, I would split up the analysis for eels taking the southern route and eels taking the northern route.
 
 
