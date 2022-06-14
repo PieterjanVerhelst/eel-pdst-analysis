@@ -1018,6 +1018,7 @@ abline(h = 0, lty = 2)
 plot(E1 ~ night_day, data = subset_1eel_2days_1, ylab = "Pearson residuals", xlab = "Day Night")
 hist(E1, xlab = "Pearson residuals", main = "")
 ```
+
 Check overdispersion
 ```{r}
 E1 <- resid(gam1, type = "pearson")
@@ -1055,6 +1056,7 @@ ggplot(subset_1eel_2days_2, aes(x = datetime, y = rel_depth)) +
         axis.title = element_text(size = 14)) +
   scale_x_datetime(date_breaks  = "1 day") 
 ```
+
 Apply GAM
 
 ```{r}
@@ -1076,6 +1078,7 @@ plot(gam1, select = 1, main = "Day")
 plot(gam1, select = 2, main = "Night")
 
 ```
+
 Check model performance.
 ```{r}
 par(mfrow = c(2, 2))
@@ -1166,6 +1169,7 @@ plot(gam1, select = 1, main = "Day")
 plot(gam1, select = 2, main = "Night")
 
 ```
+
 Check model performance. There seems to be a trend in de residuals.
 ```{r}
 par(mfrow = c(2, 2))
@@ -1196,6 +1200,7 @@ abline(h = 0, lty = 2)
 plot(E1 ~ night_day, data = subset_1eel_2days_6, ylab = "Pearson residuals", xlab = "Day Night")
 hist(E1, xlab = "Pearson residuals", main = "")
 ```
+
 Check overdispersion
 ```{r}
 E1 <- resid(gam1, type = "pearson")
