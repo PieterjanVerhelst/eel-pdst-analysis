@@ -1008,6 +1008,15 @@ plot <- ggplot(subset_1eel_2days_1, aes(x=numericdate, y=rel_depth)) +
 plot
 ```
 
+
+Plot of the residuals vs covariable 'direction_x'
+```{r}
+plot <- ggplot(subset_1eel_2days_1, aes(x=direction_x, y=residuals)) +
+  geom_point(alpha = 0.6) 
+plot
+```
+
+
 ```{r}
 E1 <- resid(gam1, type = "pearson")
 F1 <- fitted(gam1, type = "response")
@@ -1098,6 +1107,14 @@ plot <- ggplot(subset_1eel_2days_2, aes(x=numericdate, y=rel_depth)) +
 plot
 ```
 
+Plot of the residuals vs covariable 'direction_x'
+```{r}
+plot <- ggplot(subset_1eel_2days_2, aes(x=direction_x, y=residuals)) +
+  geom_point(alpha = 0.6) 
+plot
+```
+
+
 ```{r}
 E1 <- resid(gam1, type = "pearson")
 F1 <- fitted(gam1, type = "response")
@@ -1121,10 +1138,10 @@ overdispersion
 
 # Subset six days of data toward the end of the track when the vertical movement becomes more pronounced.
 ```{r}
-subset_1eel_2days_6 <- filter(subset_1eel, datetime > '2019-02-04 00:00:00',
+subset_1eel_6days <- filter(subset_1eel, datetime > '2019-02-04 00:00:00',
                               datetime < '2019-02-10 00:00:00')
 
-ggplot(subset_1eel_2days_6, aes(x = datetime, y = corrected_depth)) +
+ggplot(subset_1eel_6days, aes(x = datetime, y = corrected_depth)) +
   geom_line() +
   theme_minimal() +
   ylab("Depth (m)") +
@@ -1135,7 +1152,7 @@ ggplot(subset_1eel_2days_6, aes(x = datetime, y = corrected_depth)) +
         axis.title = element_text(size = 14)) +
   scale_x_datetime(date_breaks  = "1 day") 
 
-ggplot(subset_1eel_2days_6, aes(x = datetime, y = rel_depth)) +
+ggplot(subset_1eel_6days, aes(x = datetime, y = rel_depth)) +
   geom_line() +
   theme_minimal() +
   ylab("Depth (m)") +
@@ -1151,10 +1168,10 @@ Apply GAM
 
 Note that the R² adj reduced by more than half (33%) by addding 4 more days of data.
 ```{r}
-cor(subset_1eel_2days_6$direction_x, subset_1eel_2days_6$direction_y)
+cor(subset_1eel_6days$direction_x, subset_1eel_6days$direction_y)
 
-gam1 <- gam(rel_depth ~ s(direction_x, by = night_day) + night_day, data = subset_1eel_2days_6)
-gam2 <- gam(rel_depth ~ s(direction_x, by = night_day) + night_day, data = subset_1eel_2days_6, family = binomial(link = "logit"))
+gam1 <- gam(rel_depth ~ s(direction_x, by = night_day) + night_day, data = subset_1eel_6days)
+gam2 <- gam(rel_depth ~ s(direction_x, by = night_day) + night_day, data = subset_1eel_6days, family = binomial(link = "logit"))
 
 AIC(gam1, gam2)
 
@@ -1179,32 +1196,40 @@ gam.check(gam1)
 
 The model fit is reduced substantially.
 ```{r}
-subset_1eel_2days_6$residuals <- residuals(gam1, type="response")
-subset_1eel_2days_6$predicted <- predict.bam(gam1)
-subset_1eel_2days_6$fitted <- fitted(gam1, type="response")
+subset_1eel_6days$residuals <- residuals(gam1, type="response")
+subset_1eel_6days$predicted <- predict.bam(gam1)
+subset_1eel_6days$fitted <- fitted(gam1, type="response")
 
 
-plot <- ggplot(subset_1eel_2days_6, aes(x=numericdate, y=rel_depth)) +
+plot <- ggplot(subset_1eel_6days, aes(x=numericdate, y=rel_depth)) +
   geom_line(alpha = 0.2) +
-  geom_line(subset_1eel_2days_6, mapping = aes(x=numericdate, y=fitted), colour = "red") 
+  geom_line(subset_1eel_6days, mapping = aes(x=numericdate, y=fitted), colour = "red") 
 plot
 ```
+
+Plot of the residuals vs covariable 'direction_x'
+```{r}
+plot <- ggplot(subset_1eel_6days, aes(x=direction_x, y=residuals)) +
+  geom_point(alpha = 0.6) 
+plot
+```
+
 
 ```{r}
 E1 <- resid(gam1, type = "pearson")
 F1 <- fitted(gam1, type = "response")
 par(mfrow = c(2,2))
 plot(x = F1, y = E1, xlab = "Fitted values", ylab = "Pearson residuals")
-plot(x = subset_1eel_2days_6$direction_x, y = E1, xlab = "Direction x", ylab = "Pearson residuals")
+plot(x = subset_1eel_6days$direction_x, y = E1, xlab = "Direction x", ylab = "Pearson residuals")
 abline(h = 0, lty = 2)
-plot(E1 ~ night_day, data = subset_1eel_2days_6, ylab = "Pearson residuals", xlab = "Day Night")
+plot(E1 ~ night_day, data = subset_1eel_6days, ylab = "Pearson residuals", xlab = "Day Night")
 hist(E1, xlab = "Pearson residuals", main = "")
 ```
 
 Check overdispersion
 ```{r}
 E1 <- resid(gam1, type = "pearson")
-N <- nrow(subset_1eel_2days_2)
+N <- nrow(subset_1eel_6days)
 p <- length(coef(gam1))
 overdispersion <- sum(E1^2)/(N-p)
 overdispersion
