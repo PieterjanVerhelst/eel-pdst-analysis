@@ -900,3 +900,309 @@ gam.check(bam_model)
 ```
 
 
+
+
+
+# GAM on data of 1 eel
+This document describes the GAM procedure following Zuur et al. (2012) 'Beginner's Guide to Generalized Additive Models with R'. The analysis is applied on a single eel (ID A16031) and a few days for simplicity. Spoiler alert: it shows that the model runs very good on a few days but is off when the amount of data (i.e. days of data) is increased.
+
+# Subset on eel A16031
+```{r}
+subset_1eel <- filter(data_5eels, ID == "16031")
+```
+
+Plot the depth data. Note that the depth sensor data drifts. A linear regression was applied to correct for this drift, hence the variable name 'corrected_depth'. Also, the relative depth might be a better response variable and was calculated as the corrected_depth divided by the max depth for that day. It is assumed that the max depth resembles the sea bottom.
+```{r}
+ggplot(subset_1eel, aes(x = datetime, y = corrected_depth)) +
+  geom_line() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  = "5 days") 
+
+ggplot(subset_1eel, aes(x = datetime, y = rel_depth)) +
+  geom_line() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  = "5 days") 
+
+```
+
+# Subset two days of data in the beginning of the track, around half December
+```{r}
+subset_1eel_2days_1 <- filter(subset_1eel, datetime > '2018-12-12 00:00:00',
+                              datetime < '2018-12-14 00:00:00')
+
+ggplot(subset_1eel_2days_1, aes(x = datetime, y = corrected_depth)) +
+  geom_line() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  = "1 day") 
+
+ggplot(subset_1eel_2days_1, aes(x = datetime, y = rel_depth)) +
+  geom_line() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  = "1 day") 
+```
+
+Apply the GAM. One with a Gaussian distribution and one with a binomial distribution (since the data is between 0 and 1). 
+The explanatory variables I am interested in are the current variables (obtained via CEFAS model) and the factor with circadian phases 'day' or 'night'. The current variables are split in two vectors giving the current speed in direction 'x' and 'y'. Before the variables are fed into the GAM, a correlation analysis is applied between direction_x and direction_y. When a strong correlation (> |0.6|) is observed, variable 'direction_x' is chosen.
+
+Despite the values of the response variable are between 0 and 1, indicating a binomial distribution, the GAM with a Gaussian distribution results in the best fit and lowest AIC. Further, note that the edf in the model output illustrate non-linear relationships.
+
+```{r}
+cor(subset_1eel_2days_1$direction_x, subset_1eel_2days_1$direction_y)
+
+gam1 <- gam(rel_depth ~ s(direction_x, by = night_day) + night_day, data = subset_1eel_2days_1)
+gam2 <- gam(rel_depth ~ s(direction_x, by = night_day) + night_day, data = subset_1eel_2days_1, family = binomial(link = "logit"))
+
+AIC(gam1, gam2)
+
+summary(gam1)
+
+```
+
+In a next step, the smoothers are plotted for the best model (gam1)
+```{r}
+par(mfrow = c(2,1))
+plot(gam1, select = 1, main = "Day")
+plot(gam1, select = 2, main = "Night")
+
+```
+Check model performance.
+```{r}
+par(mfrow = c(2, 2))
+gam.check(gam1)
+
+```
+
+```{r}
+subset_1eel_2days_1$residuals <- residuals(gam1, type="response")
+subset_1eel_2days_1$predicted <- predict.bam(gam1)
+subset_1eel_2days_1$fitted <- fitted(gam1, type="response")
+
+
+plot <- ggplot(subset_1eel_2days_1, aes(x=numericdate, y=rel_depth)) +
+  geom_line(alpha = 0.2) +
+  geom_line(subset_1eel_2days_1, mapping = aes(x=numericdate, y=fitted), colour = "red") 
+plot
+```
+
+```{r}
+E1 <- resid(gam1, type = "pearson")
+F1 <- fitted(gam1, type = "response")
+par(mfrow = c(2,2))
+plot(x = F1, y = E1, xlab = "Fitted values", ylab = "Pearson residuals")
+plot(x = subset_1eel_2days_1$direction_x, y = E1, xlab = "Direction x", ylab = "Pearson residuals")
+abline(h = 0, lty = 2)
+plot(E1 ~ night_day, data = subset_1eel_2days_1, ylab = "Pearson residuals", xlab = "Day Night")
+hist(E1, xlab = "Pearson residuals", main = "")
+```
+Check overdispersion
+```{r}
+E1 <- resid(gam1, type = "pearson")
+N <- nrow(subset_1eel_2days_1)
+p <- length(coef(gam1))
+overdispersion <- sum(E1^2)/(N-p)
+overdispersion
+```
+
+
+# Subset two days of data toward the end of the track when the vertical movement becomes more pronounced.
+```{r}
+subset_1eel_2days_2 <- filter(subset_1eel, datetime > '2019-02-04 00:00:00',
+                              datetime < '2019-02-06 00:00:00')
+
+ggplot(subset_1eel_2days_2, aes(x = datetime, y = corrected_depth)) +
+  geom_line() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  = "1 day") 
+
+ggplot(subset_1eel_2days_2, aes(x = datetime, y = rel_depth)) +
+  geom_line() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  = "1 day") 
+```
+Apply GAM
+
+```{r}
+cor(subset_1eel_2days_2$direction_x, subset_1eel_2days_2$direction_y)
+
+gam1 <- gam(rel_depth ~ s(direction_x, by = night_day) + night_day, data = subset_1eel_2days_2)
+gam2 <- gam(rel_depth ~ s(direction_x, by = night_day) + night_day, data = subset_1eel_2days_2, family = binomial(link = "logit"))
+
+AIC(gam1, gam2)
+
+summary(gam1)
+
+```
+
+In a next step, the smoothers are plotted for the best model (gam1)
+```{r}
+par(mfrow = c(2,1))
+plot(gam1, select = 1, main = "Day")
+plot(gam1, select = 2, main = "Night")
+
+```
+Check model performance.
+```{r}
+par(mfrow = c(2, 2))
+gam.check(gam1)
+
+```
+
+```{r}
+subset_1eel_2days_2$residuals <- residuals(gam1, type="response")
+subset_1eel_2days_2$predicted <- predict.bam(gam1)
+subset_1eel_2days_2$fitted <- fitted(gam1, type="response")
+
+
+plot <- ggplot(subset_1eel_2days_2, aes(x=numericdate, y=rel_depth)) +
+  geom_line(alpha = 0.2) +
+  geom_line(subset_1eel_2days_2, mapping = aes(x=numericdate, y=fitted), colour = "red") 
+plot
+```
+
+```{r}
+E1 <- resid(gam1, type = "pearson")
+F1 <- fitted(gam1, type = "response")
+par(mfrow = c(2,2))
+plot(x = F1, y = E1, xlab = "Fitted values", ylab = "Pearson residuals")
+plot(x = subset_1eel_2days_2$direction_x, y = E1, xlab = "Direction x", ylab = "Pearson residuals")
+abline(h = 0, lty = 2)
+plot(E1 ~ night_day, data = subset_1eel_2days_2, ylab = "Pearson residuals", xlab = "Day Night")
+hist(E1, xlab = "Pearson residuals", main = "")
+```
+
+Check overdispersion
+```{r}
+E1 <- resid(gam1, type = "pearson")
+N <- nrow(subset_1eel_2days_2)
+p <- length(coef(gam1))
+overdispersion <- sum(E1^2)/(N-p)
+overdispersion
+```
+
+
+# Subset six days of data toward the end of the track when the vertical movement becomes more pronounced.
+```{r}
+subset_1eel_2days_6 <- filter(subset_1eel, datetime > '2019-02-04 00:00:00',
+                              datetime < '2019-02-10 00:00:00')
+
+ggplot(subset_1eel_2days_6, aes(x = datetime, y = corrected_depth)) +
+  geom_line() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  = "1 day") 
+
+ggplot(subset_1eel_2days_6, aes(x = datetime, y = rel_depth)) +
+  geom_line() +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  = "1 day") 
+```
+
+Apply GAM
+
+Note that the R² adj reduced by more than half (33%) by addding 4 more days of data.
+```{r}
+cor(subset_1eel_2days_6$direction_x, subset_1eel_2days_6$direction_y)
+
+gam1 <- gam(rel_depth ~ s(direction_x, by = night_day) + night_day, data = subset_1eel_2days_6)
+gam2 <- gam(rel_depth ~ s(direction_x, by = night_day) + night_day, data = subset_1eel_2days_6, family = binomial(link = "logit"))
+
+AIC(gam1, gam2)
+
+summary(gam1)
+
+```
+
+In a next step, the smoothers are plotted for the best model (gam1)
+```{r}
+par(mfrow = c(2,1))
+plot(gam1, select = 1, main = "Day")
+plot(gam1, select = 2, main = "Night")
+
+```
+Check model performance. There seems to be a trend in de residuals.
+```{r}
+par(mfrow = c(2, 2))
+gam.check(gam1)
+
+```
+
+The model fit is reduced substantially.
+```{r}
+subset_1eel_2days_6$residuals <- residuals(gam1, type="response")
+subset_1eel_2days_6$predicted <- predict.bam(gam1)
+subset_1eel_2days_6$fitted <- fitted(gam1, type="response")
+
+
+plot <- ggplot(subset_1eel_2days_6, aes(x=numericdate, y=rel_depth)) +
+  geom_line(alpha = 0.2) +
+  geom_line(subset_1eel_2days_6, mapping = aes(x=numericdate, y=fitted), colour = "red") 
+plot
+```
+
+```{r}
+E1 <- resid(gam1, type = "pearson")
+F1 <- fitted(gam1, type = "response")
+par(mfrow = c(2,2))
+plot(x = F1, y = E1, xlab = "Fitted values", ylab = "Pearson residuals")
+plot(x = subset_1eel_2days_6$direction_x, y = E1, xlab = "Direction x", ylab = "Pearson residuals")
+abline(h = 0, lty = 2)
+plot(E1 ~ night_day, data = subset_1eel_2days_6, ylab = "Pearson residuals", xlab = "Day Night")
+hist(E1, xlab = "Pearson residuals", main = "")
+```
+Check overdispersion
+```{r}
+E1 <- resid(gam1, type = "pearson")
+N <- nrow(subset_1eel_2days_2)
+p <- length(coef(gam1))
+overdispersion <- sum(E1^2)/(N-p)
+overdispersion
+```
+
+
