@@ -177,10 +177,12 @@ tidal <- filter(tidal, ID == "15805" |
 tidal$ID <- factor(tidal$ID) 
 
 # 3. Link tidal data to dataset ####
-# Set hourly resolution
-data$datehour <- lubridate::floor_date(data$datetime, "hour")
+# Set hourly resolution in tracking dataset
+#data$datehour <- lubridate::floor_date(data$datetime, "hour")
+data$datehour <- format(round(data$datetime, units="hours"), format="%Y-%m-%d %H:%M:%S")
+data$datehour <- ymd_hms(data$datehour)
 
-# For the tidal dataset, use round instead of floor because otherwise duplicates in datehour arise
+# Set hourly resolution in tidal dataset
 #tidal$datehour <- lubridate::floor_date(tidal$datetime, "hour")
 tidal$datehour <- format(round(tidal$datetime, units="hours"), format="%Y-%m-%d %H:%M:%S")
 tidal$datehour <- ymd_hms(tidal$datehour)
