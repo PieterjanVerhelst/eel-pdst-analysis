@@ -91,7 +91,7 @@ data_min_max <- read_csv("./data/interim/data_depth_diff.csv",
 # Create subsets of several days
 subset <- filter(data_min_max,
                  ID == "16031",
-                 datetime >= "2019-02-04 00:00:00", datetime <= "2019-02-06 00:00:00")
+                 datetime >= "2019-01-05 00:00:00", datetime <= "2019-01-08 00:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
@@ -108,10 +108,9 @@ fig_depth_diff_circadian_tidal <- ggplot(data = subset, aes(x = datetime, y = de
                           ymin=-Inf,
                           ymax=+Inf), fill = "grey", alpha=0.5) +
   geom_line(binaxis='x', size=1.0, binwidth = 1) +
-  geom_line(data = subset, aes(x = datetime, y = 100*U), size = 1.0, alpha = 0.5, colour = "purple") +
+  #geom_line(data = subset, aes(x = datetime, y = 100*U), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
-  #scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
-  scale_y_continuous(sec.axis = sec_axis(~./100, name = "Eastward velocity (m/s)")) +
+  #scale_y_continuous(sec.axis = sec_axis(~./100, name = "Eastward velocity (m/s)")) +
   theme_minimal() +
   ylab("Depth difference (m)") +
   xlab("Date") +
@@ -119,7 +118,7 @@ fig_depth_diff_circadian_tidal <- ggplot(data = subset, aes(x = datetime, y = de
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   theme(axis.text = element_text(size = 12),
         axis.title = element_text(size = 14)) +
-  scale_x_datetime(date_breaks  ="1 hour") +
+  scale_x_datetime(date_breaks  ="1 day") +
   #geom_vline(xintercept=ymd_hms(release), colour="blue") + # Release date and time
   geom_vline(xintercept=gnu, color = "red", size = 1) #+
   #geom_hline(yintercept=0, linetype="dashed", color = "blue", size = 1) +
