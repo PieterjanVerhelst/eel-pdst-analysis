@@ -57,7 +57,7 @@ fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
                           ymin=-Inf,
                           ymax=+Inf), fill = "grey", alpha=0.5) +
   geom_line(size=1.0, binwidth = 1, colour = "black") +
-  geom_line(data = subset, aes(x = datetime, y = direction/2), size = 2.0, alpha = 0.5, colour = "purple") +
+  geom_line(data = subset, aes(x = datetime, y = direction/2), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Tidal direction (°)")) +
   theme_minimal() +
@@ -108,10 +108,10 @@ fig_depth_diff_circadian_tidal <- ggplot(data = subset, aes(x = datetime, y = de
                           ymin=-Inf,
                           ymax=+Inf), fill = "grey", alpha=0.5) +
   geom_line(binaxis='x', size=1.0, binwidth = 1) +
-  #geom_line(data = subset, aes(x = datetime, y = direction/4), size = 2.0, alpha = 0.5, colour = "purple") +
+  geom_line(data = subset, aes(x = datetime, y = 100*U), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   #scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Pressure (m)")) +
-  #scale_y_continuous(sec.axis = sec_axis(~.*4, name = "Tidal direction (°)")) +
+  scale_y_continuous(sec.axis = sec_axis(~./100, name = "Eastward velocity (m/s)")) +
   theme_minimal() +
   ylab("Depth difference (m)") +
   xlab("Date") +
