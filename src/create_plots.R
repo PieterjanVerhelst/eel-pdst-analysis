@@ -39,7 +39,7 @@ data <-
 # Create subset of several days for plot
 subset <- filter(data,
                  ID == "16031",
-                 datetime >= "2019-02-04 00:00:00", datetime <= "2019-02-06 00:00:00")
+                 datetime >= "2019-02-04 00:00:00", datetime <= "2019-02-08 00:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
@@ -91,14 +91,14 @@ data_min_max <- read_csv("./data/interim/data_depth_diff.csv",
 # Create subsets of several days
 subset <- filter(data_min_max,
                  ID == "16031",
-                 datetime >= "2019-01-05 00:00:00", datetime <= "2019-01-08 00:00:00")
+                 datetime >= "2019-02-04 00:00:00", datetime <= "2019-02-08 00:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
 class(lubridate::floor_date(subset$datetime[1], "day"))
 
 # Create plot
-fig_depth_diff_circadian_tidal <- ggplot(data = subset, aes(x = datetime, y = depth_change), size = 1.0, alpha = 0.5, colour = "black") +
+fig_depth_diff_circadian_tidal <- ggplot(data = subset, aes(x = datetime, y = diving_speed), size = 1.0, alpha = 0.5, colour = "black") +
   geom_rect(data = subset %>% 
               filter(night_day == "night") %>%
               distinct(sunset, sunrise, night_day),
