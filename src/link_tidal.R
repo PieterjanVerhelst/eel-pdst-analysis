@@ -177,6 +177,15 @@ tidal <- filter(tidal, ID == "15805" |
 tidal$ID <- factor(tidal$ID) 
 
 # 3. Link tidal data to dataset ####
+data2 <- data_16031 %>%
+  rowwise() %>%
+  dplyr::mutate(diffs_tidal = list(abs(datetime - tidal_16031$datetime))) %>%
+  dplyr::mutate(tidal_datetime = tidal_16031$datetime[which(diffs_tidal == min(diffs_tidal, na.rm = TRUE))])
+
+
+
+
+
 # Set hourly resolution in tracking dataset
 #data$datehour <- lubridate::floor_date(data$datetime, "hour")
 data$datehour <- format(round(data$datetime, units="hours"), format="%Y-%m-%d %H:%M:%S")
