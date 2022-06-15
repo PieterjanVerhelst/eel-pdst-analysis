@@ -55,8 +55,12 @@ data_min_max <-
 data_min_max <-
   data_min_max %>%
   group_by(ID) %>%
-  mutate(depth_change = abs(corrected_depth - lag(corrected_depth))) %>%
+  mutate(depth_change = abs(corrected_depth - lag(corrected_depth)),
+         diving_time = numericdate - lag(numericdate)) %>%
   ungroup()
+
+data_min_max$diving_speed <- data_min_max$depth_change/data_min_max$diving_time
+
 
 # Remove depth changes below 1 meter
 #data_min_max_1m <-
