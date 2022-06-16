@@ -177,28 +177,75 @@ tidal <- filter(tidal, ID == "15805" |
 tidal$ID <- factor(tidal$ID) 
 
 # 3. Link tidal data to dataset ####
-data2 <- data %>%
-  rowwise() %>%
-  dplyr::mutate(diffs_tidal = list(abs(datetime - tidal$datetime))) %>%
-  dplyr::mutate(tidal_datetime = tidal$datetime[which(diffs_tidal == min(diffs_tidal, na.rm = TRUE))][1])
+# When running the code on the complete dataset, R runs stuck. Hence, run the code on subsets and bind them together
+unique(data$ID)
+data_ind <- filter(data, ID == "17499_2")
+tidal_ind <- filter(tidal, ID == "17499_2")
 
+data17499_2 <- data_ind %>%
+  rowwise() %>%
+  dplyr::mutate(diffs_tidal = list(abs(datetime - tidal_ind$datetime))) %>%
+  dplyr::mutate(tidal_datetime = tidal_ind$datetime[which(diffs_tidal == min(diffs_tidal, na.rm = TRUE))][1])
+
+data <- do.call("rbind", list(data15805,
+                               data15730,
+                               data15757,
+                               data15700,
+                               data15714,
+                               data15706,
+                               data16031,
+                               data15777,
+                               data15981,
+                               data17443,
+                               data17499,
+                               data17492,
+                               data17510,
+                               data17526,
+                               data17534,
+                               data17508,
+                               data17538,
+                               data17521,
+                               data17536,
+                               data17522,
+                               data17513,
+                               data17535,
+                               data15730_2,
+                               data15700_2,
+                               data15789,
+                               data17537,
+                               data17658,
+                               data17653,
+                               data17646,
+                               data17648,
+                               data17663,
+                               data17642,
+                               data17634,
+                               data17525_2,
+                               data17635,
+                               data17638,
+                               data17547,
+                               data17492_2,
+                               data17487,
+                               data17518_2,
+                               data17513_2,
+                               data17499_2))
 
 
 # Set hourly resolution in tracking dataset
 #data$datehour <- lubridate::floor_date(data$datetime, "hour")
-data$datehour <- format(round(data$datetime, units="hours"), format="%Y-%m-%d %H:%M:%S")
-data$datehour <- ymd_hms(data$datehour)
+#data$datehour <- format(round(data$datetime, units="hours"), format="%Y-%m-%d %H:%M:%S")
+#data$datehour <- ymd_hms(data$datehour)
 
 # Set hourly resolution in tidal dataset
 #tidal$datehour <- lubridate::floor_date(tidal$datetime, "hour")
-tidal$datehour <- format(round(tidal$datetime, units="hours"), format="%Y-%m-%d %H:%M:%S")
-tidal$datehour <- ymd_hms(tidal$datehour)
-
+#tidal$datehour <- format(round(tidal$datetime, units="hours"), format="%Y-%m-%d %H:%M:%S")
+#tidal$datehour <- ymd_hms(tidal$datehour)
 
 # Remove double dates per eel (ID) from tidal dataset
-#tidal <- tidal[!duplicated(tidal[c('ID','datehour')]),] 
+tidal <- rename(tidal, tidal_datetime = datetime)
+tidal <- tidal[!duplicated(tidal[c('ID','tidal_datetime')]),] 
 tidal <- tidal %>%     # Add ID number to duplicate dates
-  group_by(ID, datehour) %>%
+  group_by(ID, tidal_datetime) %>%
   add_tally()
 
 duplicates <- filter(tidal, n == 2)   # Filter duplicate dates
@@ -219,14 +266,12 @@ tidal <- rbind(tidal, duplicates)
 
 
 # Merge tracking dataset with tidal dataset
-data_tidal <- left_join(data, tidal, by = c('ID', 'datehour'))
+data_tidal <- left_join(data, tidal, by = c('ID', 'tidal_datetime'))
 
 # Process dataset
-data_tidal <- rename(data_tidal, datetime = datetime.x)
-data_tidal$datetime.y <- NULL
 data_tidal$date <- NULL
 data_tidal$time <- NULL
-
+data_tidal$diffs_tidal <- NULL
 
 # 4. write csv ####
 write.csv(data_tidal, "./data/interim/data_circadian_tidal_5min.csv")
