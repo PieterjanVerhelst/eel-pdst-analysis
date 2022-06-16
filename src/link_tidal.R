@@ -177,12 +177,10 @@ tidal <- filter(tidal, ID == "15805" |
 tidal$ID <- factor(tidal$ID) 
 
 # 3. Link tidal data to dataset ####
-data2 <- data_16031 %>%
+data2 <- data %>%
   rowwise() %>%
-  dplyr::mutate(diffs_tidal = list(abs(datetime - tidal_16031$datetime))) %>%
-  dplyr::mutate(tidal_datetime = tidal_16031$datetime[which(diffs_tidal == min(diffs_tidal, na.rm = TRUE))])
-
-
+  dplyr::mutate(diffs_tidal = list(abs(datetime - tidal$datetime))) %>%
+  dplyr::mutate(tidal_datetime = tidal$datetime[which(diffs_tidal == min(diffs_tidal, na.rm = TRUE))][1])
 
 
 
