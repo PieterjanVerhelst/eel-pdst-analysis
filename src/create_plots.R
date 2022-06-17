@@ -98,7 +98,7 @@ gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= 
 class(lubridate::floor_date(subset$datetime[1], "day"))
 
 # Create plot
-fig_depth_diff_circadian_tidal <- ggplot(data = subset, aes(x = datetime, y = diving_speed), size = 1.0, alpha = 0.5, colour = "black") +
+fig_depth_diff_circadian_tidal <- ggplot(data = subset, aes(x = datetime, y = depth_change), size = 1.0, alpha = 0.5, colour = "black") +
   geom_rect(data = subset %>% 
               filter(night_day == "night") %>%
               distinct(sunset, sunrise, night_day),
@@ -108,9 +108,9 @@ fig_depth_diff_circadian_tidal <- ggplot(data = subset, aes(x = datetime, y = di
                           ymin=-Inf,
                           ymax=+Inf), fill = "grey", alpha=0.5) +
   geom_line(binaxis='x', size=1.0, binwidth = 1) +
-  #geom_line(data = subset, aes(x = datetime, y = 100*U), size = 1.0, alpha = 0.5, colour = "purple") +
-  #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
-  #scale_y_continuous(sec.axis = sec_axis(~./100, name = "Eastward velocity (m/s)")) +
+  geom_line(data = subset, aes(x = datetime, y = 100*U), size = 1.0, alpha = 0.5, colour = "purple") +
+  scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
+  scale_y_continuous(sec.axis = sec_axis(~./100, name = "Eastward velocity (m/s)")) +
   theme_minimal() +
   ylab("Depth difference (m)") +
   xlab("Date") +
