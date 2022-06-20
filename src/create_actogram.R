@@ -44,6 +44,12 @@ data_1eel$numericdatehour <- as.numeric(data_1eel$datehour)
 data_1eel$day_number <- gsub('.{5}$', '', data_1eel$numericdatehour)
 data_1eel$day_number <- as.numeric(data_1eel$day_number)
 
+data_1eel2 <- data_1eel
+data_1eel2 <- filter(data_1eel2, datehour > "2018-12-10 00:00:00")
+data_1eel2$hour <- 24+(data_1eel2$hour)
+data_1eel2$day_number <- data_1eel2$day_number -1
+
+data_1eel <- rbind(data_1eel, data_1eel2)
 
 a1 = ggplot(data_1eel, aes(x=as.factor(hour), y=day_number, fill = corrected_depth))+ # where time is hours of the day (so, 0 to 24)
   geom_tile()+
