@@ -88,6 +88,6 @@ R Markdown files and forthcoming HTML files with code and output.
 	+ Generate `data_hourly_migrations.csv` in `interim` folder
 16. create_plots.R: Create plots for data exploration
 17. visualise_tracking_data.R: Visualise tracking data as animated gif using `moveVis` R-package. The output is stored in `data\output\`.
-
+18. create_actogram.R: Create an actogram to visualise the activity (i.e. vertical movement behaviour) of the eels
 
 
