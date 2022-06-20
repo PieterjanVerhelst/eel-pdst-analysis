@@ -57,9 +57,9 @@ fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
                           ymin=-Inf,
                           ymax=+Inf), fill = "grey", alpha=0.5) +
   geom_line(size=1.0, binwidth = 1, colour = "black") +
-  geom_line(data = subset, aes(x = datetime, y = direction/2), size = 1.0, alpha = 0.5, colour = "purple") +
+  geom_line(data = subset, aes(x = datetime, y = U*100), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
-  scale_y_continuous(sec.axis = sec_axis(~.*2, name = "Tidal direction (°)")) +
+  scale_y_continuous(sec.axis = sec_axis(~./100, name = "Eastward velocity (m/s)")) +
   theme_minimal() +
   ylab("Depth (m)") +
   xlab("Date") +
@@ -69,10 +69,10 @@ fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
         axis.title = element_text(size = 14)) +
   scale_x_datetime(date_breaks  ="1 day") +
   #geom_vline(xintercept=ymd_hms(release), colour="blue") + # Release date and time
-  geom_vline(xintercept=gnu, color = "red", size = 1) +
-  geom_hline(yintercept=0, linetype="dashed", color = "blue", size = 1) +
-  geom_hline(yintercept=90, linetype="dashed", color = "green", size = 1) +
-  geom_hline(yintercept=-90, linetype="dashed", color = "green", size = 1)
+  geom_vline(xintercept=gnu, color = "red", size = 1) #+
+  #geom_hline(yintercept=0, linetype="dashed", color = "blue", size = 1) +
+  #geom_hline(yintercept=90, linetype="dashed", color = "green", size = 1) +
+  #geom_hline(yintercept=-90, linetype="dashed", color = "green", size = 1)
 fig_circadian_tidal
 
 
