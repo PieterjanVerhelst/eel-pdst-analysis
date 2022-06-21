@@ -64,7 +64,7 @@ a1 <- ggplot(data_1eel, aes(x=as.factor(hour), y=day_number, fill = corrected_de
   scale_fill_viridis(discrete=FALSE, name = 'Frequency of activity', option = 'viridis')+
   ylab('day of year')+
   xlab('hour of day')+
-  ylim(17870, 17950) +
+  ylim(17870, 17940) +
   theme_bw()
 a1
 
