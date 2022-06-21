@@ -48,6 +48,7 @@ data_1eel2 <- data_1eel
 data_1eel2 <- filter(data_1eel2, datehour > "2018-12-10 00:00:00")
 data_1eel2$hour <- 24+(data_1eel2$hour)
 data_1eel2$day_number <- data_1eel2$day_number -1
+data_1eel2 <- filter(data_1eel2, day_number != "15499")
 
 data_1eel <- rbind(data_1eel, data_1eel2)
 
