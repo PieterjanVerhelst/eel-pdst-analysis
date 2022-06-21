@@ -6,6 +6,9 @@ require(lubridate)
 require(ggpubr)
 require(viridis)
 
+
+# 1. Create actogram based on depth data ####
+
 # Load data
 data <- read_csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv",
                  na = "", 
@@ -43,7 +46,7 @@ data_1eel$datehour <- lubridate::floor_date(data_1eel$datetime, "hour")
 data_1eel$numericdatehour <- as.numeric(data_1eel$datehour)              
 data_1eel$day_number <- as.numeric(data_1eel$Date)
 
-
+# Create duplicate for double plot actogram
 data_1eel2 <- data_1eel
 data_1eel2 <- filter(data_1eel2, datehour > "2018-12-10 00:00:00")
 data_1eel2$hour <- 24+(data_1eel2$hour)
@@ -67,5 +70,92 @@ a1 <- ggplot(data_1eel, aes(x=as.factor(hour), y=day_number, fill = corrected_de
   ylim(17870, 17940) +
   theme_bw()
 a1
+
+
+
+
+
+# 2. Create actogram based on depth difference between subsequent measurements ####
+
+# Load data
+data <- read_csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv",
+                 na = "", 
+                 col_types = list(sunrise = col_datetime(),
+                                  previous_sunset = col_datetime(),
+                                  next_sunrise = col_datetime(),
+                                  next_sunmoment = col_datetime(),
+                                  U = col_double(),
+                                  V = col_double(),
+                                  speed = col_double(),
+                                  direction = col_double()),          # set direction as numeric
+                 guess_max = 100000)
+
+data$...1 <- NULL
+data$ID <- factor(data$ID)
+
+# Select 1 eel
+data_1eel <- filter(data, ID == "16031")
+
+# Arrange data set according datetime
+data_1eel <-
+  data_1eel %>%
+  arrange(datetime)
+
+# Calculate rate of up and down vertical movement
+activity_threshold <- 2.5
+data_1eel$rate <- ((abs(data_1eel$corrected_depth - lag(data_1eel$corrected_depth, 1)))/60)*100
+data_1eel <- data_1eel %>%
+  mutate(active = if_else(data_1eel$rate > activity_threshold,
+                          1,
+                          0))
+
+data_1eel$datehour <- lubridate::floor_date(data_1eel$datetime, "hour")         
+
+data_1eel <- data_1eel %>%
+  group_by(datehour) %>%
+  summarise(frequency = sum(active))
+
+data_1eel$numericdate <- as.numeric(data_1eel$datehour)   
+data_1eel$hour <- hour(data_1eel$datehour) # extract hours of the day (0 - 24)
+data_1eel$Date <- as.Date(data_1eel$datehour)
+data_1eel$day_number <- as.numeric(data_1eel$Date)
+
+# Create duplicate for double plot actogram
+data_1eel2 <- data_1eel
+data_1eel2 <- filter(data_1eel2, datehour > "2018-12-10 00:00:00")
+data_1eel2$hour <- 24+(data_1eel2$hour)
+data_1eel2$day_number <- data_1eel2$day_number -1
+
+data_1eel <- rbind(data_1eel, data_1eel2)
+
+# Just for visualisation purpose, add +1 hour
+data_1eel$hour <- 1+(data_1eel$hour)
+
+# Remove the single record at 2019-02-13 00:00:00 which results in a single cell on top of the plot
+data_1eel <- filter(data_1eel, day_number != "17940")
+
+# Create actogram
+a2 <- ggplot(data_1eel, aes(x=as.factor(hour), y=day_number, fill = frequency))+ # where time is hours of the day (so, 0 to 24)
+  geom_tile()+
+  coord_equal() +
+  scale_fill_viridis(discrete=FALSE, name = 'Frequency of activity', option = 'viridis')+
+  ylab('day of year')+
+  xlab('hour of day')+
+  ylim(17870, 17940) +
+  theme_bw()
+a2
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
