@@ -33,6 +33,13 @@ data_1eel <-
   data_1eel %>%
   arrange(datetime)
 
+# Calculate depth relative to max depth
+data_max_depth <- data_1eel %>%
+  group_by(ID, Date) %>%
+  summarise(max_depth = min(corrected_depth))
+data_1eel <- left_join(data_1eel, data_max_depth, by = c("ID","Date"))
+data_1eel$rel_depth <- data_1eel$corrected_depth / data_1eel$max_depth
+
 # Add month label option for plots
 data_1eel$month_abb <- month(data_1eel$datetime, label = TRUE, abbr = TRUE) 
 
@@ -59,6 +66,9 @@ data_1eel$hour <- 1+(data_1eel$hour)
 
 # Remove the single record at 2019-02-13 00:00:00 which results in a single cell on top of the plot
 data_1eel <- filter(data_1eel, day_number != "17940")
+
+
+#data_1eel2 <- filter(data_1eel, day_number < "17920")
 
 # Create actogram
 a1 <- ggplot(data_1eel, aes(x=as.factor(hour), y=day_number, fill = corrected_depth))+ # where time is hours of the day (so, 0 to 24)
@@ -102,7 +112,7 @@ data_1eel <-
   arrange(datetime)
 
 # Calculate rate of up and down vertical movement
-activity_threshold <- 1.5
+activity_threshold <- 2.5
 data_1eel$rate <- ((abs(data_1eel$corrected_depth - lag(data_1eel$corrected_depth, 1)))/60)*100
 data_1eel <- data_1eel %>%
   mutate(active = if_else(data_1eel$rate > activity_threshold,
@@ -207,8 +217,5 @@ a3 <- ggplot(data_1eel, aes(x=as.factor(hour), y=day_number, fill = depth_change
   ylim(17870, 17940) +
   theme_bw()
 a3
-
-
-
 
 
