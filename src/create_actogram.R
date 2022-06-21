@@ -194,6 +194,9 @@ data_1eel$hour <- 1+(data_1eel$hour)
 # Remove the single record at 2019-02-13 00:00:00 which results in a single cell on top of the plot
 data_1eel <- filter(data_1eel, day_number != "17940")
 
+# Set as numeric
+data_1eel$depth_change <- as.numeric(data_1eel$depth_change)
+
 # Create actogram
 a3 <- ggplot(data_1eel, aes(x=as.factor(hour), y=day_number, fill = depth_change))+ # where time is hours of the day (so, 0 to 24)
   geom_tile()+
