@@ -228,16 +228,33 @@ a3
 
 
 
+# 4. Create actogram based on depth data using summaries ####
 
+# Load data
+data <- read_csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv",
+                 na = "", 
+                 col_types = list(sunrise = col_datetime(),
+                                  previous_sunset = col_datetime(),
+                                  next_sunrise = col_datetime(),
+                                  next_sunmoment = col_datetime(),
+                                  U = col_double(),
+                                  V = col_double(),
+                                  speed = col_double(),
+                                  direction = col_double()),          # set direction as numeric
+                 guess_max = 100000)
 
+data$...1 <- NULL
+data$ID <- factor(data$ID)
 
+# Select 1 eel
+data_1eel <- filter(data, ID == "16031")
 
+# Arrange data set according datetime
+data_1eel <-
+  data_1eel %>%
+  arrange(datetime)
 
-
-
-
-
-
+data_1eel$datehour <- lubridate::floor_date(data_1eel$datetime, "hour")
 
 # Calculate summary by grouping
 data_1eel_summary <- data_1eel %>%
