@@ -74,8 +74,9 @@ data_1eel <- filter(data_1eel, day_number != "17940")
 
 #data_1eel2 <- filter(data_1eel, day_number < "17920")
 
+
 # Create actogram
-a1 <- ggplot(data_1eel, aes(x=as.factor(hour), y=day_number, fill = corrected_depth))+ # where time is hours of the day (so, 0 to 24)
+a1 <- ggplot(data_1eel_summary, aes(x=as.factor(hour), y=day_number, fill = average_depth))+ # where time is hours of the day (so, 0 to 24)
   geom_tile()+
   coord_equal() +
   scale_fill_viridis(discrete=FALSE, name = 'Frequency of activity', option = 'viridis')+
@@ -221,5 +222,31 @@ a3 <- ggplot(data_1eel, aes(x=as.factor(hour), y=day_number, fill = depth_change
   ylim(17870, 17940) +
   theme_bw()
 a3
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Calculate summary by grouping
+data_1eel_summary <- data_1eel %>%
+  group_by(datehour) %>%
+  summarise(average_depth = mean(corrected_depth),
+            max_depth = max(corrected_depth))
+
+
+
+
 
 
