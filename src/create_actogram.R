@@ -40,6 +40,10 @@ data_max_depth <- data_1eel %>%
 data_1eel <- left_join(data_1eel, data_max_depth, by = c("ID","Date"))
 data_1eel$rel_depth <- data_1eel$corrected_depth / data_1eel$max_depth
 
+# Calculate distance from seabed
+data_1eel$dist_from_seabed <- data_1eel$corrected_depth - data_1eel$max_depth
+
+
 # Add month label option for plots
 data_1eel$month_abb <- month(data_1eel$datetime, label = TRUE, abbr = TRUE) 
 
