@@ -282,7 +282,8 @@ data_1eel_summary$day_number <- as.numeric(data_1eel_summary$Date)
 
 # Create duplicate for double plot actogram
 data_1eel2 <- data_1eel_summary
-data_1eel2 <- filter(data_1eel2, datehour > "2018-12-10 00:00:00")
+#data_1eel2 <- filter(data_1eel2, datehour > "2018-12-10 00:00:00")
+data_1eel2 <- filter(data_1eel2, day_number > 17874)
 data_1eel2$hour <- 24+(data_1eel2$hour)
 data_1eel2$day_number <- data_1eel2$day_number -1
 
@@ -295,7 +296,7 @@ data_1eel_summary$hour <- 1+(data_1eel_summary$hour)
 data_1eel_summary <- filter(data_1eel_summary, day_number != "17940")
 
 # Create actogram
-a4 <- ggplot(data_1eel_summary, aes(x=as.factor(hour), y=day_number, fill = max_dist_from_seabed))+ # where time is hours of the day (so, 0 to 24)
+a4 <- ggplot(data_1eel_summary, aes(x=as.factor(hour), y=day_number, fill = average_depth))+ # where time is hours of the day (so, 0 to 24)
   geom_tile()+
   coord_equal() +
   scale_fill_viridis(discrete=FALSE, name = 'Frequency of activity', option = 'viridis')+
