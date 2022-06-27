@@ -354,7 +354,9 @@ data_1eel_summary <- data_1eel %>%
   summarise(average_depth = mean(corrected_depth),
             max_depth = min(corrected_depth),
             average_dist_from_seabed = mean(dist_from_seabed),
-            max_dist_from_seabed = max(dist_from_seabed))
+            max_dist_from_seabed = max(dist_from_seabed),
+            average_temp = mean(temperature),
+            max_temp = max(temperature))
 
 data_1eel_summary$numericdate <- as.numeric(data_1eel_summary$datequarter)   
 data_1eel_summary$quarter <- sub(".*? ", "", data_1eel_summary$datequarter)   # extract quarters of the day
@@ -381,7 +383,7 @@ data_1eel_summary <- rbind(data_1eel_summary, data_1eel2)
 data_1eel_summary <- filter(data_1eel_summary, day_number != "17940")
 
 # Create actogram
-a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = average_depth))+ # where time is hours of the day (so, 0 to 24)
+a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = average_depth))+ # where time is quarter of the day (so, 0 to 96, times 2)
   geom_tile()+
   coord_equal() +
   scale_fill_viridis(discrete=FALSE, name = 'Frequency of activity', option = 'viridis')+
