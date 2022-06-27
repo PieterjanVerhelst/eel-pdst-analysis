@@ -356,11 +356,14 @@ data_1eel_summary <- data_1eel %>%
             average_dist_from_seabed = mean(dist_from_seabed),
             max_dist_from_seabed = max(dist_from_seabed))
 
-
 data_1eel_summary$numericdate <- as.numeric(data_1eel_summary$datequarter)   
 data_1eel_summary$quarter <- sub(".*? ", "", data_1eel_summary$datequarter)   # extract quarters of the day
 data_1eel_summary$Date <- as.Date(data_1eel_summary$datequarter)
 data_1eel_summary$day_number <- as.numeric(data_1eel_summary$Date)
+class(data_1eel_summary$quarter)
+data_1eel_summary$fquarter <- factor(data_1eel_summary$quarter)
+data_1eel_summary$quarter_numeric <- as.numeric(data_1eel_summary$fquarter)
+
 
 # Create duplicate for double plot actogram
 data_1eel2 <- data_1eel_summary
