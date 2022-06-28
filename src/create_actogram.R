@@ -1,4 +1,8 @@
 # Create an actogram to visualise the vertical activity pattern of eels
+# By Pieterjan Verhelst
+# Pieterjan.Verhelst@UGent.be
+# Base code by Chris Griffiths (christopher.griffiths@slu.se)
+
 
 # Load packages 
 library(tidyverse)
