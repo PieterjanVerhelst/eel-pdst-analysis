@@ -391,15 +391,21 @@ data_1eel_summary <- rbind(data_1eel_summary, data_1eel2)
 data_1eel_summary <- filter(data_1eel_summary, day_number != "17940")
 
 # Create actogram
-a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = total_activity))+ # where time is quarter of the day (so, 0 to 96, times 2)
+png(file="./additionals/Figures/actograms/A16031_avg_depth_seabed.png",
+    width=1000, height=400)
+
+#a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = total_activity))+
+a5 <- ggplot(data_1eel_summary, aes(x=quarter_numeric, y=day_number, fill = average_dist_from_seabed))+ # where time is quarter of the day (so, 0 to 96, times 2)
   geom_tile()+
   coord_equal() +
   scale_fill_viridis(discrete=FALSE, name = 'Frequency of activity', option = 'viridis')+
   ylab('day of year')+
   xlab('quarter of day')+
   ylim(17870, 17940) +
-  theme_bw()
+  theme_bw() +  
+  theme(axis.text = element_text(size = 14),
+                      axis.title = element_text(size = 16))
 a5
 
-
+dev.off()
 
