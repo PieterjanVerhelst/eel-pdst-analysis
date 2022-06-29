@@ -313,7 +313,7 @@ a4
 
 
 
-# 4. Create actogram based on depth data using summaries with 15 min resolution ####
+# 5. Create actogram based on depth data using summaries with 15 min resolution ####
 
 # Load data
 data <- read_csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv",
