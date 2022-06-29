@@ -378,7 +378,8 @@ data_1eel_summary$quarter_numeric <- as.numeric(data_1eel_summary$fquarter)
 # Create duplicate for double plot actogram
 data_1eel2 <- data_1eel_summary
 #data_1eel2 <- filter(data_1eel2, datehour > "2018-12-10 00:00:00")
-data_1eel2 <- filter(data_1eel2, day_number > 17874)
+#data_1eel2 <- filter(data_1eel2, day_number > 17874) # example for eel A16031; in next line write code more generally applicable
+data_1eel2 <- filter(data_1eel2, day_number > min(day_number))
 data_1eel2$quarter_numeric <- 96+(data_1eel2$quarter_numeric)
 data_1eel2$day_number <- data_1eel2$day_number -1
 
@@ -388,7 +389,8 @@ data_1eel_summary <- rbind(data_1eel_summary, data_1eel2)
 #data_1eel_summary$hour <- 1+(data_1eel_summary$hour)
 
 # Remove the single record at 2019-02-13 00:00:00 which results in a single cell on top of the plot
-data_1eel_summary <- filter(data_1eel_summary, day_number != "17940")
+#data_1eel_summary <- filter(data_1eel_summary, day_number != "17940") # example for eel A16031; in next line write code more generally applicable
+data_1eel_summary <- filter(data_1eel_summary, day_number != max(day_number))
 
 # Create actogram
 png(file="./additionals/Figures/actograms/A16031_activity.png",
@@ -401,7 +403,7 @@ a5 <- ggplot(data_1eel_summary, aes(x=quarter_numeric, y=day_number, fill = tota
   scale_fill_viridis(discrete=FALSE, name = 'Frequency of activity', option = 'viridis')+
   ylab('day of year')+
   xlab('quarter of day')+
-  ylim(17870, 17940) +
+  #ylim(17870, 17940) +
   theme_bw() +  
   theme(axis.text = element_text(size = 14),
                       axis.title = element_text(size = 16))
