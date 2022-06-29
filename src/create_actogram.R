@@ -332,7 +332,7 @@ data$...1 <- NULL
 data$ID <- factor(data$ID)
 
 # Select 1 eel
-data_1eel <- filter(data, ID == "16031")
+data_1eel <- filter(data, ID == "17508")
 
 # Arrange data set according datetime
 data_1eel <-
@@ -393,13 +393,13 @@ data_1eel_summary <- rbind(data_1eel_summary, data_1eel2)
 data_1eel_summary <- filter(data_1eel_summary, day_number != max(day_number))
 
 # Create actogram
-png(file="./additionals/Figures/actograms/A16031_activity.png",
+png(file="./additionals/Figures/actograms/A17508_activity.png",
     width=1000, height=400)
 
 #a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = total_activity))+
 a5 <- ggplot(data_1eel_summary, aes(x=quarter_numeric, y=day_number, fill = total_activity))+ # where time is quarter of the day (so, 0 to 96, times 2)
   geom_tile()+
-  coord_equal() +
+  #coord_equal() +
   scale_fill_viridis(discrete=FALSE, name = 'Frequency of activity', option = 'viridis')+
   ylab('day of year')+
   xlab('quarter of day')+
