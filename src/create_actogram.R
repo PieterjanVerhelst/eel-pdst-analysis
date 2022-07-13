@@ -411,3 +411,111 @@ a5
 
 dev.off()
 
+
+
+# 6. Create actogram based on depth data using summaries with 15 min resolution for all eels ####
+
+# Load data
+data <- read_csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv",
+                 na = "", 
+                 col_types = list(sunrise = col_datetime(),
+                                  previous_sunset = col_datetime(),
+                                  next_sunrise = col_datetime(),
+                                  next_sunmoment = col_datetime(),
+                                  U = col_double(),
+                                  V = col_double(),
+                                  speed = col_double(),
+                                  direction = col_double()),          # set direction as numeric
+                 guess_max = 100000)
+
+data$...1 <- NULL
+data$ID <- factor(data$ID)
+
+
+# Arrange data set according to ID and datetime
+data <- data %>% 
+  arrange(ID, datetime)
+
+# Add record of number of tracked days
+data <- data %>% 
+  #mutate(day_number = lubridate::ymd(Date)) %>% 
+  group_by(ID) %>% 
+  mutate(daynumber = Date - first(Date))
+
+data$daynumber <- as.numeric(data$daynumber) + 1 # +1 to remove the 0
+
+
+# Calculate depth relative to max depth
+data_max_depth <- data %>%
+  group_by(ID, Date) %>%
+  summarise(max_depth = min(corrected_depth))
+data <- left_join(data, data_max_depth, by = c("ID","Date"))
+data$rel_depth <- data$corrected_depth / data$max_depth
+
+# Calculate distance from seabed
+data_1eel$dist_from_seabed <- data_1eel$corrected_depth - data_1eel$max_depth
+
+# Classify behaviour from seabed
+data_1eel$activity <- ifelse(data_1eel$dist_from_seabed >= 10, 1, 0)
+
+# 15 min resolution
+data_1eel$datequarter <- lubridate::floor_date(data_1eel$datetime, "15 min")
+
+# Calculate summary by grouping
+data_1eel_summary <- data_1eel %>%
+  group_by(datequarter) %>%
+  summarise(average_depth = mean(corrected_depth),
+            max_depth = min(corrected_depth),
+            average_dist_from_seabed = mean(dist_from_seabed),
+            max_dist_from_seabed = max(dist_from_seabed),
+            average_temp = mean(temperature),
+            max_temp = max(temperature),
+            total_activity = sum(activity))
+
+data_1eel_summary$numericdate <- as.numeric(data_1eel_summary$datequarter)   
+data_1eel_summary$quarter <- sub(".*? ", "", data_1eel_summary$datequarter)   # extract quarters of the day
+data_1eel_summary$Date <- as.Date(data_1eel_summary$datequarter)
+data_1eel_summary$day_number <- as.numeric(data_1eel_summary$Date)
+class(data_1eel_summary$quarter)
+data_1eel_summary$fquarter <- factor(data_1eel_summary$quarter)
+data_1eel_summary$quarter_numeric <- as.numeric(data_1eel_summary$fquarter)
+
+
+# Create duplicate for double plot actogram
+data_1eel2 <- data_1eel_summary
+#data_1eel2 <- filter(data_1eel2, datehour > "2018-12-10 00:00:00")
+#data_1eel2 <- filter(data_1eel2, day_number > 17874) # example for eel A16031; in next line write code more generally applicable
+data_1eel2 <- filter(data_1eel2, day_number > min(day_number))
+data_1eel2$quarter_numeric <- 96+(data_1eel2$quarter_numeric)
+data_1eel2$day_number <- data_1eel2$day_number -1
+
+data_1eel_summary <- rbind(data_1eel_summary, data_1eel2)
+
+# Just for visualisation purpose, add +1 hour
+#data_1eel_summary$hour <- 1+(data_1eel_summary$hour)
+
+# Remove the single record at 2019-02-13 00:00:00 which results in a single cell on top of the plot
+#data_1eel_summary <- filter(data_1eel_summary, day_number != "17940") # example for eel A16031; in next line write code more generally applicable
+data_1eel_summary <- filter(data_1eel_summary, day_number != max(day_number))
+
+# Create actogram
+png(file="./additionals/Figures/actograms/A17499_2_activity.png",
+    width=1000, height=400)
+
+#a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = total_activity))+
+a6 <- ggplot(data_1eel_summary, aes(x=quarter_numeric, y=day_number, fill = total_activity))+ # where time is quarter of the day (so, 0 to 96, times 2)
+  geom_tile()+
+  #coord_equal() +
+  scale_fill_viridis(discrete=FALSE, name = 'Frequency of activity', option = 'viridis')+
+  ylab('day of year')+
+  xlab('quarter of day')+
+  #ylim(17870, 17940) +
+  theme_bw() +  
+  theme(axis.text = element_text(size = 14),
+        axis.title = element_text(size = 16))
+a6
+
+dev.off()
+
+
+
