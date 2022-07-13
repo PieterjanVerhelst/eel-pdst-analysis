@@ -380,7 +380,7 @@ data_1eel2 <- data_1eel_summary
 #data_1eel2 <- filter(data_1eel2, datehour > "2018-12-10 00:00:00")
 #data_1eel2 <- filter(data_1eel2, day_number > 17874) # example for eel A16031; in next line write code more generally applicable
 data_1eel2 <- filter(data_1eel2, day_number > min(day_number))
-data_1eel2$quarter_numeric <- 96+(data_1eel2$quarter_numeric)
+data_1eel2$quarter_numeric <- 96+(data_1eel2$quarter_numeric)   # add a day (24 hours = 96 quarters = 24 hour * 4 quarters in an hour)
 data_1eel2$day_number <- data_1eel2$day_number -1
 
 data_1eel_summary <- rbind(data_1eel_summary, data_1eel2)
@@ -436,15 +436,6 @@ data$ID <- factor(data$ID)
 data <- data %>% 
   arrange(ID, datetime)
 
-# Add record of number of tracked days
-data <- data %>% 
-  #mutate(day_number = lubridate::ymd(Date)) %>% 
-  group_by(ID) %>% 
-  mutate(daynumber = Date - first(Date))
-
-data$daynumber <- as.numeric(data$daynumber) + 1 # +1 to remove the 0
-
-
 # Calculate depth relative to max depth
 data_max_depth <- data %>%
   group_by(ID, Date) %>%
@@ -453,17 +444,17 @@ data <- left_join(data, data_max_depth, by = c("ID","Date"))
 data$rel_depth <- data$corrected_depth / data$max_depth
 
 # Calculate distance from seabed
-data_1eel$dist_from_seabed <- data_1eel$corrected_depth - data_1eel$max_depth
+data$dist_from_seabed <- data$corrected_depth - data$max_depth
 
 # Classify behaviour from seabed
-data_1eel$activity <- ifelse(data_1eel$dist_from_seabed >= 10, 1, 0)
+data$activity <- ifelse(data$dist_from_seabed >= 10, 1, 0)
 
 # 15 min resolution
-data_1eel$datequarter <- lubridate::floor_date(data_1eel$datetime, "15 min")
+data$datequarter <- lubridate::floor_date(data$datetime, "15 min")
 
 # Calculate summary by grouping
-data_1eel_summary <- data_1eel %>%
-  group_by(datequarter) %>%
+data_summary <- data %>%
+  group_by(ID, datequarter) %>%
   summarise(average_depth = mean(corrected_depth),
             max_depth = min(corrected_depth),
             average_dist_from_seabed = mean(dist_from_seabed),
@@ -472,43 +463,54 @@ data_1eel_summary <- data_1eel %>%
             max_temp = max(temperature),
             total_activity = sum(activity))
 
-data_1eel_summary$numericdate <- as.numeric(data_1eel_summary$datequarter)   
-data_1eel_summary$quarter <- sub(".*? ", "", data_1eel_summary$datequarter)   # extract quarters of the day
-data_1eel_summary$Date <- as.Date(data_1eel_summary$datequarter)
-data_1eel_summary$day_number <- as.numeric(data_1eel_summary$Date)
-class(data_1eel_summary$quarter)
-data_1eel_summary$fquarter <- factor(data_1eel_summary$quarter)
-data_1eel_summary$quarter_numeric <- as.numeric(data_1eel_summary$fquarter)
+data_summary$numericdate <- as.numeric(data_summary$datequarter)   
+data_summary$quarter <- sub(".*? ", "", data_summary$datequarter)   # extract quarters of the day
+data_summary$Date <- as.Date(data_summary$datequarter)
+data_summary$day_number <- as.numeric(data_summary$Date)
+class(data_summary$quarter)
+data_summary$fquarter <- factor(data_summary$quarter)
+data_summary$quarter_numeric <- as.numeric(data_summary$fquarter)
+
+# Add record of number of tracked days
+data_summary <- data_summary %>% 
+  #mutate(day_number = lubridate::ymd(Date)) %>% 
+  group_by(ID) %>% 
+  mutate(day_ordernumber = Date - first(Date))
+
+data_summary$day_ordernumber <- as.numeric(data_summary$day_ordernumber) + 2 # + 2 to remove the 0 and be 1 day ahead of the duplicate
 
 
 # Create duplicate for double plot actogram
-data_1eel2 <- data_1eel_summary
+data2 <- data_summary
 #data_1eel2 <- filter(data_1eel2, datehour > "2018-12-10 00:00:00")
 #data_1eel2 <- filter(data_1eel2, day_number > 17874) # example for eel A16031; in next line write code more generally applicable
-data_1eel2 <- filter(data_1eel2, day_number > min(day_number))
-data_1eel2$quarter_numeric <- 96+(data_1eel2$quarter_numeric)
-data_1eel2$day_number <- data_1eel2$day_number -1
+data2 <- data2 %>%
+  group_by(ID) %>%
+  filter(day_number > min(day_number))
+data2$quarter_numeric <- 96+(data2$quarter_numeric)   # add a day (24 hours = 96 quarters = 24 hour * 4 quarters in an hour)
+data2$day_number <- data2$day_number -1
+data2$day_ordernumber <- data2$day_ordernumber -1 # - 1 so eventually the day_ordernummer of the duplicate is one day lagging the original
 
-data_1eel_summary <- rbind(data_1eel_summary, data_1eel2)
+data_summary <- rbind(data_summary, data2)
 
 # Just for visualisation purpose, add +1 hour
 #data_1eel_summary$hour <- 1+(data_1eel_summary$hour)
 
 # Remove the single record at 2019-02-13 00:00:00 which results in a single cell on top of the plot
 #data_1eel_summary <- filter(data_1eel_summary, day_number != "17940") # example for eel A16031; in next line write code more generally applicable
-data_1eel_summary <- filter(data_1eel_summary, day_number != max(day_number))
+data_summary <- filter(data_summary, day_number != max(day_number))
 
 # Create actogram
 png(file="./additionals/Figures/actograms/A17499_2_activity.png",
     width=1000, height=400)
 
 #a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = total_activity))+
-a6 <- ggplot(data_1eel_summary, aes(x=quarter_numeric, y=day_number, fill = total_activity))+ # where time is quarter of the day (so, 0 to 96, times 2)
+a6 <- ggplot(data_summary, aes(x=quarter_numeric, y=day_ordernumber, fill = total_activity))+ # where time is quarter of the day (so, 0 to 96, times 2)
   geom_tile()+
   #coord_equal() +
   scale_fill_viridis(discrete=FALSE, name = 'Frequency of activity', option = 'viridis')+
-  ylab('day of year')+
-  xlab('quarter of day')+
+  ylab('Post-release days')+
+  xlab('Quarter of day')+
   #ylim(17870, 17940) +
   theme_bw() +  
   theme(axis.text = element_text(size = 14),
