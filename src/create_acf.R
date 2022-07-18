@@ -68,4 +68,27 @@ plot(vals_list[[1]], xlim=c(0, 1000),
 abline(v = 144, col = "darkgreen")
 abline(v = 288, col = "darkblue")
 
+# Create ggplot version of the plot
+acf_values <- as.data.frame(vals_list[[1]])
+acf_values <- rename(acf_values, acf_value = V1)
+acf_values$index <- seq.int(nrow(acf_values))
+acf_values <- head(acf_values, 1000)
 
+acf <- ggplot(data = acf_values, aes(x = index, y = acf_value)) +
+  geom_point() +
+  theme_minimal() +
+  ylab("ACF value") +
+  xlab("Measurement number") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+  theme(axis.text = element_text(size = 16),
+        axis.title = element_text(size = 18)) +
+  geom_vline(xintercept = 144, linetype="solid", 
+               color = "green", size=1.5) +
+  geom_vline(xintercept = 288, linetype="solid", 
+             color = "blue", size=1.5)
+acf  
+  
+  
+  
+  
