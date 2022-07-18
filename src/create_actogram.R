@@ -332,7 +332,7 @@ data$...1 <- NULL
 data$ID <- factor(data$ID)
 
 # Select 1 eel
-data_1eel <- filter(data, ID == "17499_2")
+data_1eel <- filter(data, ID == "15981")
 
 # Arrange data set according datetime
 data_1eel <-
@@ -393,7 +393,7 @@ data_1eel_summary <- rbind(data_1eel_summary, data_1eel2)
 data_1eel_summary <- filter(data_1eel_summary, day_number != max(day_number))
 
 # Create actogram
-png(file="./additionals/Figures/actograms/A17499_2_activity.png",
+png(file="./additionals/Figures/actograms/A15981_activity.png",
     width=1000, height=400)
 
 #a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = total_activity))+
@@ -430,9 +430,6 @@ data <- read_csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv",
 
 data$...1 <- NULL
 data$ID <- factor(data$ID)
-
-# Remove eel with error in depth pattern
-data <- filter(data, ID != '15981')
 
 
 # Arrange data set according to ID and datetime
