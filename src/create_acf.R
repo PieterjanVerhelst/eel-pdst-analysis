@@ -28,13 +28,12 @@ data <- read_csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv",
 data$...1 <- NULL
 data$ID <- factor(data$ID)
 
+# Arrange data set according to ID and datetime
+data <- data %>% 
+  arrange(ID, datetime)
+
 # Select 1 eel
 data_1eel <- filter(data, ID == "16031")
-
-# Arrange data set according datetime
-data_1eel <-
-  data_1eel %>%
-  arrange(datetime)
 
 
 # Create ACF plot
