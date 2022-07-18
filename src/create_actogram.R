@@ -432,6 +432,21 @@ data$...1 <- NULL
 data$ID <- factor(data$ID)
 
 
+# Nordic eels
+data <- filter(data, ID == "15805" |
+                  ID == "15981" |
+                  ID == "17492_2" |
+                  ID == "17499" |
+                  ID == "17525_2")
+
+# Channel eels
+data <- filter(data, ID != "15805" ,
+                 ID != "15981" ,
+                 ID != "17492_2" ,
+                 ID != "17499" ,
+                 ID != "17525_2")
+
+
 # Arrange data set according to ID and datetime
 data <- data %>% 
   arrange(ID, datetime)
@@ -501,7 +516,7 @@ data_summary <- rbind(data_summary, data2)
 data_summary <- filter(data_summary, day_number != max(day_number))
 
 # Create actogram
-png(file="./additionals/Figures/actograms/all_activity.png",
+png(file="./additionals/Figures/actograms/channel_activity.png",
     width=1000, height=400)
 
 #a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = total_activity))+
