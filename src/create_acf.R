@@ -28,26 +28,41 @@ data <- read_csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv",
 data$...1 <- NULL
 data$ID <- factor(data$ID)
 
+# Nordic eels
+data <- filter(data, ID == "15805" |
+                 ID == "15981" |
+                 ID == "17492_2" |
+                 ID == "17499" |
+                 ID == "17525_2")
+
+# Channel eels
+data <- filter(data, ID != "15805" ,
+               ID != "15981" ,
+               ID != "17492_2" ,
+               ID != "17499" ,
+               ID != "17525_2")
+
+# Select 1 eel
+#data <- filter(data, ID == "16031")
+
+
 # Arrange data set according to ID and datetime
 data <- data %>% 
   arrange(ID, datetime)
 
-# Select 1 eel
-data_1eel <- filter(data, ID == "16031")
-
 
 # Create ACF plot
 # Create an autocorrelation function plot to explore the cyclic signals in the data. The horizontal blue lines in the plot indicate the confidence interval in the correlogram.
-forecast::Acf(data_1eel$corrected_depth, type = c("correlation"), lag.max=max(dim(data_1eel)), plot = TRUE)  
+forecast::Acf(data$corrected_depth, type = c("correlation"), lag.max=max(dim(data)), plot = TRUE)  
 
 # For clarity, create the plot for the first 500 observations
-forecast::Acf(data_1eel$corrected_depth, type = c("correlation"), lag.max=500, plot = TRUE)
+forecast::Acf(data$corrected_depth, type = c("correlation"), lag.max=500, plot = TRUE)
 
 #In the plot above, we see 2 cycles subsequently returning. The first is probably related to a tidal signal, as it occurs ca. every 12 hours at lag 144: (12 hours x 60 minutes) / 5 minutes = 144
 #The second is probably related to a circadian rythm with a 24 h pattern at ca. lag 288: (24 hours x 60 minutes) / 5 minutes = 288
 #To illustrate this, we added a green vertical line at lag 144 and a blue line at lag 288 to the plot.
 
-vals_list <- forecast::Acf(data_1eel$corrected_depth, type = c("correlation"), lag.max=max(dim(data_1eel)), plot = FALSE)
+vals_list <- forecast::Acf(data$corrected_depth, type = c("correlation"), lag.max=max(dim(data)), plot = FALSE)
 plot(vals_list[[1]], xlim=c(0, 1000),
      ylab="Correlation value")
 abline(v = 144, col = "darkgreen")
