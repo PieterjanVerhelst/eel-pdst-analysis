@@ -524,7 +524,7 @@ a6 <- ggplot(data_summary, aes(x=quarter_numeric, y=day_ordernumber, fill = ftot
   geom_tile()+
   #coord_equal() +
   #scale_fill_viridis(discrete=FALSE, name = 'Frequency of activity', option = 'viridis') +
-  scale_fill_manual(values = c("yellow", "orange", "darkgreen", "darkblue"), name = "New Legend Title") +
+  scale_fill_manual(values = c("yellow", "orange", "darkgreen", "darkblue"), name = "Frequency of activity") +
   ylab('Post-release days')+
   xlab('Quarter of day')+
   #ylim(17870, 17940) +
