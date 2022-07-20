@@ -520,16 +520,22 @@ png(file="./additionals/Figures/actograms/channel_activity.png",
     width=1000, height=400)
 
 #a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = total_activity))+
-a6 <- ggplot(data_summary, aes(x=quarter_numeric, y=day_ordernumber, fill = total_activity))+ # where time is quarter of the day (so, 0 to 96, times 2)
+a6 <- ggplot(data_summary, aes(x=quarter_numeric, y=day_ordernumber, fill = ftotal_activity))+ # where time is quarter of the day (so, 0 to 96, times 2)
   geom_tile()+
   #coord_equal() +
-  scale_fill_viridis(discrete=FALSE, name = 'Frequency of activity', option = 'viridis')+
+  #scale_fill_viridis(discrete=FALSE, name = 'Frequency of activity', option = 'viridis') +
+  scale_fill_manual(values = c("yellow", "orange", "darkgreen", "darkblue"), name = "New Legend Title") +
   ylab('Post-release days')+
   xlab('Quarter of day')+
   #ylim(17870, 17940) +
   theme_bw() +  
-  theme(axis.text = element_text(size = 14),
-        axis.title = element_text(size = 16))
+  theme(axis.text = element_text(size = 16),
+        axis.title = element_text(size = 18)) +
+  theme(legend.key.size = unit(1, 'cm'), #change legend key size
+        #legend.key.height = unit(1, 'cm'), #change legend key height
+        legend.key.width = unit(2, 'cm'), #change legend key width
+        legend.title = element_text(size=18), #change legend title font size
+        legend.text = element_text(size=16)) #change legend text font size
 a6
 
 dev.off()
