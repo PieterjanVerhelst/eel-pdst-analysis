@@ -515,6 +515,9 @@ data_summary <- rbind(data_summary, data2)
 #data_1eel_summary <- filter(data_1eel_summary, day_number != "17940") # example for eel A16031; in next line write code more generally applicable
 data_summary <- filter(data_summary, day_number != max(day_number))
 
+# Set total activity as factor
+data_summary$total_activity <- factor(data_summary$total_activity)
+
 # Create actogram
 png(file="./additionals/Figures/actograms/channel_activity.png",
     width=1000, height=400)
