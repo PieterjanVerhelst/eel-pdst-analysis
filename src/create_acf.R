@@ -81,8 +81,8 @@ acf <- ggplot(data = acf_values, aes(x = index, y = acf_value)) +
   xlab("Measurement number") +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
-  theme(axis.text = element_text(size = 16),
-        axis.title = element_text(size = 18)) +
+  theme(axis.text = element_text(size = 20),
+        axis.title = element_text(size = 22)) +
   geom_vline(xintercept = 144, linetype="solid", 
                color = "green", size=1.5) +
   geom_vline(xintercept = 288, linetype="solid", 
