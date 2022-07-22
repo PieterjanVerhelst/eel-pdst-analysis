@@ -532,13 +532,13 @@ a6 <- ggplot(data_summary, aes(x=quarter_numeric, y=day_ordernumber, fill = tota
   xlab('Quarter of day')+
   #ylim(17870, 17940) +
   theme_bw() +  
-  theme(axis.text = element_text(size = 16),
-        axis.title = element_text(size = 18)) +
+  theme(axis.text = element_text(size = 20),
+        axis.title = element_text(size = 22)) +
   theme(legend.key.size = unit(1, 'cm'), #change legend key size
         #legend.key.height = unit(1, 'cm'), #change legend key height
         legend.key.width = unit(2, 'cm'), #change legend key width
-        legend.title = element_text(size=18), #change legend title font size
-        legend.text = element_text(size=16)) #change legend text font size
+        legend.title = element_text(size=22), #change legend title font size
+        legend.text = element_text(size=20)) #change legend text font size
 a6
 
 dev.off()
