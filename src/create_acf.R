@@ -43,7 +43,7 @@ data <- filter(data, ID != "15805" ,
                ID != "17525_2")
 
 # Select 1 eel
-data <- filter(data, ID == "17525_2")
+data <- filter(data, ID == "17535")
 
 
 # Arrange data set according to ID and datetime
