@@ -446,6 +446,8 @@ data <- filter(data, ID != "15805" ,
                  ID != "17499" ,
                  ID != "17525_2")
 
+# Select 1 eel
+data <- filter(data, ID == "17525_2")
 
 # Arrange data set according to ID and datetime
 data <- data %>% 
@@ -523,11 +525,11 @@ png(file="./additionals/Figures/actograms/channel_activity.png",
     width=1000, height=400)
 
 #a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = total_activity))+
-a6 <- ggplot(data_summary, aes(x=quarter_numeric, y=day_ordernumber, fill = total_activity))+ # where time is quarter of the day (so, 0 to 96, times 2)
+a6 <- ggplot(data_summary, aes(x=quarter_numeric, y=day_ordernumber, fill = average_depth))+ # where time is quarter of the day (so, 0 to 96, times 2)
   geom_tile()+
   #coord_equal() +
-  #scale_fill_viridis(discrete=FALSE, name = 'Average depth', option = 'viridis') +
-  scale_fill_manual(values = c("darkblue", "darkgreen", "orange", "yellow"), name = "Frequency of activity") +
+  scale_fill_viridis(discrete=FALSE, name = 'Average depth', option = 'viridis') +
+  #scale_fill_manual(values = c("darkblue", "darkgreen", "orange", "yellow"), name = "Frequency of activity") +
   ylab('Post-release days')+
   xlab('Quarter of day')+
   #ylim(17870, 17940) +
