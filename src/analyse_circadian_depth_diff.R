@@ -25,9 +25,10 @@ data <- data[!is.na(data$night_day),]
 # Calculate summary
 aggregate(data$depth_change, list(data$night_day), mean)
 aggregate(data$depth_change, list(data$night_day), sd)
+aggregate(data$depth_change, list(data$night_day), median)
 aggregate(data$depth_change, list(data$night_day), min)
 aggregate(data$depth_change, list(data$night_day), max)
-aggregate(data$depth_change, list(data$night_day, data$ID), mean) # per eel
+aggregate(data$depth_change, list(data$night_day, data$ID), median) # per eel
 
 # Create plot
 boxplot <- ggplot(data, aes(x=night_day, y=depth_change)) + 
