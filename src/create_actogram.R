@@ -437,6 +437,12 @@ data$...1 <- NULL
 data$ID <- factor(data$ID)
 
 
+
+# Remove DVM data from eel A17535
+data <- data[!(data$ID == "17535" & data$datetime >= '2020-01-11 00:00:00'),]
+
+
+
 # Nordic eels
 data <- filter(data, ID == "15805" |
                   ID == "15981" |
@@ -530,11 +536,11 @@ png(file="./additionals/Figures/actograms/channel_activity.png",
     width=1000, height=400)
 
 #a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = total_activity))+
-a6 <- ggplot(data_summary, aes(x=quarter_numeric, y=day_ordernumber, fill = total_activity))+ # where time is quarter of the day (so, 0 to 96, times 2)
+a6 <- ggplot(data_summary, aes(x=quarter_numeric, y=day_ordernumber, fill = average_depth))+ # where time is quarter of the day (so, 0 to 96, times 2)
   geom_tile()+
   #coord_equal() +
-  #scale_fill_viridis(discrete=FALSE, name = 'Average depth', option = 'viridis') +
-  scale_fill_manual(values = c("darkblue", "darkgreen", "orange", "yellow"), name = "Frequency of activity") +
+  scale_fill_viridis(discrete=FALSE, name = 'Average depth', option = 'viridis') +
+  #scale_fill_manual(values = c("darkblue", "darkgreen", "orange", "yellow"), name = "Frequency of activity") +
   ylab('Post-release days')+
   xlab('Quarter of day')+
   #ylim(17870, 17940) +
