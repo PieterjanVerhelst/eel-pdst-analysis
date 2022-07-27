@@ -46,12 +46,16 @@ boxplot
 
 # Another plot
 # summarise
-aggregated <- aggregate(data$depth_change, list(data$night_day, data$ID), mean)
+aggregated <- aggregate(data$depth_change, list(data$night_day, data$ID), median)
+aggregated <- rename(aggregated, 
+                     night_day = Group.1,
+                     ID = Group.2,
+                     median_depth_change = x)
 # Subset night data before treatment
-night <- subset(aggregated,  Group.1 == "night", x,
+night <- subset(aggregated,  night_day == "night", median_depth_change,
                  drop = TRUE)
 # subset day data after treatment
-day <- subset(aggregated,  Group.1 == "day", x,
+day <- subset(aggregated,  night_day == "day", median_depth_change,
                 drop = TRUE)
 # Plot paired data
 pd <- paired(day, night)
