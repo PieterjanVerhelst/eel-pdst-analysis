@@ -59,8 +59,9 @@ day <- subset(aggregated,  night_day == "day", median_depth_change,
                 drop = TRUE)
 # Plot paired data
 pd <- paired(day, night)
-plot(pd, type = "profile") + theme_bw()
-
+plot(pd, type = "profile") + 
+  theme_bw()
+  
 
 # Analyse data
 # Check assumptions
