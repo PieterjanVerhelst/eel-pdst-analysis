@@ -1,4 +1,4 @@
-# Analyse circadian depth pattern
+# Analyse circadian depth pattern: depth difference
 # By Pieterjan Verhelst
 # pieterjan.verhelst@Uinbo.be
 
