@@ -88,6 +88,7 @@ leveneTest(depth_change ~ night_day, data = data)
 # Assumptions not met
 
 # Paired samples Wilcoxon test
-wilcox.test(data$depth_change, data$night_day, paired = TRUE, alternative = "two.sided")
+wilcox.test(day, night, paired = TRUE)
+
 
 
