@@ -90,5 +90,6 @@ R Markdown files and forthcoming HTML files with code and output.
 17. visualise_tracking_data.R: Visualise tracking data as animated gif using `moveVis` R-package. The output is stored in `data\output\`.
 18. create_actogram.R: Create an actogram to visualise the activity (i.e. vertical movement behaviour) of the eels
 19. create_acf.R: Create an ACF plot to visualise the activity (i.e. vertical movement behaviour) of the eels
+20. analyse_circadian_depth_diff.R: Analyse depth difference according to the circadian phases day and night
 
 
