@@ -29,6 +29,11 @@ data <- read_csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv",
 data$...1 <- NULL
 data$ID <- factor(data$ID)
 
+
+# Remove DVM data from eel A17535
+data <- data[!(data$ID == "17535" & data$datetime >= '2020-01-11 00:00:00'),]
+
+
 # Select 1 eel
 data_1eel <- filter(data, ID == "16031")
 
