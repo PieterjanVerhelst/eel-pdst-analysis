@@ -101,7 +101,7 @@ boxplot <- ggplot(data_min_max_no_na, aes(x=tidal_phase, y=depth_change)) +
 boxplot
 
 
-# Another plot
+# Paired plot
 # summarise
 aggregated <- aggregate(data_min_max_no_na$depth_change, list(data_min_max_no_na$tidal_phase, data_min_max_no_na$ID), median)
 aggregated <- rename(aggregated, 

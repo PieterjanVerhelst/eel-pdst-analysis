@@ -64,7 +64,7 @@ boxplot <- ggplot(data, aes(x=night_day, y=dist_from_seabed)) +
 boxplot
 
 
-# Another plot
+# Paired plot
 # summarise
 aggregated <- aggregate(data$dist_from_seabed, list(data$night_day, data$ID), median)
 aggregated <- rename(aggregated, 

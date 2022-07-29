@@ -44,7 +44,7 @@ boxplot <- ggplot(data, aes(x=night_day, y=depth_change)) +
 boxplot
 
 
-# Another plot
+# Paired plot
 # summarise
 aggregated <- aggregate(data$depth_change, list(data$night_day, data$ID), median)
 aggregated <- rename(aggregated, 

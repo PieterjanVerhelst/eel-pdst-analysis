@@ -62,7 +62,7 @@ boxplot <- ggplot(data, aes(x=tidal_phase, y=dist_from_seabed)) +
 boxplot
 
 
-# Another plot
+# Paired plot
 # summarise
 aggregated <- aggregate(data$dist_from_seabed, list(data$tidal_phase, data$ID), median)
 aggregated <- rename(aggregated, 
