@@ -1,6 +1,6 @@
 # Analyse circadian depth pattern: actual depth
 # By Pieterjan Verhelst
-# pieterjan.verhelst@Uinbo.be
+# pieterjan.verhelst@inbo.be
 
 
 # Load packages
