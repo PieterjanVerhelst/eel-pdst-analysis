@@ -94,4 +94,10 @@ R Markdown files and forthcoming HTML files with code and output.
 21. analyse_circadian_depth.R: Analyse depth according to the circadian phases day and night
 22. classify_tides.R: classify tidal phases (i.e. ebb or flood) based on surface current data
 	+ Generate `data_tidal_phases.csv` in `interim` folder
+23. analyse_tidal_depth.R: Analyse depth according to the tidal phases ebb and flood
+
+
+
+
+
 

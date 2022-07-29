@@ -6,7 +6,7 @@
 # Load packages
 library(tidyverse) # To do datascience
 library(lubridate)
-
+library(PairedData)
 
 # 1. Read data ####
 data <- read.csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv")
@@ -68,6 +68,7 @@ plot(pd, type = "profile") +
 
 
 # Paired samples Wilcoxon test
+# See: http://www.sthda.com/english/wiki/paired-samples-wilcoxon-test-in-r
 wilcox.test(day, night, paired = TRUE)
 
 
