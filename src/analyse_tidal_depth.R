@@ -18,25 +18,42 @@ data$night_day <- factor(data$night_day)
 data$tidal_phase <- factor(data$tidal_phase)
 
 
+# Arrange data set according to tag ID and datetime, so min and max are calculated accordingly
+data <-
+  data %>%
+  arrange(ID, datetime)
+
+
+# Calculate depth relative to max depth
+data_max_depth <- data %>%
+  group_by(ID, Date) %>%
+  summarise(max_depth = min(corrected_depth))
+data <- left_join(data, data_max_depth, by = c("ID","Date"))
+data$rel_depth <- data$corrected_depth / data$max_depth
+
+# Calculate distance from seabed
+data$dist_from_seabed <- data$corrected_depth - data$max_depth
+
+
 # Remove NA in tidal phase
 data <- data[!is.na(data$tidal_phase),]
 
 
 # Calculate summary
-aggregate(data$corrected_depth, list(data$tidal_phase), mean)
-aggregate(data$corrected_depth, list(data$tidal_phase), sd)
-aggregate(data$corrected_depth, list(data$tidal_phase), median)
-aggregate(data$corrected_depth, list(data$tidal_phase), min)
-aggregate(data$corrected_depth, list(data$tidal_phase), max)
-aggregate(data$corrected_depth, list(data$tidal_phase, data$ID), median) # per eel
+aggregate(data$dist_from_seabed, list(data$tidal_phase), mean)
+aggregate(data$dist_from_seabed, list(data$tidal_phase), sd)
+aggregate(data$dist_from_seabed, list(data$tidal_phase), median)
+aggregate(data$dist_from_seabed, list(data$tidal_phase), min)
+aggregate(data$dist_from_seabed, list(data$tidal_phase), max)
+aggregate(data$dist_from_seabed, list(data$tidal_phase, data$ID), median) # per eel
 
 
 # Create plot
-boxplot <- ggplot(data, aes(x=tidal_phase, y=corrected_depth)) + 
+boxplot <- ggplot(data, aes(x=tidal_phase, y=dist_from_seabed)) + 
   geom_boxplot() +
   theme_minimal() +
-  ylab("Depth (m)") +
-  xlab("Circadian phase") +
+  ylab("Distance from seabed (m)") +
+  xlab("Tidal phase") +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
   theme(axis.text = element_text(size = 20),
@@ -47,7 +64,7 @@ boxplot
 
 # Another plot
 # summarise
-aggregated <- aggregate(data$corrected_depth, list(data$tidal_phase, data$ID), median)
+aggregated <- aggregate(data$dist_from_seabed, list(data$tidal_phase, data$ID), median)
 aggregated <- rename(aggregated, 
                      tidal_phase = Group.1,
                      ID = Group.2,
@@ -69,19 +86,19 @@ plot(pd, type = "profile") +
 # 1. Normality
 
 # Create qqplot with qqline
-qqnorm(data$corrected_depth)
-qqline(data$corrected_depth)
+qqnorm(data$dist_from_seabed)
+qqline(data$dist_from_seabed)
 
 # Shapiro test
 # The p-value > 0.05 implying that the distribution of the data are not significantly different from normal distribution. In other words, we can assume the normality.
-shapiro.test(data$corrected_depth)
+shapiro.test(data$dist_from_seabed)
 
 # 2. Check homogeneity of variances
 # Levene’s test
 # Levene’s test is used to assess whether the variances of two or more populations are equal.
 # https://www.datanovia.com/en/lessons/homogeneity-of-variance-test-in-r/
 # When p > 0.05, there is no significant difference between the two variances.
-leveneTest(corrected_depth ~ tidal_phase, data = data)
+leveneTest(dist_from_seabed ~ tidal_phase, data = data)
 
 
 

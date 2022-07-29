@@ -91,7 +91,7 @@ R Markdown files and forthcoming HTML files with code and output.
 18. create_actogram.R: Create an actogram to visualise the activity (i.e. vertical movement behaviour) of the eels
 19. create_acf.R: Create an ACF plot to visualise the activity (i.e. vertical movement behaviour) of the eels
 20. analyse_circadian_depth_diff.R: Analyse depth difference according to the circadian phases day and night
-21. analyse_circadian_depth.R: Analyse depth according to the circadian phases day and night
+21. analyse_circadian_depth.R: Analyse distance from seabed according to the circadian phases day and night
 22. classify_tides.R: classify tidal phases (i.e. ebb or flood) based on surface current data
 	+ Generate `data_tidal_phases.csv` in `interim` folder
 23. analyse_tidal_depth.R: Analyse depth according to the tidal phases ebb and flood
