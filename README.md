@@ -82,18 +82,18 @@ R Markdown files and forthcoming HTML files with code and output.
 	+ Generate `data_circadian_tidal_5min.csv` in `interim` folder
 13. link_moon_sun.R: Link illuminated moon fraction, sun altitude and sun azimuth data to the dataset
 	+ Generate `data_circadian_tidal_moon_sun_5min.csv` in `interim` folder
-14. calc_depth_diff.R: calculate depth difference between minima and maxima
-	+ Generate `data_depth_diff.csv` in `interim` folder
-15. calc_hourly_migrations.R: calculate the number of vertical migrations per hour together with hourly summarised environmental data
-	+ Generate `data_hourly_migrations.csv` in `interim` folder
-16. create_plots.R: Create plots for data exploration
-17. visualise_tracking_data.R: Visualise tracking data as animated gif using `moveVis` R-package. The output is stored in `data\output\`.
-18. create_actogram.R: Create an actogram to visualise the activity (i.e. vertical movement behaviour) of the eels
-19. create_acf.R: Create an ACF plot to visualise the activity (i.e. vertical movement behaviour) of the eels
-20. analyse_circadian_depth_diff.R: Analyse depth difference according to the circadian phases day and night
-21. analyse_circadian_depth.R: Analyse distance from seabed according to the circadian phases day and night
-22. classify_tides.R: classify tidal phases (i.e. ebb or flood) based on surface current data
+14. classify_tides.R: classify tidal phases (i.e. ebb or flood) based on surface current data
 	+ Generate `data_tidal_phases.csv` in `interim` folder
+15. calc_depth_diff.R: calculate depth difference between minima and maxima
+	+ Generate `data_depth_diff.csv` in `interim` folder
+16. calc_hourly_migrations.R: calculate the number of vertical migrations per hour together with hourly summarised environmental data
+	+ Generate `data_hourly_migrations.csv` in `interim` folder
+17. create_plots.R: Create plots for data exploration
+18. visualise_tracking_data.R: Visualise tracking data as animated gif using `moveVis` R-package. The output is stored in `data\output\`.
+19. create_actogram.R: Create an actogram to visualise the activity (i.e. vertical movement behaviour) of the eels
+20. create_acf.R: Create an ACF plot to visualise the activity (i.e. vertical movement behaviour) of the eels
+21. analyse_circadian_depth_diff.R: Analyse depth difference according to the circadian phases day and night
+22. analyse_circadian_depth.R: Analyse distance from seabed according to the circadian phases day and night
 23. analyse_tidal_depth.R: Analyse distance from seabed according to the tidal phases ebb and flood
 24. analyse_tidal_depth_diff.R: Analyse depth difference according to the tidal phases ebb and flood
 
