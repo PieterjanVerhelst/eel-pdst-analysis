@@ -1,4 +1,4 @@
-# Analyse circadian depth pattern: distance from seabed
+# Analyse depth pattern: distance from seabed in relation to circadian and tidal phases
 # By Pieterjan Verhelst
 # pieterjan.verhelst@inbo.be
 
@@ -9,13 +9,11 @@ library(lubridate)
 library(PairedData)
 
 # 1. Read data ####
-data <- read.csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv")
+data <- read.csv("./data/interim/data_tidal_phases.csv")
 data$ID <- factor(data$ID)
 data$datetime <- ymd_hms(data$datetime)
 data$night_day <- factor(data$night_day)
-data <- data %>%
-  rename(direction_x = U,
-         direction_y = V)
+data$tidal_phase <- factor(data$tidal_phase)
 
 # Remove DVM data from eel A17535
 data <- data[!(data$ID == "17535" & data$datetime >= '2020-01-11 00:00:00'),]
@@ -38,16 +36,25 @@ data$dist_from_seabed <- data$corrected_depth - data$max_depth
 
 
 # Remove NA in circadian phase
-data <- data[!is.na(data$night_day),]
+#data <- data[!is.na(data$night_day),]
 
 
 # Calculate summary
-aggregate(data$dist_from_seabed, list(data$night_day), mean)
-aggregate(data$dist_from_seabed, list(data$night_day), sd)
-aggregate(data$dist_from_seabed, list(data$night_day), median)
-aggregate(data$dist_from_seabed, list(data$night_day), min)
-aggregate(data$dist_from_seabed, list(data$night_day), max)
-aggregate(data$dist_from_seabed, list(data$night_day, data$ID), median) # per eel
+## Circadian phases
+aggregate(data$dist_from_seabed, list(data$night_day), mean, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$night_day), sd, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$night_day), median, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$night_day), min, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$night_day), max, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$night_day, data$ID), median, na.rm = TRUE) # per eel
+
+## Tidal phases
+aggregate(data$dist_from_seabed, list(data$tidal_phase), mean, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$tidal_phase), sd, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$tidal_phase), median, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$tidal_phase), min, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$tidal_phase), max, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$tidal_phase, data$ID), median, na.rm = TRUE) # per eel
 
 
 # Create plot
