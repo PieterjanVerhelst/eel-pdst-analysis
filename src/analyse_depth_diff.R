@@ -1,4 +1,4 @@
-# Analyse depth pattern: depth difference in relation to circadian and tidal phases
+# Analyse depth pattern: depth difference in relation to circadian and current phases
 # By Pieterjan Verhelst
 # pieterjan.verhelst@inbo.be
 
