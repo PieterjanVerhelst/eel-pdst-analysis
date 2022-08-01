@@ -132,6 +132,8 @@ subset <- filter(data, ID == "16031" |
 subset <- filter(subset, dist_from_seabed > 0)
 summary(subset$dist_from_seabed)
 
+data_no_neg <- filter(data, dist_from_seabed > 0)
+
 ## GLMM from MASS
 glm_model <- MASS::glmmPQL(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_phase,
                            random=~1|ID,
@@ -149,14 +151,15 @@ summary(bam_model)
 
 ## GLM from glmer
 mod_glmer <- glmer(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_phase +
-                      + (1|ID), 
-                    data=subset,
+                    (1|ID), 
+                    data=data_no_neg,
                     family=Gamma(link = "log"))
 summary(mod_glmer)
 
 plot(mod_glmer)
 
 # Check model
+par(mfrow=c(2,2))
 qqnorm(resid(mod_glmer))
 hist(resid(mod_glmer))
 plot(fitted(mod_glmer),resid(mod_glmer))
