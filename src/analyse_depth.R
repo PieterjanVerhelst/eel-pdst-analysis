@@ -14,11 +14,12 @@ library(lme4)
 
 
 # 1. Read data ####
-data <- read.csv("./data/interim/data_tidal_phases.csv")
+data <- read.csv("./data/interim/data_current_phases.csv")
 data$ID <- factor(data$ID)
 data$datetime <- ymd_hms(data$datetime)
 data$night_day <- factor(data$night_day)
-data$tidal_phase <- factor(data$tidal_phase)
+data$current_phase_x <- factor(data$current_phase_x)
+data$current_phase_y <- factor(data$current_phase_y)
 
 # Remove DVM data from eel A17535
 data <- data[!(data$ID == "17535" & data$datetime >= '2020-01-11 00:00:00'),]
