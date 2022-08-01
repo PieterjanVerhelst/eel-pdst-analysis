@@ -1,4 +1,4 @@
-# Classify tidal phases
+# Classify current phases
 # By Raïsa Carmen
 # raisa.carmen@inbo.be
 
@@ -25,7 +25,8 @@ data <- data %>%
 data <- data[!(data$ID == "17535" & data$datetime >= '2020-01-11 00:00:00'),]
 
 
-# Classify tidal phase
+# Classify currents
+# current in x-direction
 data$counter <- NA
 counter <- 1
 for(i in 2:nrow(data)){
@@ -46,15 +47,46 @@ previous <- data %>% group_by(ID, counter) %>%
   ungroup()
 
 data <- data %>% left_join(previous) %>%
-  mutate(tidal_phase = ifelse(ID == previous_ID,
+  mutate(current_phase_x = ifelse(ID == previous_ID,
                               ifelse(direction_x >= direction_x_prev,
-                                     "flood",
-                                     "ebb"),
+                                     "eastward",
+                                     "westward"),
                               NA)
   ) %>%
   dplyr::select(-counter, -previous_ID, -direction_x_prev)
 
 
+# current in y-direction
+data$counter <- NA
+counter <- 1
+for(i in 2:nrow(data)){
+  if((is.na(data[i-1,"direction_y"]) | is.na(data[i,"direction_y"]) |
+      (data[i,"direction_y"] == data[i-1,"direction_y"])) &
+     data[i, "ID"] == data[i - 1, "ID"]){
+    data[i, "counter"] <- counter
+  }
+  else{counter <- counter+1
+  data[i, "counter"] <- counter
+  }
+}
+
+previous <- data %>% group_by(ID, counter) %>%
+  summarize(direction_y_prev = first(direction_y),
+            previous_ID = first(ID)) %>%
+  mutate(counter = lead(counter)) %>%
+  ungroup()
+
+data <- data %>% left_join(previous) %>%
+  mutate(current_phase_y = ifelse(ID == previous_ID,
+                                  ifelse(direction_y >= direction_y_prev,
+                                         "northward",
+                                         "southward"),
+                                  NA)
+  ) %>%
+  dplyr::select(-counter, -previous_ID, -direction_y_prev)
+
+
+
 # write csv
-write.csv(data, "./data/interim/data_tidal_phases.csv")
+write.csv(data, "./data/interim/data_current_phases.csv")
 
