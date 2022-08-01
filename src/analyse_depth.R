@@ -7,6 +7,11 @@
 library(tidyverse) # To do datascience
 library(lubridate)
 library(PairedData)
+library(car)
+library(MASS)
+library(mgcv)
+library(lme4)
+
 
 # 1. Read data ####
 data <- read.csv("./data/interim/data_tidal_phases.csv")
@@ -90,9 +95,74 @@ plot(pd, type = "profile") +
   theme_bw()
 
 
+# Analyse data
+# Check assumptions
+# 1. Normality
+
+# Create qqplot with qqline
+qqnorm(data$dist_from_seabed)
+qqline(data$dist_from_seabed)
+
+# Shapiro test
+# The p-value > 0.05 implying that the distribution of the data are not significantly different from normal distribution. In other words, we can assume the normality.
+shapiro.test(data$dist_from_seabed)
+
+# 2. Check homogeneity of variances
+# Levene’s test
+# Levene’s test is used to assess whether the variances of two or more populations are equal.
+# https://www.datanovia.com/en/lessons/homogeneity-of-variance-test-in-r/
+# When p > 0.05, there is no significant difference between the two variances.
+leveneTest(dist_from_seabed ~ night_day, data = data)
+
+
+# Paired t-test
+# Assumptions not met
+
 # Paired samples Wilcoxon test
 # See: http://www.sthda.com/english/wiki/paired-samples-wilcoxon-test-in-r
 wilcox.test(day, night, paired = TRUE)
 
+
+# GLMM
+subset <- filter(data, ID == "16031" |
+                   ID == "17508" |
+                   ID == "17538" |
+                   ID == "15789" |
+                   ID == "17648")
+subset <- filter(subset, dist_from_seabed > 0)
+summary(subset$dist_from_seabed)
+
+## GLMM from MASS
+glm_model <- MASS::glmmPQL(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_phase,
+                           random=~1|ID,
+                           family = Gamma(link = "inverse"),
+                           data = subset, na.action = na.omit)
+summary(glm_model)
+
+## bam 
+bam_model <- bam(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_phase +
+                   s(ID, bs="re"),
+                 family = Gamma(link = "log"), data = subset, discrete = TRUE,
+                 rho=0.99,
+                 na.action = na.omit)
+summary(bam_model)
+
+## GLM from glmer
+mod_glmer <- glmer(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_phase +
+                      + (1|ID), 
+                    data=subset,
+                    family=Gamma(link = "log"))
+summary(mod_glmer)
+
+plot(mod_glmer)
+
+# Check model
+qqnorm(resid(mod_glmer))
+hist(resid(mod_glmer))
+plot(fitted(mod_glmer),resid(mod_glmer))
+
+# Check overdispersion
+library("blmeco") 
+dispersion_glmer(mod_glmer) #it shouldn't be over 1.4
 
 
