@@ -13,7 +13,7 @@ library(lubridate)
 # 1. Plot raw data ####
 
 # Import data
-data <- read_csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv",
+data <- read_csv("./data/interim/data_current_phases.csv",
                  na = "", 
                  col_types = list(sunrise = col_datetime(),
                                   previous_sunset = col_datetime(),
@@ -21,15 +21,18 @@ data <- read_csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv",
                                   sunrise = col_datetime(),
                                   next_sunrise = col_datetime(),
                                   next_sunmoment = col_datetime(),
-                                  U = col_double(),
+                                  direction_x = col_double(),
                                   V = col_double(),
-                                  speed = col_double(),
+                                  direction_y = col_double(),
                                   direction = col_double()),          # set direction as numeric
                  guess_max = 100000)
 
 
 data$...1 <- NULL
 data$ID <- factor(data$ID)
+data$current_phase_x <- factor(data$current_phase_x)
+data$current_phase_y <- factor(data$current_phase_y)
+
 
 data <-
   data %>%
@@ -57,7 +60,7 @@ fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
                           ymin=-Inf,
                           ymax=+Inf), fill = "grey", alpha=0.5) +
   geom_line(size=1.0, binwidth = 1, colour = "black") +
-  geom_line(data = subset, aes(x = datetime, y = U*100), size = 1.0, alpha = 0.5, colour = "purple") +
+  geom_line(data = subset, aes(x = datetime, y = direction_x*100), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~./100, name = "Eastward velocity (m/s)")) +
   theme_minimal() +
