@@ -139,15 +139,6 @@ wilcox.test(day, night, paired = TRUE)
 
 
 # GLMM
-subset <- filter(data, ID == "16031" |
-                   ID == "17508" |
-                   ID == "17538" |
-                   ID == "15789" |
-                   ID == "17648")
-subset <- filter(subset, dist_from_seabed > 0)
-summary(subset$dist_from_seabed)
-
-data_no_neg <- filter(data, dist_from_seabed > 0)
 
 ### Processing steps
 summary(data$dist_from_seabed) # all values need to be > 0
