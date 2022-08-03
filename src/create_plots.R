@@ -42,7 +42,7 @@ data <-
 # Create subset of several days for plot
 subset <- filter(data,
                  ID == "16031",
-                 datetime >= "2019-02-03 21:00:00", datetime <= "2019-02-08 00:00:00")
+                 datetime >= "2019-02-03 21:00:00", datetime <= "2019-02-08 03:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
@@ -100,8 +100,8 @@ stop$change <- NULL
 start <- rename(start, datetime_start = datetime)
 stop <- rename(stop, datetime_stop = datetime2)
 
-start$id <- factor(c(1:16))
-stop$id <- factor(c(0:15))
+start$id <- factor(c(1:17))
+stop$id <- factor(c(0:16))
 
 start_stop <- left_join(start, stop, by = 'id')
 
