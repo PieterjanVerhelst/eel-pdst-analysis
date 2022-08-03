@@ -11,6 +11,7 @@ library(car)
 library(MASS)
 library(mgcv)
 library(lme4)
+library("blmeco") # To calculate overdispersion of GLMM
 
 
 # 1. Read data ####
@@ -182,15 +183,9 @@ mod_glmer <- glmer(dist_from_seabed ~  night_day + current_phase_x + current_pha
                      night_day:current_phase_x +
                      night_day:current_phase_y +
                      current_phase_x:current_phase_y +
-                    (1|ID), 
+                    (1|ID/day_ordernumber), 
                     data=data,
                     family=Gamma(link = "log"))
-
-mod_glmer <- glmer(dist_from_seabed ~  night_day + current_phase_x + current_phase_y + 
-
-                     (1|ID) , 
-                   data=data,
-                   family=Gamma(link = "log"))
 
 
 summary(mod_glmer)
@@ -204,8 +199,8 @@ hist(resid(mod_glmer))
 plot(fitted(mod_glmer),resid(mod_glmer))
 
 # Check overdispersion
-library("blmeco") 
 dispersion_glmer(mod_glmer) #it shouldn't be over 1.4
 
-
+# Power analysis
+#power <- powerSim(mod_glmer, test = fixed("night_day"), nsim = 100)
 
