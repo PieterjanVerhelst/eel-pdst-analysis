@@ -24,6 +24,20 @@ data$current_phase_y <- factor(data$current_phase_y)
 # Remove DVM data from eel A17535
 data <- data[!(data$ID == "17535" & data$datetime >= '2020-01-11 00:00:00'),]
 
+# Nordic eels
+data <- filter(data, ID == "15805" |
+                 ID == "15981" |
+                 ID == "17492_2" |
+                 ID == "17499" |
+                 ID == "17525_2")
+
+# Channel eels
+data <- filter(data, ID != "15805" ,
+               ID != "15981" ,
+               ID != "17492_2" ,
+               ID != "17499" ,
+               ID != "17525_2")
+
 # Arrange data set according to tag ID and datetime, so min and max are calculated accordingly
 data <-
   data %>%
@@ -52,15 +66,15 @@ aggregate(data$dist_from_seabed, list(data$night_day), sd, na.rm = TRUE)
 aggregate(data$dist_from_seabed, list(data$night_day), median, na.rm = TRUE)
 aggregate(data$dist_from_seabed, list(data$night_day), min, na.rm = TRUE)
 aggregate(data$dist_from_seabed, list(data$night_day), max, na.rm = TRUE)
-aggregate(data$dist_from_seabed, list(data$night_day, data$ID), median, na.rm = TRUE) # per eel
+aggregate(data$dist_from_seabed, list(data$night_day, data$ID), mean, na.rm = TRUE) # per eel
 
-## Tidal phases
-aggregate(data$dist_from_seabed, list(data$tidal_phase), mean, na.rm = TRUE)
-aggregate(data$dist_from_seabed, list(data$tidal_phase), sd, na.rm = TRUE)
-aggregate(data$dist_from_seabed, list(data$tidal_phase), median, na.rm = TRUE)
-aggregate(data$dist_from_seabed, list(data$tidal_phase), min, na.rm = TRUE)
-aggregate(data$dist_from_seabed, list(data$tidal_phase), max, na.rm = TRUE)
-aggregate(data$dist_from_seabed, list(data$tidal_phase, data$ID), median, na.rm = TRUE) # per eel
+## Current phases
+aggregate(data$dist_from_seabed, list(data$current_phase_x), mean, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$current_phase_x), sd, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$current_phase_x), median, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$current_phase_x), min, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$current_phase_x), max, na.rm = TRUE)
+aggregate(data$dist_from_seabed, list(data$current_phase_x, data$ID), mean, na.rm = TRUE) # per eel
 
 
 # Create plot
@@ -135,6 +149,20 @@ summary(subset$dist_from_seabed)
 
 data_no_neg <- filter(data, dist_from_seabed > 0)
 
+### Processing steps
+summary(data$dist_from_seabed) # all values need to be > 0
+
+# set 0 to 0.00001
+data$dist_from_seabed <- if_else(data$dist_from_seabed == 0,
+                      0.00001,
+                      data$dist_from_seabed)
+
+# Check correlation
+data_no_na <- data %>% drop_na(direction_x)
+data_no_na <- data_no_na %>% drop_na(direction_y)
+cor(data_no_na$direction_x, data_no_na$direction_y)
+
+
 ## GLMM from MASS
 glm_model <- MASS::glmmPQL(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_phase,
                            random=~1|ID,
@@ -151,7 +179,7 @@ bam_model <- bam(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_p
 summary(bam_model)
 
 ## GLM from glmer
-mod_glmer <- glmer(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_phase +
+mod_glmer <- glmer(dist_from_seabed ~  night_day + current_phase_x + current_phase_y + 
                     (1|ID), 
                     data=data_no_neg,
                     family=Gamma(link = "log"))
