@@ -153,6 +153,14 @@ data_no_na <- data %>% drop_na(direction_x)
 data_no_na <- data_no_na %>% drop_na(direction_y)
 cor(data_no_na$direction_x, data_no_na$direction_y)
 
+# Add tracking day number
+data$Date <- ymd(data$Date)
+data <- data %>% 
+  #mutate(day_number = lubridate::ymd(Date)) %>% 
+  group_by(ID) %>% 
+  mutate(day_ordernumber = Date - first(Date))
+data$day_ordernumber <- as.numeric(data$day_ordernumber) + 1
+
 
 ## GLMM from MASS
 glm_model <- MASS::glmmPQL(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_phase,
@@ -171,9 +179,20 @@ summary(bam_model)
 
 ## GLM from glmer
 mod_glmer <- glmer(dist_from_seabed ~  night_day + current_phase_x + current_phase_y + 
+                     night_day:current_phase_x +
+                     night_day:current_phase_y +
+                     current_phase_x:current_phase_y +
                     (1|ID), 
-                    data=data_no_neg,
+                    data=data,
                     family=Gamma(link = "log"))
+
+mod_glmer <- glmer(dist_from_seabed ~  night_day + current_phase_x + current_phase_y + 
+
+                     (1|ID) , 
+                   data=data,
+                   family=Gamma(link = "log"))
+
+
 summary(mod_glmer)
 
 plot(mod_glmer)
@@ -187,5 +206,6 @@ plot(fitted(mod_glmer),resid(mod_glmer))
 # Check overdispersion
 library("blmeco") 
 dispersion_glmer(mod_glmer) #it shouldn't be over 1.4
+
 
 
