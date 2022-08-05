@@ -7,6 +7,7 @@
 library(tidyverse) # To do datascience
 library(lubridate)
 library(MASS)
+library(nlme)
 library(mgcv)
 library(lme4)
 library("blmeco") # To calculate overdispersion of GLMM
@@ -122,9 +123,9 @@ data$day_ordernumber <- as.numeric(data$day_ordernumber) + 1
 ## GLMM
 ### LMM from lme4
 data$sqrt_dist_from_seabed <- sqrt(data$dist_from_seabed)
-lm_model <- nlme::lme(dist_from_seabed ~  night_day + current_phase_x + current_phase_y,
+lm_model <- lme(dist_from_seabed ~  night_day + current_phase_x + current_phase_y,
                       random = ~1|ID,
-                      correlation = nlme::corAR1(form = ~ 1 | ID),
+                      correlation = corAR1(form = ~ 1 | ID),
                       data = data, na.action = na.omit) 
 
 summary(lm_model)
