@@ -6,8 +6,6 @@
 # Load packages
 library(tidyverse) # To do datascience
 library(lubridate)
-library(PairedData)
-library(car)
 library(MASS)
 library(mgcv)
 library(lme4)
@@ -92,69 +90,28 @@ boxplot <- ggplot(data, aes(x=night_day, y=dist_from_seabed)) +
 boxplot
 
 
-# Paired plot
-# summarise
-aggregated <- aggregate(data$dist_from_seabed, list(data$night_day, data$ID), median)
-aggregated <- rename(aggregated, 
-                     night_day = Group.1,
-                     ID = Group.2,
-                     depth = x)
-# Subset night data before treatment
-night <- subset(aggregated,  night_day == "night", depth,
-                drop = TRUE)
-# subset day data after treatment
-day <- subset(aggregated,  night_day == "day", depth,
-              drop = TRUE)
-# Plot paired data
-pd <- paired(day, night)
-plot(pd, type = "profile") + 
-  theme_bw()
 
 
 # Analyse data
-# Check assumptions
-# 1. Normality
-
+## Normality
 # Create qqplot with qqline
 qqnorm(data$dist_from_seabed)
 qqline(data$dist_from_seabed)
 
-# Shapiro test
-# The p-value > 0.05 implying that the distribution of the data are not significantly different from normal distribution. In other words, we can assume the normality.
-shapiro.test(data$dist_from_seabed)
-
-# 2. Check homogeneity of variances
-# Levene’s test
-# Levene’s test is used to assess whether the variances of two or more populations are equal.
-# https://www.datanovia.com/en/lessons/homogeneity-of-variance-test-in-r/
-# When p > 0.05, there is no significant difference between the two variances.
-leveneTest(dist_from_seabed ~ night_day, data = data)
-
-
-# Paired t-test
-# Assumptions not met
-
-# Paired samples Wilcoxon test
-# See: http://www.sthda.com/english/wiki/paired-samples-wilcoxon-test-in-r
-wilcox.test(day, night, paired = TRUE)
-
-
-# GLMM
-
-### Processing steps
+## Processing steps
 summary(data$dist_from_seabed) # all values need to be > 0
 
-# set 0 to 0.00001
+# set 0 to 0.00001 to apply Gamma distribution
 data$dist_from_seabed <- if_else(data$dist_from_seabed == 0,
                       0.00001,
                       data$dist_from_seabed)
 
-# Check correlation
+## Check correlation
 data_no_na <- data %>% drop_na(direction_x)
 data_no_na <- data_no_na %>% drop_na(direction_y)
 cor(data_no_na$direction_x, data_no_na$direction_y)
 
-# Add tracking day number
+## Add tracking day number
 data$Date <- ymd(data$Date)
 data <- data %>% 
   #mutate(day_number = lubridate::ymd(Date)) %>% 
@@ -162,15 +119,16 @@ data <- data %>%
   mutate(day_ordernumber = Date - first(Date))
 data$day_ordernumber <- as.numeric(data$day_ordernumber) + 1
 
-
-## GLMM from MASS
-glm_model <- MASS::glmmPQL(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_phase,
-                           random=~1|ID,
-                           family = Gamma(link = "inverse"),
-                           data = subset, na.action = na.omit)
+## GLMM
+### GLMM from MASS
+glm_model <- MASS::glmmPQL(dist_from_seabed ~  night_day + current_phase_x + current_phase_y,
+                           random = ~1|ID,
+                           correlation = corAR1(form = ~ 1 | ID),
+                           family = Gamma(link = "log"),
+                           data = data, na.action = na.omit)
 summary(glm_model)
 
-## bam 
+### bam 
 bam_model <- bam(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_phase +
                    s(ID, bs="re"),
                  family = Gamma(link = "log"), data = subset, discrete = TRUE,
@@ -178,7 +136,11 @@ bam_model <- bam(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_p
                  na.action = na.omit)
 summary(bam_model)
 
-## GLM from glmer
+
+
+
+
+### GLM from glmer
 mod_glmer <- glmer(dist_from_seabed ~  night_day + current_phase_x + current_phase_y + 
                      night_day:current_phase_x +
                      night_day:current_phase_y +
