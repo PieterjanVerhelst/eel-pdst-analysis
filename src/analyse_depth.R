@@ -113,16 +113,16 @@ data_summary <- data %>%
 # Analyse data
 ## Normality
 # Create qqplot with qqline
-qqnorm(data$dist_from_seabed)
-qqline(data$dist_from_seabed)
+qqnorm(data_summary$mean_seabed)
+qqline(data_summary$mean_seabed)
 
 ## Processing steps
-summary(data$dist_from_seabed) # all values need to be > 0
+summary(data_summary$mean_seabed) # all values need to be > 0
 
 # set 0 to 0.00001 to apply Gamma distribution
-data$dist_from_seabed <- if_else(data$dist_from_seabed == 0,
+data_summary$mean_seabed <- if_else(data_summary$mean_seabed == 0,
                       0.00001,
-                      data$dist_from_seabed)
+                      data_summary$mean_seabed)
 
 ## Check correlation
 data_no_na <- data %>% drop_na(direction_x)
@@ -130,12 +130,13 @@ data_no_na <- data_no_na %>% drop_na(direction_y)
 cor(data_no_na$direction_x, data_no_na$direction_y)
 
 ## Add tracking day number
-data$Date <- ymd(data$Date)
-data <- data %>% 
+#data_summary$Date <- ymd(data_summary$date_hour)
+data_summary$Date <- as.Date(data_summary$date_hour)
+data_summary <- data_summary %>% 
   #mutate(day_number = lubridate::ymd(Date)) %>% 
   group_by(ID) %>% 
   mutate(day_ordernumber = Date - first(Date))
-data$day_ordernumber <- as.numeric(data$day_ordernumber) + 1
+data_summary$day_ordernumber <- as.numeric(data_summary$day_ordernumber) + 1
 
 ## GLMM
 ### LMM from lme4
@@ -149,13 +150,13 @@ summary(lm_model)
 
 
 ### GLMM from MASS
-glm_model <- MASS::glmmPQL(dist_from_seabed ~  night_day + current_phase_x + current_phase_y,
+glm_model <- MASS::glmmPQL(mean_seabed ~  night_day + current_phase_x + current_phase_y,
                            random = ~1|ID,
                            correlation = corAR1(form = ~ 1 | ID),
                            family = Gamma(link = "log"),
-                           data = data, na.action = na.omit)
+                           data = data_summary, na.action = na.omit)
 summary(glm_model)
-
+#~jitter(as.numeric(DT))|ID/Date
 
 ### bam 
 bam_model <- bam(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_phase +
