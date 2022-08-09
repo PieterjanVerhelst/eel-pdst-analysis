@@ -174,7 +174,7 @@ glm_model4 <- MASS::glmmPQL(sqrt(mean_seabed) ~  night_day + current_phase_x + c
                             family = gaussian,
                             data = data_summary, na.action = na.omit)
 
-summary(glm_model4)
+summary(glm_model2)
 
 # Check model
 plot(glm_model2)
