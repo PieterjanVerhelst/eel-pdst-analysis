@@ -155,8 +155,36 @@ glm_model <- MASS::glmmPQL(mean_seabed ~  night_day + current_phase_x + current_
                            correlation = corAR1(form = ~ 1 | ID),
                            family = Gamma(link = "log"),
                            data = data_summary, na.action = na.omit)
-summary(glm_model)
-#~jitter(as.numeric(DT))|ID/Date
+
+glm_model2 <- MASS::glmmPQL(mean_seabed ~  night_day + current_phase_x + current_phase_y,
+                           random = ~1|ID/Date,
+                           correlation = corAR1(form = ~ 1|ID/Date),
+                           family = Gamma(link = "log"),
+                           data = data_summary, na.action = na.omit)
+
+glm_model3 <- MASS::glmmPQL(mean_seabed ~  night_day + current_phase_x + current_phase_y,
+                            random = ~1|ID/Date,
+                            correlation = corAR1(form = ~ 1|ID/Date),
+                            family = gaussian,
+                            data = data_summary, na.action = na.omit)
+
+glm_model4 <- MASS::glmmPQL(sqrt(mean_seabed) ~  night_day + current_phase_x + current_phase_y,
+                            random = ~1|ID/Date,
+                            correlation = corAR1(form = ~ 1|ID/Date),
+                            family = gaussian,
+                            data = data_summary, na.action = na.omit)
+
+summary(glm_model4)
+
+# Check model
+plot(glm_model2)
+par(mfrow=c(2,2))
+qqnorm(resid(glm_model2))
+hist(resid(glm_model2))
+plot(fitted(glm_model2),resid(glm_model2))
+
+
+
 
 ### bam 
 bam_model <- bam(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_phase +
