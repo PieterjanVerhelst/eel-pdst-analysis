@@ -56,7 +56,12 @@ data$dist_from_seabed <- data$corrected_depth - data$max_depth
 
 
 # Remove NA in circadian phase
-#data <- data[!is.na(data$night_day),]
+data <- data[!is.na(data$night_day),]
+
+# Remove NA in current_phase_x and current_phase_y
+data <- data[!is.na(data$current_phase_x),]
+# Remove NA in circadian phase
+data <- data[!is.na(data$current_phase_y),]
 
 
 # Calculate summary
