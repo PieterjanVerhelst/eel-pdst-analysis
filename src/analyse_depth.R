@@ -96,6 +96,18 @@ boxplot <- ggplot(data, aes(x=night_day, y=dist_from_seabed)) +
 boxplot
 
 
+# Summarise data per hour
+#data$date_hour <- floor(data$datetime/3600)
+data$date_hour <- lubridate::floor_date(data$datetime, "hour")  
+data_summary <- data %>%
+  group_by(ID, date_hour, night_day, current_phase_x, current_phase_y) %>%
+  summarise(mean_depth = mean(corrected_depth),
+            mean_seabed = mean(dist_from_seabed),
+            mean_temp = mean(temperature),
+            mean_moon = mean(moon_fraction),
+            mean_sun_altitude = mean(sun_altitude),
+            mean_sun_azimuth = mean(sun_azimuth))
+  
 
 
 # Analyse data
