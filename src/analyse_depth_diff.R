@@ -6,7 +6,6 @@
 # Load packages
 library(tidyverse) # To do datascience
 library(lubridate)
-library(PairedData)
 
 
 # Load data
