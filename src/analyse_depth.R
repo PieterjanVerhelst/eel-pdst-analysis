@@ -165,7 +165,7 @@ glm_model3 <- MASS::glmmPQL(mean_seabed ~  night_day + current_phase_x + current
                             family = gaussian,
                             data = data_summary, na.action = na.omit)
 
-glm_model5 <- MASS::glmmPQL(sqrt(mean_seabed) ~  night_day + current_phase_x + current_phase_y +
+glm_model4 <- MASS::glmmPQL(sqrt(mean_seabed) ~  night_day + current_phase_x + current_phase_y +
                               night_day:current_phase_x +
                               night_day:current_phase_y,
                             random = ~1|ID/Date,
