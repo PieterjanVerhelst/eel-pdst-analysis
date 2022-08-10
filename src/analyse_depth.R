@@ -111,16 +111,12 @@ data_summary <- data %>%
   
 
 
-# Analyse data
-## Normality
-# Create qqplot with qqline
-qqnorm(data_summary$mean_seabed)
-qqline(data_summary$mean_seabed)
 
-## Processing steps
+
+# Processing steps
 summary(data_summary$mean_seabed) # all values need to be > 0
 
-# set 0 to 0.00001 to apply Gamma distribution
+## set 0 to 0.00001 to apply Gamma distribution
 data_summary$mean_seabed <- if_else(data_summary$mean_seabed == 0,
                       0.00001,
                       data_summary$mean_seabed)
@@ -141,55 +137,10 @@ data_summary$day_ordernumber <- as.numeric(data_summary$day_ordernumber) + 1
 
 
 
-
-## GLMM
-### LMM from lme4
-data$sqrt_dist_from_seabed <- sqrt(data$dist_from_seabed)
-lm_model <- lme(dist_from_seabed ~  night_day + current_phase_x + current_phase_y,
-                      random = ~1|ID,
-                      correlation = corAR1(form = ~ 1 | ID),
-                      data = data, na.action = na.omit) 
-
-summary(lm_model)
-
-
-
-
-### bam 
-bam_model <- bam(dist_from_seabed ~  night_day + tidal_phase + night_day:tidal_phase +
-                   s(ID, bs="re"),
-                 family = Gamma(link = "log"), data = subset, discrete = TRUE,
-                 rho=0.99,
-                 na.action = na.omit)
-summary(bam_model)
-
-
-### GLMM from lme4
-mod_glmer <- glmer(dist_from_seabed ~  night_day + current_phase_x + current_phase_y + 
-                     night_day:current_phase_x +
-                     night_day:current_phase_y +
-                     current_phase_x:current_phase_y +
-                    (1|ID/day_ordernumber), 
-                    data=data,
-                    family=Gamma(link = "log"))
-
-
-summary(mod_glmer)
-
-plot(mod_glmer)
-
-# Check model
-par(mfrow=c(2,2))
-qqnorm(resid(mod_glmer))
-hist(resid(mod_glmer))
-plot(fitted(mod_glmer),resid(mod_glmer))
-
-# Check overdispersion
-dispersion_glmer(mod_glmer) #it shouldn't be over 1.4
-
-# Power analysis
-#power <- powerSim(mod_glmer, test = fixed("night_day"), nsim = 100)
-
+# Check data distribution
+# Create qqplot with qqline
+qqnorm(data_summary$mean_seabed)
+qqline(data_summary$mean_seabed)
 
 
 
