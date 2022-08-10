@@ -7,7 +7,7 @@
 library(tidyverse) # To do datascience
 library(lubridate)
 library(MASS)
-#library(nlme)
+library(nlme)    # For the corAR1() functionality
 #library(mgcv)
 #library(lme4)
 #library("blmeco") # To calculate overdispersion of GLMM
