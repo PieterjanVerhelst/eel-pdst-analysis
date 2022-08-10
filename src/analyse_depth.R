@@ -149,44 +149,6 @@ lm_model <- lme(dist_from_seabed ~  night_day + current_phase_x + current_phase_
 summary(lm_model)
 
 
-### GLMM from MASS
-glm_model <- MASS::glmmPQL(mean_seabed ~  night_day + current_phase_x + current_phase_y,
-                           random = ~1|ID,
-                           correlation = corAR1(form = ~ 1 | ID),
-                           family = Gamma(link = "log"),
-                           data = data_summary, na.action = na.omit)
-
-glm_model2 <- MASS::glmmPQL(mean_seabed ~  night_day + current_phase_x + current_phase_y +
-                              night_day:current_phase_x +
-                              night_day:current_phase_y,
-                           random = ~1|ID/Date,
-                           correlation = corAR1(form = ~ 1|ID/Date),
-                           family = Gamma(link = "log"),
-                           data = data_summary, na.action = na.omit)
-
-glm_model3 <- MASS::glmmPQL(mean_seabed ~  night_day + current_phase_x + current_phase_y,
-                            random = ~1|ID/Date,
-                            correlation = corAR1(form = ~ 1|ID/Date),
-                            family = gaussian,
-                            data = data_summary, na.action = na.omit)
-
-glm_model4 <- MASS::glmmPQL(sqrt(mean_seabed) ~  night_day + current_phase_x + current_phase_y +
-                              night_day:current_phase_x +
-                              night_day:current_phase_y,
-                            random = ~1|ID/Date,
-                            correlation = corAR1(form = ~ 1|ID/Date),
-                            family = gaussian,
-                            data = data_summary, na.action = na.omit)
-
-summary(glm_model4)
-
-# Check model
-plot(glm_model4)
-par(mfrow=c(2,2))
-qqnorm(resid(glm_model4, type = "n"))  # type = "n"   means that the normalised residues are used; these take into account autocorrelation
-hist(resid(glm_model4, type = "n"))
-plot(fitted(glm_model4),resid(glm_model4, type = "n"))
-
 
 
 ### bam 
@@ -224,3 +186,43 @@ dispersion_glmer(mod_glmer) #it shouldn't be over 1.4
 # Power analysis
 #power <- powerSim(mod_glmer, test = fixed("night_day"), nsim = 100)
 
+
+
+
+### GLMM from MASS
+glm_model <- MASS::glmmPQL(mean_seabed ~  night_day + current_phase_x + current_phase_y,
+                           random = ~1|ID,
+                           correlation = corAR1(form = ~ 1 | ID),
+                           family = Gamma(link = "log"),
+                           data = data_summary, na.action = na.omit)
+
+glm_model2 <- MASS::glmmPQL(mean_seabed ~  night_day + current_phase_x + current_phase_y +
+                              night_day:current_phase_x +
+                              night_day:current_phase_y,
+                            random = ~1|ID/Date,
+                            correlation = corAR1(form = ~ 1|ID/Date),
+                            family = Gamma(link = "log"),
+                            data = data_summary, na.action = na.omit)
+
+glm_model3 <- MASS::glmmPQL(mean_seabed ~  night_day + current_phase_x + current_phase_y,
+                            random = ~1|ID/Date,
+                            correlation = corAR1(form = ~ 1|ID/Date),
+                            family = gaussian,
+                            data = data_summary, na.action = na.omit)
+
+glm_model4 <- MASS::glmmPQL(sqrt(mean_seabed) ~  night_day + current_phase_x + current_phase_y +
+                              night_day:current_phase_x +
+                              night_day:current_phase_y,
+                            random = ~1|ID/Date,
+                            correlation = corAR1(form = ~ 1|ID/Date),
+                            family = gaussian,
+                            data = data_summary, na.action = na.omit)
+
+summary(glm_model4)
+
+# Check model
+plot(glm_model4)
+par(mfrow=c(2,2))
+qqnorm(resid(glm_model4, type = "n"))  # type = "n"   means that the normalised residues are used; these take into account autocorrelation
+hist(resid(glm_model4, type = "n"))
+plot(fitted(glm_model4),resid(glm_model4, type = "n"))
