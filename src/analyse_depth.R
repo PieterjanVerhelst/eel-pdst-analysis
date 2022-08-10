@@ -11,6 +11,7 @@ library(nlme)
 library(mgcv)
 library(lme4)
 library("blmeco") # To calculate overdispersion of GLMM
+library(coefplot2)
 
 
 # 1. Read data ####
@@ -125,9 +126,9 @@ data_summary$mean_seabed <- if_else(data_summary$mean_seabed == 0,
                       data_summary$mean_seabed)
 
 ## Check correlation
-data_no_na <- data %>% drop_na(direction_x)
-data_no_na <- data_no_na %>% drop_na(direction_y)
-cor(data_no_na$direction_x, data_no_na$direction_y)
+#data_no_na <- data %>% drop_na(direction_x)
+#data_no_na <- data_no_na %>% drop_na(direction_y)
+#cor(data_no_na$direction_x, data_no_na$direction_y)
 
 ## Add tracking day number
 #data_summary$Date <- ymd(data_summary$date_hour)
@@ -137,6 +138,9 @@ data_summary <- data_summary %>%
   group_by(ID) %>% 
   mutate(day_ordernumber = Date - first(Date))
 data_summary$day_ordernumber <- as.numeric(data_summary$day_ordernumber) + 1
+
+
+
 
 ## GLMM
 ### LMM from lme4
@@ -210,7 +214,7 @@ glm_model3 <- MASS::glmmPQL(mean_seabed ~  night_day + current_phase_x + current
                             family = gaussian,
                             data = data_summary, na.action = na.omit)
 
-glm_model4 <- MASS::glmmPQL(sqrt(mean_seabed) ~  night_day + current_phase_x + current_phase_y +
+glm_model5 <- MASS::glmmPQL(sqrt(mean_seabed) ~  night_day + current_phase_x + current_phase_y +
                               night_day:current_phase_x +
                               night_day:current_phase_y,
                             random = ~1|ID/Date,
@@ -226,3 +230,7 @@ par(mfrow=c(2,2))
 qqnorm(resid(glm_model4, type = "n"))  # type = "n"   means that the normalised residues are used; these take into account autocorrelation
 hist(resid(glm_model4, type = "n"))
 plot(fitted(glm_model4),resid(glm_model4, type = "n"))
+dev.off()
+
+coefplot2(glm_model4)
+
