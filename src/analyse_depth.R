@@ -12,6 +12,7 @@ library(nlme)    # For the corAR1() functionality
 #library(lme4)
 #library("blmeco") # To calculate overdispersion of GLMM
 library(coefplot2)
+library(ggeffects)
 
 
 # 1. Read data ####
@@ -175,15 +176,90 @@ glm_model4 <- MASS::glmmPQL(sqrt(mean_seabed) ~  night_day + current_phase_x + c
                             family = gaussian,
                             data = data_summary, na.action = na.omit)
 
-summary(glm_model4)
+
+
+# Since the Gaussian model is chosen, we can also work with lme() from the nlme package
+# Info by Pieter Verschelde (INBO): vierkantwortel zorgt voor een betere benadering van een normale distributie, maar het is zeker nog geen normale distributie, niettemin lijkt een gamma distributie geen betere benadering. Omdat de distributie niet perfect normaal is moet wel opgelet worden met interpreteren van p-waarden die dicht bij 00.05 zijn zoals bv de 0.022 van de interactie, eigenlijk is dit geen sterk effect en kan het gewoon significant zijn door de fout in responsdistributie
+glm_model5 <- lme(sqrt(mean_seabed) ~  night_day + current_phase_x + current_phase_y +
+                    night_day:current_phase_x +
+                    night_day:current_phase_y,
+                    random = ~1|ID/Date,
+                    correlation = corAR1(form = ~ 1|ID/Date),
+                    data = data_summary, na.action = na.omit)
+
+
+summary(glm_model5)
+
 
 # Check model
-plot(glm_model4)
+plot(glm_model5)
 par(mfrow=c(2,2))
-qqnorm(resid(glm_model4, type = "n"))  # type = "n"   means that the normalised residues are used; these take into account autocorrelation
-hist(resid(glm_model4, type = "n"))
-plot(fitted(glm_model4),resid(glm_model4, type = "n"))
+qqnorm(resid(glm_model5, type = "n"))  # type = "n"   means that the normalised residues are used; these take into account autocorrelation
+hist(resid(glm_model5, type = "n"))
+plot(fitted(glm_model5),resid(glm_model5, type = "n"))
 dev.off()
 
-coefplot2(glm_model4)
+coefplot2(glm_model5)
+
+
+#newdata
+newdata <- expand.grid(night_day = c("night", "day"), current_phase_x = c("eastward", "westward"), current_phase_y = c("northward", "southward"))
+newdata$pred_sqrt <- predict(glm_model5, newdata = newdata, level = 0)
+
+
+#confidence bounds
+#code gehaald van https://rdrr.io/github/bsurial/bernr/src/R/bolker_ci.R (is een klassieke methode die veel gebruikt worden. Referentie kan Zuur et al. zijn
+bolker_ci <- function(model, newdat, pred_int = FALSE, conf_level = 0.95) {
+  if(class(model) != "lme") {
+    stop("works for lme-models only")
+  }
+  z <- round(qnorm((1-conf_level)/2, lower.tail = FALSE), 2)
+  newdat$pred <- predict(model, newdat, level = 0)
+  Designmat <- model.matrix(formula(model)[-2], newdat)
+  predvar <- diag(Designmat %*% vcov(model) %*% t(Designmat))
+  newdat$se <- sqrt(predvar)
+  newdat$ci_l <- newdat$pred - z*newdat$se
+  newdat$ci_h <- newdat$pred + z*newdat$se
+  if(pred_int == TRUE) {
+    newdat$se2 <- sqrt(predvar+model$sigma^2)
+    newdat$predint_l <- newdat$pred - z*newdat$se2
+    newdat$predint_h <- newdat$pred + z*newdat$se2
+  }
+  newdat
+}
+
+conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
+  mutate(predictie = pred^2,
+         lcl = ci_l^2,
+         ucl = ci_h^2,
+         combi = interaction(night_day, current_phase_x, current_phase_y))
+
+ggplot(conf_bounds, aes(x = combi, y = predictie, ymin = lcl, ymax = ucl)) +
+  xlab("scenario") + ylab("distance from seabed (m)") +
+  geom_point() + geom_errorbar() + theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#alternatief die alles voor je doet (dit is wel nog in de vierkantwortelschaal)
+effects <- ggeffects::ggpredict(glm_model5)
+effects
+plot(effects)
+
+# Check model
+plot(glm_model5) #niet genormaliseerde residu"s
+
+
+newdata2 <- data_summary %>%
+  mutate(normres = resid(glm_model5, type = "n"),
+         fitted = fitted(glm_model5),
+         fitted0 = fitted(glm_model5, level = 0))
+ggplot(newdata2, aes(x = night_day, y = normres)) + geom_boxplot()
+ggplot(newdata2, aes(x = current_phase_x, y = normres)) + geom_boxplot()
+ggplot(newdata2, aes(x = current_phase_y, y = normres)) + geom_boxplot()
+#niet normaal verdeeld, maar wel symmetrisch en heel smalle schouders
+ggplot(newdata2, aes(sample = normres)) + geom_qq() + geom_qq_line()
+ggplot(newdata2, aes(x = normres)) + geom_histogram()
+#eigenlijk zou hier geen trend in mogen zitten, maar het zijn vooral enkele extremen bij hoge fits die de lijn hier omhoog trekken
+ggplot(newdata2, aes(x = fitted, y = normres)) + geom_point() + geom_smooth()
+ggplot(newdata2, aes(x = fitted, y = sqrt_mean_seabed)) + geom_point() + geom_smooth() +
+  geom_abline(intercept = 0, slope = 1, color = "red")
+
 
