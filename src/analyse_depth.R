@@ -104,6 +104,7 @@ data$date_hour <- lubridate::floor_date(data$datetime, "hour")
 data_summary <- data %>%
   group_by(ID, date_hour, night_day, current_phase_x, current_phase_y) %>%
   summarise(mean_depth = mean(corrected_depth),
+            mean_rel_depth = mean(rel_depth),
             mean_seabed = mean(dist_from_seabed),
             mean_temp = mean(temperature),
             mean_moon = mean(moon_fraction),
@@ -113,7 +114,7 @@ data_summary <- data %>%
 
 
 
-
+### For model with mean distance from seabed as response variable ####
 # Processing steps
 summary(data_summary$mean_seabed) # all values need to be > 0
 
@@ -121,6 +122,12 @@ summary(data_summary$mean_seabed) # all values need to be > 0
 data_summary$mean_seabed <- if_else(data_summary$mean_seabed == 0,
                       0.00001,
                       data_summary$mean_seabed)
+
+### For model with relative depth from seabed as response variable ####
+# Remove mean_rel_depth < 0
+# This is due to depths above sea surface
+plot(data_summary$mean_rel_depth)
+data_summary <- filter(data_summary, mean_rel_depth > 0)
 
 ## Check correlation
 #data_no_na <- data %>% drop_na(direction_x)
@@ -143,6 +150,8 @@ data_summary$day_ordernumber <- as.numeric(data_summary$day_ordernumber) + 1
 qqnorm(data_summary$mean_seabed)
 qqline(data_summary$mean_seabed)
 
+qqnorm(data_summary$mean_rel_depth)
+qqline(data_summary$mean_rel_depth)
 
 
 ### GLMM from MASS
@@ -180,13 +189,12 @@ glm_model4 <- MASS::glmmPQL(sqrt(mean_seabed) ~  night_day + current_phase_x + c
 
 # Since the Gaussian model is chosen, we can also work with lme() from the nlme package
 # Info by Pieter Verschelde (INBO): vierkantwortel zorgt voor een betere benadering van een normale distributie, maar het is zeker nog geen normale distributie, niettemin lijkt een gamma distributie geen betere benadering. Omdat de distributie niet perfect normaal is moet wel opgelet worden met interpreteren van p-waarden die dicht bij 00.05 zijn zoals bv de 0.022 van de interactie, eigenlijk is dit geen sterk effect en kan het gewoon significant zijn door de fout in responsdistributie
-glm_model5 <- lme(sqrt(mean_seabed) ~  night_day + current_phase_x + current_phase_y +
+glm_model5 <- lme(mean_rel_depth ~  night_day + current_phase_x + current_phase_y +
                     night_day:current_phase_x +
                     night_day:current_phase_y,
                     random = ~1|ID/Date,
                     correlation = corAR1(form = ~ 1|ID/Date),
                     data = data_summary, na.action = na.omit)
-
 
 summary(glm_model5)
 
@@ -228,15 +236,27 @@ bolker_ci <- function(model, newdat, pred_int = FALSE, conf_level = 0.95) {
   newdat
 }
 
+
+# Calculate confidence intervals
 conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
-  mutate(predictie = pred^2,
-         lcl = ci_l^2,
-         ucl = ci_h^2,
+  mutate(predictie = pred,
+         lcl = ci_l,
+         ucl = ci_h,
          combi = interaction(night_day, current_phase_x, current_phase_y))
 
+# Confidence intervals in case response variable was squared
+#conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
+#  mutate(predictie = pred^2,
+#         lcl = ci_l^2,
+#         ucl = ci_h^2,
+#         combi = interaction(night_day, current_phase_x, current_phase_y))
+
+# Plot confidence intervals
 ggplot(conf_bounds, aes(x = combi, y = predictie, ymin = lcl, ymax = ucl)) +
-  xlab("scenario") + ylab("distance from seabed (m)") +
-  geom_point() + geom_errorbar() + theme_bw() + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  xlab("Scenario") + ylab("Relative depth") +
+  geom_point() + geom_errorbar() + theme_bw() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 16),
+        axis.title = element_text(size = 18))
 
 #alternatief die alles voor je doet (dit is wel nog in de vierkantwortelschaal)
 effects <- ggeffects::ggpredict(glm_model5)
