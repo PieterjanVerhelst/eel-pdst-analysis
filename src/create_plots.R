@@ -42,7 +42,7 @@ data <-
 # Create subset of several days for plot
 subset <- filter(data,
                  ID == "16031",
-                 datetime >= "2019-02-03 21:00:00", datetime <= "2019-02-08 03:00:00")
+                 datetime >= "2019-02-03 21:00:00", datetime <= "2019-02-08 07:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
@@ -100,8 +100,8 @@ stop$change <- NULL
 start <- rename(start, datetime_start = datetime)
 stop <- rename(stop, datetime_stop = datetime2)
 
-start$id <- factor(c(1:17))
-stop$id <- factor(c(0:16))
+start$id <- factor(c(1:18))
+stop$id <- factor(c(0:17))
 
 start_stop <- left_join(start, stop, by = 'id')
 
@@ -128,8 +128,8 @@ fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
             inherit.aes = FALSE,
             mapping = aes(xmin = datetime_start,
                           xmax = datetime_stop,
-                          ymin= 0,
-                          ymax= 20), fill = "blue", alpha=0.3) +
+                          ymin= -140,
+                          ymax= -150), fill = "blue", alpha=0.3) +
   geom_line(size=1.0, binwidth = 1, colour = "black") +
   #geom_line(data = subset, aes(x = datetime, y = direction_x*100), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
