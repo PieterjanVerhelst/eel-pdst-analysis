@@ -123,13 +123,13 @@ fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
                           ymin=-Inf,
                           ymax=+Inf), fill = "grey", alpha=0.6) +
   geom_rect(data = start_stop %>% 
-              filter(current_phase_x == "eastward") %>%
+              filter(current_phase_x == "westward") %>%
               distinct(datetime_start, datetime_stop, current_phase_x),
             inherit.aes = FALSE,
             mapping = aes(xmin = datetime_start,
                           xmax = datetime_stop,
                           ymin= -140,
-                          ymax= -150), fill = "blue", alpha=0.3) +
+                          ymax= -155), fill = "blue", alpha=0.3) +
   geom_line(size=1.0, binwidth = 1, colour = "black") +
   #geom_line(data = subset, aes(x = datetime, y = direction_x*100), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
