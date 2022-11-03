@@ -563,3 +563,143 @@ dev.off()
 
 
 
+# 7. Create actogram based on relative depth data using summaries with 15 min resolution for all eels ####
+
+# Load data
+data <- read_csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv",
+                 na = "", 
+                 col_types = list(sunrise = col_datetime(),
+                                  previous_sunset = col_datetime(),
+                                  next_sunrise = col_datetime(),
+                                  next_sunmoment = col_datetime(),
+                                  U = col_double(),
+                                  V = col_double(),
+                                  speed = col_double(),
+                                  direction = col_double()),          # set direction as numeric
+                 guess_max = 100000)
+
+data$...1 <- NULL
+data$ID <- factor(data$ID)
+
+
+
+# Remove DVM data from eel A17535
+data <- data[!(data$ID == "17535" & data$datetime >= '2020-01-11 00:00:00'),]
+
+
+
+# Nordic eels
+data <- filter(data, ID == "15805" |
+                 ID == "15981" |
+                 ID == "17492_2" |
+                 ID == "17499" |
+                 ID == "17525_2")
+
+# Channel eels
+data <- filter(data, ID != "15805" ,
+               ID != "15981" ,
+               ID != "17492_2" ,
+               ID != "17499" ,
+               ID != "17525_2")
+
+# Select 1 eel
+data <- filter(data, ID == "17535")
+
+# Arrange data set according to ID and datetime
+data <- data %>% 
+  arrange(ID, datetime)
+
+# Calculate depth relative to max depth
+data_max_depth <- data %>%
+  group_by(ID, Date) %>%
+  summarise(max_depth = min(corrected_depth))
+data <- left_join(data, data_max_depth, by = c("ID","Date"))
+data$rel_depth <- data$corrected_depth / data$max_depth
+
+# Calculate distance from seabed
+data$dist_from_seabed <- data$corrected_depth - data$max_depth
+
+# Classify behaviour from seabed
+data$activity <- ifelse(data$dist_from_seabed >= 10, 1, 0)
+
+# 15 min resolution
+data$datequarter <- lubridate::floor_date(data$datetime, "15 min")
+
+# Calculate summary by grouping
+data_summary <- data %>%
+  group_by(ID, datequarter) %>%
+  summarise(average_rel_depth = mean(rel_depth),
+            min_rel_depth = min(rel_depth),
+            max_rel_depth = max(rel_depth))
+
+data_summary$numericdate <- as.numeric(data_summary$datequarter)   
+data_summary$quarter <- sub(".*? ", "", data_summary$datequarter)   # extract quarters of the day
+data_summary$Date <- as.Date(data_summary$datequarter)
+data_summary$day_number <- as.numeric(data_summary$Date)
+class(data_summary$quarter)
+data_summary$fquarter <- factor(data_summary$quarter)
+data_summary$quarter_numeric <- as.numeric(data_summary$fquarter)
+
+# Add record of number of tracked days
+data_summary <- data_summary %>% 
+  #mutate(day_number = lubridate::ymd(Date)) %>% 
+  group_by(ID) %>% 
+  mutate(day_ordernumber = Date - first(Date))
+
+data_summary$day_ordernumber <- as.numeric(data_summary$day_ordernumber) + 2 # + 2 to remove the 0 and be 1 day ahead of the duplicate
+
+
+# Create duplicate for double plot actogram
+data2 <- data_summary
+#data_1eel2 <- filter(data_1eel2, datehour > "2018-12-10 00:00:00")
+#data_1eel2 <- filter(data_1eel2, day_number > 17874) # example for eel A16031; in next line write code more generally applicable
+data2 <- data2 %>%
+  group_by(ID) %>%
+  filter(day_number > min(day_number))
+data2$quarter_numeric <- 96+(data2$quarter_numeric)   # add a day (24 hours = 96 quarters = 24 hour * 4 quarters in an hour)
+data2$day_number <- data2$day_number -1
+data2$day_ordernumber <- data2$day_ordernumber -1 # - 1 so eventually the day_ordernummer of the duplicate is one day lagging the original
+
+data_summary <- rbind(data_summary, data2)
+
+# Just for visualisation purpose, add +1 hour
+#data_1eel_summary$hour <- 1+(data_1eel_summary$hour)
+
+# Remove the single record at 2019-02-13 00:00:00 which results in a single cell on top of the plot
+#data_1eel_summary <- filter(data_1eel_summary, day_number != "17940") # example for eel A16031; in next line write code more generally applicable
+data_summary <- filter(data_summary, day_number != max(day_number))
+
+# Set total activity as factor
+#data_summary$total_activity <- factor(data_summary$total_activity)
+
+# Create actogram
+png(file="./additionals/Figures/actograms/channel_rel_depth.png",
+    width=1000, height=400)
+
+#a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = total_activity))+
+a7 <- ggplot(data_summary, aes(x=quarter_numeric, y=day_ordernumber, fill = average_rel_depth))+ # where time is quarter of the day (so, 0 to 96, times 2)
+  geom_tile()+
+  #coord_equal() +
+  scale_fill_viridis(discrete=FALSE, name = 'Average relative \n depth', option = 'magma') +
+  #scale_fill_gradient2(low = "yellow",
+  #                    mid = "green",
+  #                    high = "blue",
+  #                    midpoint = 10,
+  #                    name = 'Average distance from seabed (m)') +
+  #scale_fill_manual(values = c("darkblue", "darkgreen", "orange", "yellow"), name = "Frequency of \n activity") +
+  ylab('Post-release days')+
+  xlab('Quarter of day')+
+  #ylim(17870, 17940) +
+  theme_bw() +  
+  theme(axis.text = element_text(size = 20),
+        axis.title = element_text(size = 22)) +
+  theme(legend.key.size = unit(1, 'cm'), #change legend key size
+        #legend.key.height = unit(1, 'cm'), #change legend key height
+        legend.key.width = unit(2, 'cm'), #change legend key width
+        legend.title = element_text(size=22), #change legend title font size
+        legend.text = element_text(size=20)) #change legend text font size
+a7
+
+dev.off()
+
+
