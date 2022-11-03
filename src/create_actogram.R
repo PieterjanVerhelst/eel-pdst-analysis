@@ -603,7 +603,7 @@ data <- filter(data, ID != "15805" ,
                ID != "17525_2")
 
 # Select 1 eel
-data <- filter(data, ID == "17535")
+data <- filter(data, ID == "17525_2")
 
 # Arrange data set according to ID and datetime
 data <- data %>% 
@@ -673,14 +673,14 @@ data_summary <- filter(data_summary, day_number != max(day_number))
 #data_summary$total_activity <- factor(data_summary$total_activity)
 
 # Create actogram
-png(file="./additionals/Figures/actograms/channel_rel_depth.png",
-    width=1000, height=400)
+png(file="./additionals/Figures/actograms/nordic_A17525_2_rel_depth.png",
+    width=800, height=600)
 
 #a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = total_activity))+
 a7 <- ggplot(data_summary, aes(x=quarter_numeric, y=day_ordernumber, fill = average_rel_depth))+ # where time is quarter of the day (so, 0 to 96, times 2)
   geom_tile()+
   #coord_equal() +
-  scale_fill_viridis(discrete=FALSE, name = 'Average relative \n depth', option = 'magma') +
+  scale_fill_viridis(discrete=FALSE, name = 'Average relative \n depth') +
   #scale_fill_gradient2(low = "yellow",
   #                    mid = "green",
   #                    high = "blue",
@@ -688,7 +688,7 @@ a7 <- ggplot(data_summary, aes(x=quarter_numeric, y=day_ordernumber, fill = aver
   #                    name = 'Average distance from seabed (m)') +
   #scale_fill_manual(values = c("darkblue", "darkgreen", "orange", "yellow"), name = "Frequency of \n activity") +
   ylab('Post-release days')+
-  xlab('Quarter of day')+
+  xlab('Hour')+
   #ylim(17870, 17940) +
   theme_bw() +  
   theme(axis.text = element_text(size = 20),
