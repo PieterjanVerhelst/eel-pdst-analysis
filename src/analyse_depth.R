@@ -1,4 +1,4 @@
-# Analyse depth pattern: distance from seabed in relation to circadian and current phases
+# Analyse depth pattern: distance from seabed in relation to circadian and current phases, and water temperature
 # By Pieterjan Verhelst
 # pieterjan.verhelst@inbo.be
 
