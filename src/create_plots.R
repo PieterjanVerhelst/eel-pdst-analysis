@@ -311,8 +311,8 @@ subset$circ_current <- factor(subset$circ_current)
 
 # Create boxplot with longitude and depth according to current phase and circadian phase
 ggplot(subset, aes(x=Date, y=corrected_depth, fill = circ_current)) + 
-  geom_boxplot(width = 1.0) +
-  geom_point(data = subset, aes(x = Date, y = geoloc_avg_lon*20, type = "Longitude"), size = 5.0, alpha = 0.5, colour = "orange") +
+  geom_boxplot(width = 0.7) +
+  geom_point(data = subset, aes(x = Date, y = geoloc_avg_lon*20), size = 5.0, alpha = 0.5, colour = "orange") +
   scale_y_continuous(sec.axis = sec_axis(~./20, name = "Longitude")) +
   theme_classic() +
   ylab("Mean depth (m)") +
@@ -320,7 +320,8 @@ ggplot(subset, aes(x=Date, y=corrected_depth, fill = circ_current)) +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   theme(axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14)) #+
+        axis.title = element_text(size = 14)) +
+  theme(legend.position="bottom") #+
 #theme(legend.position="none")
 
 
