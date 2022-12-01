@@ -225,4 +225,103 @@ ggplot(subset, aes(x = bins, y = depth_change)) +
 
 
 
+# 3. Create scatter and boxplots following an eel's trajectory ####
+# Read data 
+data <- read.csv("./data/interim/data_current_phases.csv")
+data$ID <- factor(data$ID)
+data$datetime <- ymd_hms(data$datetime)
+data$night_day <- factor(data$night_day)
+data$current_phase_x <- factor(data$current_phase_x)
+data$current_phase_y <- factor(data$current_phase_y)
+
+# Filter eel A16031
+subset <- filter(data, ID == "16031")
+
+# Remove rows with NA in column with direction_x
+subset <- subset(subset, !is.na(direction_x))
+
+# create current speed class
+summary(subset$speed)
+
+subset$speed_class <- NA
+for (i in 1:dim(subset)[1]){
+  if (subset$speed[i] < 0.5){
+    subset$speed_class[i] = "1"
+  } else if (subset$speed[i] > 0.5 & subset$speed[i] < 1.0){
+    subset$speed_class[i] = "2"
+  } else if (subset$speed[i] > 1.0 & subset$speed[i] < 1.5){
+    subset$speed_class[i] = "3"
+  } else{
+    subset$speed_class[i] = "4"
+  }}
+
+class(subset$speed_class)
+subset$speed_class <- factor(subset$speed_class)
+summary(subset$speed_class)
+
+# Create plot with current speed classes
+ggplot(subset, aes(x=datetime, y=corrected_depth)) +
+  geom_point(aes(colour = factor(speed_class))) 
+
+# Create plot with current phase 'east-west' axis
+ggplot(subset, aes(x=datetime, y=corrected_depth)) +
+  geom_point(aes(colour = factor(current_phase_x))) 
+
+# Calculate daily average depths
+avg_depth <- subset %>%
+  group_by(ID, Date, current_phase_x) %>%
+  summarize(mean_depth = mean(corrected_depth))
+
+# Remove single NA of release moment
+avg_depth <- na.omit(avg_depth)
+subset <- na.omit(subset)
+
+# Create dotplot
+ggplot(avg_depth, aes(x=Date, y=mean_depth)) + 
+  geom_point(aes(colour = factor(current_phase_x))) +
+  theme_classic() +
+  ylab("Mean depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14))
+
+# Create boxplot with longitud and depth according to current phase 
+ggplot(subset, aes(x=Date, y=corrected_depth, fill = current_phase_x)) + 
+  geom_boxplot() +
+  #geom_line(data = subset, aes(x = Date, y = geoloc_avg_lon*20), linewidth = 1.0, alpha = 0.5, colour = "purple") +
+  geom_point(data = subset, aes(x = Date, y = geoloc_avg_lon*20), size = 5.0, alpha = 0.5, colour = "purple") +
+  scale_y_continuous(sec.axis = sec_axis(~./20, name = "Longitude")) +
+  theme_classic() +
+  ylab("Mean depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14))
+
+
+# Combine night_day & current_phase_x
+subset <- subset %>% 
+  unite(circ_current, night_day, current_phase_x, sep = "_", remove = FALSE)
+class(subset$circ_current)
+subset$circ_current <- factor(subset$circ_current)
+
+
+# Create boxplot with longitude and depth according to current phase and circadian phase
+ggplot(subset, aes(x=Date, y=corrected_depth, fill = circ_current)) + 
+  geom_boxplot(width = 1.0) +
+  geom_point(data = subset, aes(x = Date, y = geoloc_avg_lon*20, type = "Longitude"), size = 5.0, alpha = 0.5, colour = "orange") +
+  scale_y_continuous(sec.axis = sec_axis(~./20, name = "Longitude")) +
+  theme_classic() +
+  ylab("Mean depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) #+
+#theme(legend.position="none")
+
+
 
