@@ -46,7 +46,7 @@ data <- filter(data, ID != "15805" ,
                ID != "17525_2")
 
 # Select 1 eel
-data <- filter(data, ID == "17535")
+data <- filter(data, ID == "15789")
 
 
 # Arrange data set according to ID and datetime
@@ -93,5 +93,15 @@ acf <- ggplot(data = acf_values, aes(x = index, y = acf_value)) +
 acf  
   
   
-  
-  
+# Create plot for publication  
+AutoCorrelation <- forecast::Acf(data$corrected_depth, type = c("correlation"), lag.max = 1000, plot = TRUE)
+
+plot(AutoCorrelation, main = "A15789",
+     cex.main = 10, 
+     cex.lab = 1,
+     cex.axis = 1)
+abline(v = 144, col = "darkgreen", lwd = 5.0)
+abline(v = 288, col = "darkblue", lwd = 5.0)
+
+
+
