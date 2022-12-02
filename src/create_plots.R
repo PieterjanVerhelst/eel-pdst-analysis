@@ -267,6 +267,10 @@ ggplot(subset, aes(x=datetime, y=corrected_depth)) +
 ggplot(subset, aes(x=datetime, y=corrected_depth)) +
   geom_point(aes(colour = factor(current_phase_x))) 
 
+# Create plot with water temperature
+ggplot(subset, aes(x=datetime, y=corrected_depth)) +
+  geom_point(aes(colour = temperature)) 
+
 # Calculate daily average depths
 avg_depth <- subset %>%
   group_by(ID, Date, current_phase_x) %>%
