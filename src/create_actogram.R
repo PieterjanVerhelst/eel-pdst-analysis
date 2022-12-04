@@ -705,7 +705,133 @@ dev.off()
 
 
 
-# 8. Create actogram based on dummy data to illustrate patterns ####
+
+# 8. Create actogram based on relative depth with 5 min resolution for single eel ####
+
+# Load data
+data <- read_csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv",
+                 na = "", 
+                 col_types = list(sunrise = col_datetime(),
+                                  previous_sunset = col_datetime(),
+                                  next_sunrise = col_datetime(),
+                                  next_sunmoment = col_datetime(),
+                                  U = col_double(),
+                                  V = col_double(),
+                                  speed = col_double(),
+                                  direction = col_double()),          # set direction as numeric
+                 guess_max = 100000)
+
+data$...1 <- NULL
+data$ID <- factor(data$ID)
+
+
+
+# Remove DVM data from eel A17535
+data <- data[!(data$ID == "17535" & data$datetime >= '2020-01-11 00:00:00'),]
+
+
+# Select 1 eel
+data <- filter(data, ID == "17525_2")
+
+# Arrange data set according to ID and datetime
+data <- data %>% 
+  arrange(ID, datetime)
+
+# Calculate depth relative to max depth
+data_max_depth <- data %>%
+  group_by(ID, Date) %>%
+  summarise(max_depth = min(corrected_depth))
+data <- left_join(data, data_max_depth, by = c("ID","Date"))
+data$rel_depth <- data$corrected_depth / data$max_depth
+
+# Calculate distance from seabed
+data$dist_from_seabed <- data$corrected_depth - data$max_depth
+
+# Classify behaviour from seabed
+data$activity <- ifelse(data$dist_from_seabed >= 10, 1, 0)
+
+
+data$day_number <- as.numeric(data$Date)
+class(data$datetime)
+data$fdatetime <- factor(data$datetime)
+
+
+data$five_min <- sub(".*? ", "", data$datetime)   # extract 5 min of the day
+data$day_number <- as.numeric(data$Date)
+class(data$five_min)
+data$ffive_min <- factor(data$five_min)
+data$five_min_numeric <- as.numeric(data$ffive_min)
+
+
+# Add record of number of tracked days
+data <- data %>% 
+  #mutate(day_number = lubridate::ymd(Date)) %>% 
+  group_by(ID) %>% 
+  mutate(day_ordernumber = Date - first(Date))
+
+data$day_ordernumber <- as.numeric(data$day_ordernumber) + 2 # + 2 to remove the 0 and be 1 day ahead of the duplicate
+
+
+# Create duplicate for double plot actogram
+data2 <- data
+#data_1eel2 <- filter(data_1eel2, datehour > "2018-12-10 00:00:00")
+#data_1eel2 <- filter(data_1eel2, day_number > 17874) # example for eel A16031; in next line write code more generally applicable
+data2 <- data2 %>%
+  group_by(ID) %>%
+  filter(day_number > min(day_number))
+data2$five_min_numeric <- 288+(data2$five_min_numeric)   # add a day (24 hours = 288 times 5 min in an hour = 24 hour * 12 times 5 min in an hour)
+data2$day_number <- data2$day_number -1
+data2$day_ordernumber <- data2$day_ordernumber -1 # - 1 so eventually the day_ordernummer of the duplicate is one day lagging the original
+
+data <- rbind(data, data2)
+
+# Just for visualisation purpose, add +1 hour
+#data_1eel_summary$hour <- 1+(data_1eel_summary$hour)
+
+# Remove the single record at 2019-02-13 00:00:00 which results in a single cell on top of the plot
+#data_1eel_summary <- filter(data_1eel_summary, day_number != "17940") # example for eel A16031; in next line write code more generally applicable
+data <- filter(data, day_number != max(day_number))
+
+# Set total activity as factor
+#data_summary$total_activity <- factor(data_summary$total_activity)
+
+# Create actogram
+png(file="./additionals/Figures/actograms/nordic_A17525_2_rel_depth_actogram.png",
+    width=1500, height=1000)
+
+#a5 <- ggplot(data_1eel_summary, aes(x=as.factor(quarter_numeric), y=day_number, fill = total_activity))+
+a8 <- ggplot(data, aes(x=five_min_numeric, y=day_ordernumber, fill = rel_depth))+ # where time is quarter of the day (so, 0 to 96, times 2)
+  geom_tile()+
+  #coord_equal() +
+  scale_fill_viridis(discrete=FALSE, name = 'Relative \n depth') +
+  #scale_fill_gradient2(low = "yellow",
+  #                    mid = "green",
+  #                    high = "blue",
+  #                    midpoint = 10,
+  #                    name = 'Average distance from seabed (m)') +
+  #scale_fill_manual(values = c("darkblue", "darkgreen", "orange", "yellow"), name = "Frequency of \n activity") +
+  ylab('Post-release days')+
+  xlab('Hour')+
+  #ylim(17870, 17940) +
+  #theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) +
+  theme_classic() +
+  theme(axis.text = element_text(size = 20),
+        axis.title = element_text(size = 22)) +
+  theme(legend.position="none",  # set position of legend
+        legend.key.size = unit(1, 'cm'), #change legend key size
+        #legend.key.height = unit(1, 'cm'), #change legend key height
+        legend.key.width = unit(2, 'cm'), #change legend key width
+        legend.title = element_text(size=22), #change legend title font size
+        legend.text = element_text(size=20)) #change legend text font size
+a8
+
+dev.off()
+
+
+
+
+
+# 9. Create actogram based on dummy data to illustrate patterns ####
 
 # Load data
 data <- read_csv("./additionals/actogram_dummy.csv")
