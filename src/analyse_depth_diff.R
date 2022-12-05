@@ -155,6 +155,10 @@ dev.off()
 coefplot2(glm_model4)
 
 
+# In case mean water temperature was added, check correlation with the factor covariables via one-way anova
+res.aov <- aov(temperature ~ Date, data = data)
+summary(res.aov)
+
 #newdata
 newdata <- expand.grid(night_day = c("night", "day"), current_phase_x = c("eastward", "westward"), current_phase_y = c("northward", "southward"))
 newdata$pred_sqrt <- predict(glm_model5, newdata = newdata, level = 0)
