@@ -1,4 +1,4 @@
-# Analyse depth pattern: distance from seabed in relation to circadian and current phases, and water temperature
+# Analyse depth pattern: distance from seabed in relation to circadian and current phases
 # By Pieterjan Verhelst
 # pieterjan.verhelst@inbo.be
 
@@ -189,7 +189,7 @@ glm_model4 <- MASS::glmmPQL(sqrt(mean_seabed) ~  night_day + current_phase_x + c
 
 # Since the Gaussian model is chosen, we can also work with lme() from the nlme package
 # Info by Pieter Verschelde (INBO): vierkantwortel zorgt voor een betere benadering van een normale distributie, maar het is zeker nog geen normale distributie, niettemin lijkt een gamma distributie geen betere benadering. Omdat de distributie niet perfect normaal is moet wel opgelet worden met interpreteren van p-waarden die dicht bij 00.05 zijn zoals bv de 0.022 van de interactie, eigenlijk is dit geen sterk effect en kan het gewoon significant zijn door de fout in responsdistributie
-glm_model5 <- lme(mean_rel_depth ~  mean_temp + night_day + current_phase_x + current_phase_y +
+glm_model5 <- lme(mean_rel_depth ~  night_day + current_phase_x + current_phase_y +
                     night_day:current_phase_x +
                     night_day:current_phase_y,
                     random = ~1|ID/Date,
@@ -209,6 +209,11 @@ plot(fitted(glm_model5),resid(glm_model5, type = "n"))
 dev.off()
 
 coefplot2(glm_model5)
+
+# In case mean water temperature was added, check correlation with the factor covariables via one-way anova
+res.aov <- aov(mean_temp ~ Date, data = data_summary)
+summary(res.aov)
+
 
 
 #newdata
