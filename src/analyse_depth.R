@@ -196,6 +196,13 @@ glm_model5 <- lme(mean_rel_depth ~  night_day + current_phase_x + current_phase_
                     correlation = corAR1(form = ~ 1|ID/Date),
                     data = data_summary, na.action = na.omit)
 
+# Stepwise backward selection
+glm_model5 <- lme(mean_rel_depth ~  night_day + current_phase_y +
+                   
+                    night_day:current_phase_y,
+                  random = ~1|ID/Date,
+                  correlation = corAR1(form = ~ 1|ID/Date),
+                  data = data_summary, na.action = na.omit)
 
 summary(glm_model5)
 
