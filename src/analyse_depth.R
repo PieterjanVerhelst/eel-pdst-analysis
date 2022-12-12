@@ -129,6 +129,10 @@ data_summary$mean_seabed <- if_else(data_summary$mean_seabed == 0,
 plot(data_summary$mean_rel_depth)
 data_summary <- filter(data_summary, mean_rel_depth > 0)
 
+# Remove mean_rel_depth values larger than 1
+data_summary <- filter(data_summary, mean_rel_depth < 1)
+
+
 ## Check correlation
 #data_no_na <- data %>% drop_na(direction_x)
 #data_no_na <- data_no_na %>% drop_na(direction_y)
