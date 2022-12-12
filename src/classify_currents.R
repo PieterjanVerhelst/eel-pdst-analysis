@@ -44,9 +44,9 @@ for (i in 1:dim(data)[1]){
 data$direction_abs <- abs(data$direction)
 data$current_phase_y <- NA
 for (i in 1:dim(data)[1]){
-  if (data$direction[i] <= 90){
+  if (data$direction_abs[i] <= 90){
     data$current_phase_y[i] = "northward"
-  } else if (data$direction[i] > 90){
+  } else if (data$direction_abs[i] > 90){
     data$current_phase_y[i] = "southward"
   } else{
     data$current_phase_y[i] = "NA"
