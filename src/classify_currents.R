@@ -1,6 +1,6 @@
 # Classify current phases
-# By Raïsa Carmen
-# raisa.carmen@inbo.be
+# By Pieterjan Verhelst
+# pieterjan.verhelst@inbo.be
 
 
 # Load packages
@@ -24,69 +24,41 @@ data <- data %>%
 # Remove DVM data from eel A17535
 data <- data[!(data$ID == "17535" & data$datetime >= '2020-01-11 00:00:00'),]
 
+# Remove rows with NA in direction column
+data <- data %>% drop_na(direction)
 
 # Classify currents
-# current in x-direction
-data$counter <- NA
-counter <- 1
-for(i in 2:nrow(data)){
-  if((is.na(data[i-1,"direction_x"]) | is.na(data[i,"direction_x"]) |
-      (data[i,"direction_x"] == data[i-1,"direction_x"])) &
-     data[i, "ID"] == data[i - 1, "ID"]){
-    data[i, "counter"] <- counter
-  }
-  else{counter <- counter+1
-  data[i, "counter"] <- counter
-  }
-}
-
-previous <- data %>% group_by(ID, counter) %>%
-  summarize(direction_x_prev = first(direction_x),
-            previous_ID = first(ID)) %>%
-  mutate(counter = lead(counter)) %>%
-  ungroup()
-
-data <- data %>% left_join(previous) %>%
-  mutate(current_phase_x = ifelse(ID == previous_ID,
-                              ifelse(direction_x >= direction_x_prev,
-                                     "eastward",
-                                     "westward"),
-                              NA)
-  ) %>%
-  dplyr::select(-counter, -previous_ID, -direction_x_prev)
+# Current in x-direction
+data$current_phase_x <- NA
+for (i in 1:dim(data)[1]){
+  if (data$direction[i] >= 0){
+    data$current_phase_x[i] = "eastward"
+  } else if (data$direction[i] < 0){
+    data$current_phase_x[i] = "westward"
+  } else{
+    data$current_phase_x[i] = "NA"
+  }}
 
 
-# current in y-direction
-data$counter <- NA
-counter <- 1
-for(i in 2:nrow(data)){
-  if((is.na(data[i-1,"direction_y"]) | is.na(data[i,"direction_y"]) |
-      (data[i,"direction_y"] == data[i-1,"direction_y"])) &
-     data[i, "ID"] == data[i - 1, "ID"]){
-    data[i, "counter"] <- counter
-  }
-  else{counter <- counter+1
-  data[i, "counter"] <- counter
-  }
-}
+# Current in y-direction
+data$direction_abs <- abs(data$direction)
+data$current_phase_y <- NA
+for (i in 1:dim(data)[1]){
+  if (data$direction[i] <= 90){
+    data$current_phase_y[i] = "northward"
+  } else if (data$direction[i] > 90){
+    data$current_phase_y[i] = "southward"
+  } else{
+    data$current_phase_y[i] = "NA"
+  }}
 
-previous <- data %>% group_by(ID, counter) %>%
-  summarize(direction_y_prev = first(direction_y),
-            previous_ID = first(ID)) %>%
-  mutate(counter = lead(counter)) %>%
-  ungroup()
 
-data <- data %>% left_join(previous) %>%
-  mutate(current_phase_y = ifelse(ID == previous_ID,
-                                  ifelse(direction_y >= direction_y_prev,
-                                         "northward",
-                                         "southward"),
-                                  NA)
-  ) %>%
-  dplyr::select(-counter, -previous_ID, -direction_y_prev)
 
+table(data$current_phase_x)
+table(data$current_phase_y)
 
 
 # write csv
 write.csv(data, "./data/interim/data_current_phases.csv")
+
 
