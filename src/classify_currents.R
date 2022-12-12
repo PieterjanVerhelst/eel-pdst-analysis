@@ -29,11 +29,21 @@ data <- data %>% drop_na(direction)
 
 # Classify currents
 # Current in x-direction
+#data$current_phase_x <- NA
+#for (i in 1:dim(data)[1]){
+#  if (data$direction[i] >= 0){
+#    data$current_phase_x[i] = "eastward"
+#  } else if (data$direction[i] < 0){
+#    data$current_phase_x[i] = "westward"
+#  } else{
+#    data$current_phase_x[i] = "NA"
+#  }}
+
 data$current_phase_x <- NA
 for (i in 1:dim(data)[1]){
-  if (data$direction[i] >= 0){
+  if (data$direction_x[i] >= 0){
     data$current_phase_x[i] = "eastward"
-  } else if (data$direction[i] < 0){
+  } else if (data$direction_x[i] < 0){
     data$current_phase_x[i] = "westward"
   } else{
     data$current_phase_x[i] = "NA"
@@ -41,12 +51,22 @@ for (i in 1:dim(data)[1]){
 
 
 # Current in y-direction
-data$direction_abs <- abs(data$direction)
+#data$direction_abs <- abs(data$direction)
+#data$current_phase_y <- NA
+#for (i in 1:dim(data)[1]){
+#  if (data$direction_abs[i] <= 90){
+#    data$current_phase_y[i] = "northward"
+#  } else if (data$direction_abs[i] > 90){
+#    data$current_phase_y[i] = "southward"
+#  } else{
+#    data$current_phase_y[i] = "NA"
+#  }}
+
 data$current_phase_y <- NA
 for (i in 1:dim(data)[1]){
-  if (data$direction_abs[i] <= 90){
+  if (data$direction_y[i] >= 0){
     data$current_phase_y[i] = "northward"
-  } else if (data$direction_abs[i] > 90){
+  } else if (data$direction_y[i] < 0){
     data$current_phase_y[i] = "southward"
   } else{
     data$current_phase_y[i] = "NA"
