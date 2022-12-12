@@ -140,7 +140,7 @@ glm_model5 <- lme(sqrt(depth_change) ~  night_day + current_phase_x + current_ph
                   data = data, na.action = na.omit)
 
 # Stepwise backward selection
-glm_model5 <- lme(sqrt(depth_change) ~  night_day + current_phase_y,
+glm_model5 <- lme(sqrt(depth_change) ~  night_day,
                   random = ~1|ID/Date,
                   correlation = corAR1(form = ~ 1|ID/Date),
                   data = data, na.action = na.omit)
