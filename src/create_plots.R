@@ -81,7 +81,7 @@ fig_circadian_tidal
 
 
 
-# Plot raw data with eastward current volocity as factor
+# Plot raw data with eastward current velocity as factor
 start_stop_x <- dplyr::select(subset, datetime, current_phase_x)
 start_stop_x$change <- if_else(start_stop_x$current_phase_x != lag(start_stop_x$current_phase_x, 1) ,
                                1,
@@ -128,13 +128,14 @@ fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
             inherit.aes = FALSE,
             mapping = aes(xmin = datetime_start,
                           xmax = datetime_stop,
-                          ymin= -120,
-                          ymax= -135), fill = "blue", alpha=0.3) +
+                          ymin= -110,
+                          ymax= -125), fill = "blue", alpha=0.3) +
   geom_line(size=1.0, binwidth = 1, colour = "black") +
   #geom_line(data = subset, aes(x = datetime, y = direction_x*100), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   #scale_y_continuous(sec.axis = sec_axis(~./100, name = "Eastward velocity (m/s)")) +
-  theme_minimal() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   ylab("Depth (m)") +
   xlab("Date") +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
