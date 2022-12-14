@@ -94,7 +94,7 @@ R Markdown files and forthcoming HTML files with code and output.
 20. create_acf.R: Create an ACF plot to visualise the activity (i.e. vertical movement behaviour) of the eels
 21. analyse_depth.R: Analyse distance from seabed according to the circadian phases (day and night), current phases (eastward, westward, northward and southward currents)
 22. analyse_depth_diff.R: Analyse depth difference according to the circadian phases (day and night) and current phases (eastward, westward, northward and southward currents)
-
+23. speed_current_analysis.R: Analyse maximum daily migration speed relative to maximum daily current strengths
 
 
 
