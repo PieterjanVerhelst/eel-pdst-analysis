@@ -117,7 +117,7 @@ data_min_max_hour <- data_min_max_hour %>% group_by(ID, date_hour, night_day) %>
 
 
 # 6. Write csv ####
-write.csv(data_min_max, "./data/interim/data_depth_diff.csv")
+write.csv(data_min_max_hour, "./data/interim/data_depth_diff.csv")
 
 
 
