@@ -836,7 +836,8 @@ dev.off()
 # Load data
 data <- read_csv("./additionals/actogram_dummy.csv")
 
-data$date_time <- dmy_hm(data$date_time)
+#data$date_time <- dmy_hm(data$date_time)
+data$date_time <- as.POSIXct(data$date_time,format="%d/%m/%Y %H:%M")
 data_1eel <- data
 
 # Arrange data set according datetime
