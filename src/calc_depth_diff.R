@@ -89,8 +89,33 @@ data_min_max_no_na <- data_min_max[!is.na(data_min_max$depth_change),]
 aggregate(data_min_max_no_na$depth_change, list(data_min_max_no_na$night_day, data_min_max_no_na$ID), mean)
 
 
+# 5. Summarise data per hour ####
+#data$date_hour <- floor(data$datetime/3600)
+data_min_max$date_hour <- lubridate::floor_date(data_min_max$datetime, "hour")  
 
-# 5. Write csv ####
+
+# Calculate hourly depth change
+hourly_depth_change <- data_min_max %>%
+  select(ID, date_hour, depth_change) %>%
+  group_by(ID, date_hour) %>%
+  summarise(hourly_depth_change = max(depth_change))
+
+
+# Join with data
+data_min_max_hour <- left_join(data_min_max, hourly_depth_change, by = c("ID", "date_hour"))
+
+# Keep relevant columns
+data_min_max_hour <- select(data_min_max_hour, ID, date_hour, night_day, direction_x, direction_y, speed, direction, hourly_depth_change)
+
+# Remove doubles
+data_min_max_hour <- data_min_max_hour %>%
+  distinct()
+
+# Remove duplicate since ocean current data someties goes from, for example, 04:05 - 05:00. When applying 'floor()' this results in doubly hourly timestamps
+data_min_max_hour <- data_min_max_hour %>% group_by(ID, date_hour, night_day) %>% slice(-2)
+
+
+# 6. Write csv ####
 write.csv(data_min_max, "./data/interim/data_depth_diff.csv")
 
 
