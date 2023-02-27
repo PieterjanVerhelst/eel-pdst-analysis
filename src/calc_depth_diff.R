@@ -90,6 +90,7 @@ aggregate(data_min_max_no_na$depth_change, list(data_min_max_no_na$night_day, da
 
 
 # 5. Summarise data per hour ####
+# --> calculate vertical movement per hour (total movement, not range!)
 #data$date_hour <- floor(data$datetime/3600)
 data_min_max$date_hour <- lubridate::floor_date(data_min_max$datetime, "hour")  
 
