@@ -102,3 +102,57 @@ abline(v = 288, col = "darkblue", lwd = 5.0)
 
 
 
+
+# 2. Create ACF based on dummy data to illustrate patterns ####
+
+# Load data
+data <- read_csv("./additionals/actogram_dummy.csv")
+
+#data$date_time <- dmy_hm(data$date_time)
+data$date_time <- as.POSIXct(data$date_time,format="%d/%m/%Y %H:%M")
+data_1eel <- data
+
+# Arrange data set according datetime
+data_1eel <-
+  data_1eel %>%
+  arrange(date_time)
+
+# 15 min resolution
+data_1eel$datequarter <- data_1eel$date_time
+
+data_1eel$numericdate <- as.numeric(data_1eel$datequarter)   
+data_1eel$quarter <- sub(".*? ", "", data_1eel$datequarter)   # extract quarters of the day
+data_1eel$Date <- as.Date(data_1eel$datequarter)
+data_1eel$day_number <- as.numeric(data_1eel$Date)
+class(data_1eel$quarter)
+data_1eel$fquarter <- factor(data_1eel$quarter)
+data_1eel$quarter_numeric <- as.numeric(data_1eel$fquarter)
+
+
+# Create duplicate for double plot actogram
+data_1eel2 <- data_1eel
+#data_1eel2 <- filter(data_1eel2, datehour > "2018-12-10 00:00:00")
+#data_1eel2 <- filter(data_1eel2, day_number > 17874) # example for eel A16031; in next line write code more generally applicable
+data_1eel2 <- filter(data_1eel2, day_number > min(day_number))
+data_1eel2$quarter_numeric <- 96+(data_1eel2$quarter_numeric)   # add a day (24 hours = 96 quarters = 24 hour * 4 quarters in an hour)
+data_1eel2$day_number <- data_1eel2$day_number -1
+
+data_1eel <- rbind(data_1eel, data_1eel2)
+
+# Just for visualisation purpose, add +1 hour
+#data_1eel_summary$hour <- 1+(data_1eel_summary$hour)
+
+# Remove the single record at 2019-02-13 00:00:00 which results in a single cell on top of the plot
+#data_1eel_summary <- filter(data_1eel_summary, day_number != "17940") # example for eel A16031; in next line write code more generally applicable
+data_1eel <- filter(data_1eel, day_number != max(day_number))
+
+
+# Create plot for publication  
+AutoCorrelation <- forecast::Acf(data_1eel$circadian, type = c("correlation"), lag.max = 288, plot = TRUE)
+
+plot(AutoCorrelation)
+abline(v = 48, col = "darkgreen", lwd = 5.0)   # 12-h cycle: (12 * 60) / 15
+abline(v = 96, col = "darkblue", lwd = 5.0)   # 24-h cycle: (24 * 60) / 15
+
+
+
