@@ -144,8 +144,8 @@ tidal <- waves(x, beta = 3, f = 12)
 
 
 # get sum of all y values, combine to single object
-yall <- rowSums(cbind(circadian, tidal))
-dat <- data.frame(x, circadian, tidal, yall) %>% 
+circa_tidal <- rowSums(cbind(circadian, tidal))
+dat <- data.frame(x, circadian, tidal, circa_tidal) %>% 
   gather('var', 'val', -x)
 
 # plot
@@ -162,7 +162,7 @@ dummy <- as.data.frame(dummy)
 
 
 # Create ACF
-AutoCorrelation <- forecast::Acf(dummy$tidal, type = c("correlation"), lag.max = 288, plot = TRUE)
+AutoCorrelation <- forecast::Acf(dummy$yall, type = c("correlation"), lag.max = 192, plot = TRUE)
 
 plot(AutoCorrelation)
 abline(v = 48, col = "darkgreen", lwd = 5.0)   # 12-h cycle: (12 * 60) / 15
