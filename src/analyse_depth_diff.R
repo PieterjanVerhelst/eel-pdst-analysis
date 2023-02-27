@@ -33,10 +33,10 @@ data <- filter(data, ID != "15805" ,
 # Arrange data set according to tag ID and datetime, so min and max are calculated accordingly
 data <-
   data %>%
-  arrange(ID, datetime)
+  arrange(ID, date_hour)
 
-# Remove NA in depth_change (= first row of each animal)
-data <- data[!is.na(data$depth_change),]
+# Remove NA in hourly_depth_change (= first row of each animal)
+data <- data[!is.na(data$hourly_depth_change),]
 
 # Remove NA in circadian phase
 data <- data[!is.na(data$night_day),]
