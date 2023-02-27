@@ -47,15 +47,15 @@ data <- data[!is.na(data$current_phase_x),]
 data <- data[!is.na(data$current_phase_y),]
 
 # Calculate summary
-aggregate(data$depth_change, list(data$night_day), mean)
-aggregate(data$depth_change, list(data$night_day), sd)
-aggregate(data$depth_change, list(data$night_day), median)
-aggregate(data$depth_change, list(data$night_day), min)
-aggregate(data$depth_change, list(data$night_day), max)
-aggregate(data$depth_change, list(data$night_day, data$ID), median) # per eel
+aggregate(data$hourly_depth_change, list(data$night_day), mean)
+aggregate(data$hourly_depth_change, list(data$night_day), sd)
+aggregate(data$hourly_depth_change, list(data$night_day), median)
+aggregate(data$hourly_depth_change, list(data$night_day), min)
+aggregate(data$hourly_depth_change, list(data$night_day), max)
+aggregate(data$hourly_depth_change, list(data$night_day, data$ID), median) # per eel
 
 # Create plot
-boxplot <- ggplot(data, aes(x=night_day, y=depth_change)) + 
+boxplot <- ggplot(data, aes(x=night_day, y=hourly_depth_change)) + 
   geom_boxplot() +
   theme_minimal() +
   ylab("Depth difference (m)") +
@@ -71,7 +71,7 @@ boxplot
 
 
 # Processing steps
-summary(data$depth_change) # all values need to be > 0
+summary(data$hourly_depth_change) # all values need to be > 0
 
 
 ## Check correlation
@@ -82,6 +82,7 @@ summary(data$depth_change) # all values need to be > 0
 ## Add tracking day number
 #data_summary$Date <- ymd(data_summary$date_hour)
 #data_summary$Date <- as.Date(data_summary$date_hour)
+data$Date <- as.Date(data$date_hour)
 data <- data %>% 
   #mutate(day_number = lubridate::ymd(Date)) %>% 
   group_by(ID) %>% 
@@ -92,8 +93,8 @@ data$day_ordernumber <- as.numeric(data$day_ordernumber) + 1
 
 # Check data distribution
 # Create qqplot with qqline
-qqnorm(data$depth_change)
-qqline(data$depth_change)
+qqnorm(data$hourly_depth_change)
+qqline(data$hourly_depth_change)
 
 
 
@@ -143,6 +144,13 @@ glm_model5 <- lme(sqrt(depth_change) ~  night_day,
                   correlation = corAR1(form = ~ 1|ID/Date),
                   data = data, na.action = na.omit)
 
+
+glm_model5 <- lme(hourly_depth_change ~  night_day + current_phase_x + current_phase_y +
+                    night_day:current_phase_x +
+                    night_day:current_phase_y,
+                  random = ~1|ID/Date,
+                  correlation = corAR1(form = ~ 1|ID/Date),
+                  data = data, na.action = na.omit)
 
 
 summary(glm_model5)
