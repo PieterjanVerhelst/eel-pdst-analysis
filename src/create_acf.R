@@ -158,11 +158,12 @@ ggplot(dat, aes(x = x, y = val)) +
 # Combine dummy data into dataframe
 dummy <- cbind(x, circadian)
 dummy <- cbind(dummy, tidal)
+dummy <- cbind(dummy, circa_tidal)
 dummy <- as.data.frame(dummy)
 
 
 # Create ACF
-AutoCorrelation <- forecast::Acf(dummy$yall, type = c("correlation"), lag.max = 192, plot = TRUE)
+AutoCorrelation <- forecast::Acf(dummy$tidal, type = c("correlation"), lag.max = 192, plot = TRUE)
 
 plot(AutoCorrelation)
 abline(v = 48, col = "darkgreen", lwd = 5.0)   # 12-h cycle: (12 * 60) / 15
