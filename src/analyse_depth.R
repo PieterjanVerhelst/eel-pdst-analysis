@@ -109,8 +109,16 @@ data_summary <- data %>%
             mean_temp = mean(temperature),
             mean_moon = mean(moon_fraction),
             mean_sun_altitude = mean(sun_altitude),
-            mean_sun_azimuth = mean(sun_azimuth))
+            mean_sun_azimuth = mean(sun_azimuth),
+            mean_direction_x = mean(direction_x),
+            mean_direction_y = mean(direction_y))
   
+
+
+
+# Calculate the p parallel and t transverse with 25 degrees of in the direction of the Englisch Channel
+data_summary$p_parallel <- (data_summary$mean_direction_x * cos(deg2rad(25))) + (data_summary$mean_direction_y * sin(deg2rad(25))) 
+data_summary$t_transverse <- (data_summary$mean_direction_x * sin(deg2rad(25))) + (data_summary$mean_direction_y * cos(deg2rad(25))) 
 
 
 
