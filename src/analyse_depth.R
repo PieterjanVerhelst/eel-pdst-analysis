@@ -116,7 +116,7 @@ data_summary <- data %>%
 
 
 
-# Calculate the p parallel and t transverse with 25 degrees of in the direction of the Englisch Channel
+# Calculate the p parallel and t transverse with 25 degrees of in the direction of the English Channel
 data_summary$p_parallel <- (data_summary$mean_direction_x * cos(deg2rad(25))) + (data_summary$mean_direction_y * sin(deg2rad(25))) 
 data_summary$t_transverse <- (data_summary$mean_direction_x * sin(deg2rad(25))) + (data_summary$mean_direction_y * cos(deg2rad(25))) 
 
