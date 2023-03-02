@@ -7,6 +7,7 @@
 library(tidyverse) # To do datascience
 library(tidylog)  # To get infos about dplyr functions
 library(lubridate)
+library(pracma)  # For the 'deg2rad()' function
 
 
 
@@ -37,6 +38,12 @@ data$current_phase_y <- factor(data$current_phase_y)
 data <-
   data %>%
   arrange(ID, datetime)
+
+
+# Calculate the p parallel and t transverse with 25 degrees of in the direction of the English Channel
+data$p_parallel <- (data$direction_x * cos(deg2rad(25))) + (data$direction_y * sin(deg2rad(25))) 
+data$t_transverse <- (data$direction_x * sin(deg2rad(25))) + (data$direction_y * cos(deg2rad(25))) 
+
 
 
 # Create subset of several days for plot

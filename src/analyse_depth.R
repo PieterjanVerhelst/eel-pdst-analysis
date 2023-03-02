@@ -13,6 +13,7 @@ library(nlme)    # For the corAR1() functionality
 #library("blmeco") # To calculate overdispersion of GLMM
 library(coefplot2)
 library(ggeffects)
+library(pracma)  # For the 'deg2rad()' function
 
 
 # 1. Read data ####
