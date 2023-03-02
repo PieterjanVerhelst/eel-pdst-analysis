@@ -91,10 +91,11 @@ R Markdown files and forthcoming HTML files with code and output.
 17. create_plots.R: Create plots for data exploration
 18. visualise_tracking_data.R: Visualise tracking data as animated gif using `moveVis` R-package. The output is stored in `data\output\`.
 19. create_actogram.R: Create an actogram to visualise the activity (i.e. vertical movement behaviour) of the eels
-20. create_acf.R: Create an ACF plot to visualise the activity (i.e. vertical movement behaviour) of the eels
-21. analyse_depth.R: Analyse distance from seabed according to the circadian phases (day and night), current phases (eastward, westward, northward and southward currents)
-22. analyse_depth_diff.R: Analyse depth difference according to the circadian phases (day and night) and current phases (eastward, westward, northward and southward currents)
-23. speed_current_analysis.R: Analyse maximum daily migration speed relative to maximum daily current strengths
+20. create_periodogram.R: Create periodogram to identify main periods in depth time series of the eels
+21. create_acf.R: Create an ACF plot to visualise the activity (i.e. vertical movement behaviour) of the eels
+22. analyse_depth.R: Analyse distance from seabed according to the circadian phases (day and night), current phases (eastward, westward, northward and southward currents)
+23. analyse_depth_diff.R: Analyse depth difference according to the circadian phases (day and night) and current phases (eastward, westward, northward and southward currents)
+24. speed_current_analysis.R: Analyse maximum daily migration speed relative to maximum daily current strengths
 
 
 

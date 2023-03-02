@@ -45,6 +45,21 @@ data$p_parallel <- (data$direction_x * cos(deg2rad(25))) + (data$direction_y * s
 data$t_transverse <- (data$direction_x * sin(deg2rad(25))) + (data$direction_y * cos(deg2rad(25))) 
 
 
+# Classify current in p_parallel
+
+data$current_phase_p <- NA
+for (i in 1:dim(data)[1]){
+  if (data$direction_x[i] >= 0){
+    data$current_phase_p[i] = "non-favourable"
+  } else if (data$direction_x[i] < 0){
+    data$current_phase_p[i] = "favourable"
+  } else{
+    data$current_phase_p[i] = "NA"
+  }}
+
+
+
+
 
 # Create subset of several days for plot
 subset <- filter(data,
@@ -67,7 +82,7 @@ fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
                           ymin=-Inf,
                           ymax=+Inf), fill = "grey", alpha=0.5) +
   geom_line(size=1.0, binwidth = 1, colour = "black") +
-  geom_line(data = subset, aes(x = datetime, y = direction_x*100), size = 1.0, alpha = 0.5, colour = "purple") +
+  geom_line(data = subset, aes(x = datetime, y = p_parallel*100), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
   scale_y_continuous(sec.axis = sec_axis(~./100, name = "Eastward velocity (m/s)")) +
   theme_minimal() +
