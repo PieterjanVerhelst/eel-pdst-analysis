@@ -156,11 +156,11 @@ ggplot(data=df_periodogram, aes(x=freq_hour, y=spec)) +
         panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   ylab("Spectrum") +
   xlab("Hour") +
-  xlim(0, 40) +
+  xlim(0, 72) +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  theme(axis.text = element_text(size = 18),
-        axis.title = element_text(size = 20)) +
+  theme(axis.text = element_text(size = 22),
+        axis.title = element_text(size = 24)) +
   geom_vline(xintercept = 12, linetype="solid", 
              color = "green", size=1.5) +
   geom_vline(xintercept = 24, linetype="solid", 
