@@ -11,7 +11,60 @@ library(pracma)  # For the 'deg2rad()' function
 
 
 
-# 1. Plot raw data ####
+
+# 1. Plot complete track ####
+
+# Import data
+data <- read_csv("./data/interim/data_current_phases.csv",
+                 na = "", 
+                 col_types = list(sunrise = col_datetime(),
+                                  previous_sunset = col_datetime(),
+                                  sunset = col_datetime(),
+                                  sunrise = col_datetime(),
+                                  next_sunrise = col_datetime(),
+                                  next_sunmoment = col_datetime(),
+                                  direction_x = col_double(),
+                                  V = col_double(),
+                                  direction_y = col_double(),
+                                  direction = col_double()),          # set direction as numeric
+                 guess_max = 100000)
+
+
+data$...1 <- NULL
+data$ID <- factor(data$ID)
+data$current_phase_x <- factor(data$current_phase_x)
+data$current_phase_y <- factor(data$current_phase_y)
+
+# Select 1 eel
+subset <- filter(data, ID == "17648")
+subset <-
+  subset %>%
+  arrange(ID, datetime)
+
+
+# Create plot
+plot_complete_track <- ggplot(subset, aes(x = datetime,
+                                       y = corrected_depth)) +
+  geom_line(binaxis='x', size=1.0, binwidth = 1) +
+  #geom_line(data = subset, aes(x = datetime, y = pressure/2), size = 1.0, alpha = 0.5, colour = "purple") +
+  #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 20),
+        axis.title = element_text(size = 22)) +
+  scale_x_datetime(date_breaks  ="1 week")
+
+plot_complete_track
+
+
+
+
+
+# 2. Plot raw data ####
 
 # Import data
 data <- read_csv("./data/interim/data_current_phases.csv",
@@ -38,25 +91,6 @@ data$current_phase_y <- factor(data$current_phase_y)
 data <-
   data %>%
   arrange(ID, datetime)
-
-
-# Calculate the p parallel and t transverse with 25 degrees of in the direction of the English Channel
-data$p_parallel <- (data$direction_x * cos(deg2rad(25))) + (data$direction_y * sin(deg2rad(25))) 
-data$t_transverse <- (data$direction_x * sin(deg2rad(25))) + (data$direction_y * cos(deg2rad(25))) 
-
-
-# Classify current in p_parallel
-
-data$current_phase_p <- NA
-for (i in 1:dim(data)[1]){
-  if (data$direction_x[i] >= 0){
-    data$current_phase_p[i] = "non-favourable"
-  } else if (data$direction_x[i] < 0){
-    data$current_phase_p[i] = "favourable"
-  } else{
-    data$current_phase_p[i] = "NA"
-  }}
-
 
 
 
@@ -177,7 +211,7 @@ fig_circadian_tidal
 
 
 
-# 2. Plot difference in depth between minima and maxima ####
+# 3. Plot difference in depth between minima and maxima ####
 data_min_max <- read_csv("./data/interim/data_depth_diff.csv",
                  col_types = list(sunrise = col_datetime(),
                                   previous_sunset = col_datetime(),
@@ -248,7 +282,7 @@ ggplot(subset, aes(x = bins, y = depth_change)) +
 
 
 
-# 3. Create scatter and boxplots following an eel's trajectory ####
+# 4. Create scatter and boxplots following an eel's trajectory ####
 # Read data 
 data <- read.csv("./data/interim/data_current_phases.csv")
 data$ID <- factor(data$ID)
