@@ -74,6 +74,24 @@ for (i in 1:dim(data)[1]){
 
 
 
+# Calculate the p parallel and t transverse with 25 degrees of in the direction of the English Channel
+data$p_parallel <- (data$direction_x * cos(deg2rad(25))) + (data$direction_y * sin(deg2rad(25))) 
+data$t_transverse <- (data$direction_x * sin(deg2rad(25))) + (data$direction_y * cos(deg2rad(25))) 
+
+# Classify current in p_parallel
+
+data$current_phase_p <- NA
+for (i in 1:dim(data)[1]){
+  if (data$direction_x[i] >= 0){
+    data$current_phase_p[i] = "non-favourable"
+  } else if (data$direction_x[i] < 0){
+    data$current_phase_p[i] = "favourable"
+  } else{
+    data$current_phase_p[i] = "NA"
+  }}
+
+
+
 table(data$current_phase_x)
 table(data$current_phase_y)
 
