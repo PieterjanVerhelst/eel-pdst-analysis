@@ -94,6 +94,7 @@ for (i in 1:dim(data)[1]){
 
 table(data$current_phase_x)
 table(data$current_phase_y)
+table(data$current_phase_p)
 
 
 # write csv
