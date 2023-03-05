@@ -185,7 +185,7 @@ fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
             mapping = aes(xmin = datetime_start,
                           xmax = datetime_stop,
                           ymin= -40,
-                          ymax= -50), fill = "blue", alpha=0.3) +
+                          ymax= -47), fill = "blue", alpha=0.3) +
   geom_line(size=1.0, binwidth = 1, colour = "black") +
   #geom_line(data = subset, aes(x = datetime, y = direction_x*100), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
@@ -197,8 +197,8 @@ fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
   ylim(-50, 0) +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  theme(axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14)) +
+  theme(axis.text = element_text(size = 30),
+        axis.title = element_text(size = 32)) +
   scale_x_datetime(date_breaks  ="1 day") +
   #geom_vline(xintercept=ymd_hms(release), colour="blue") + # Release date and time
   geom_vline(xintercept=gnu, color = "red", size = 1) #+
