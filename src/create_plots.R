@@ -194,6 +194,7 @@ fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
         panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   ylab("Depth (m)") +
   xlab("Date") +
+  ylim(-50, 0) +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   theme(axis.text = element_text(size = 12),
