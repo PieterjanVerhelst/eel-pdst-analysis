@@ -97,8 +97,8 @@ data <-
 
 # Create subset of several days for plot
 subset <- filter(data,
-                 ID == "15700_2",
-                 datetime >= "2020-01-25 21:00:00", datetime <= "2020-01-30 07:00:00")
+                 ID == "15789",
+                 datetime >= "2019-12-29 00:00:00", datetime <= "2019-12-31 01:00:00")
 
 # Create line every 24 hours
 gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
@@ -138,32 +138,32 @@ fig_circadian_tidal
 
 
 # Plot raw data with eastward current velocity as factor
-start_stop_x <- dplyr::select(subset, datetime, current_phase_x)
-start_stop_x$change <- if_else(start_stop_x$current_phase_x != lag(start_stop_x$current_phase_x, 1) ,
+start_stop_p <- dplyr::select(subset, datetime, current_phase_p)
+start_stop_p$change <- if_else(start_stop_p$current_phase_p != lag(start_stop_p$current_phase_p, 1) ,
                                1,
                                0)
 
-start <- filter(start_stop_x, change == 1)
+start <- filter(start_stop_p, change == 1)
 
 stop <- start
 stop$datetime2 <- stop$datetime - (5*60)
-stop$current_phase_x <- if_else(stop$current_phase_x == "westward",
-                                "eastward",
-                                "westward")
+stop$current_phase_p <- if_else(stop$current_phase_p == "favourable",
+                                "non-favourable",
+                                "favourable")
 start$change <- NULL
 stop$change <- NULL
 
 start <- rename(start, datetime_start = datetime)
 stop <- rename(stop, datetime_stop = datetime2)
 
-start$id <- factor(c(1:18))
-stop$id <- factor(c(0:17))
+start$id <- factor(c(1:8))
+stop$id <- factor(c(0:7))
 
 start_stop <- left_join(start, stop, by = 'id')
 
-start_stop <- rename(start_stop, current_phase_x = current_phase_x.x)
+start_stop <- rename(start_stop, current_phase_p = current_phase_p.x)
 start_stop$id <- NULL
-start_stop$current_phase_x.y <- NULL
+start_stop$current_phase_p.y <- NULL
 
 
 
@@ -179,13 +179,13 @@ fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
                           ymin=-Inf,
                           ymax=+Inf), fill = "grey", alpha=0.6) +
   geom_rect(data = start_stop %>% 
-              filter(current_phase_x == "westward") %>%
-              distinct(datetime_start, datetime_stop, current_phase_x),
+              filter(current_phase_p == "favourable") %>%
+              distinct(datetime_start, datetime_stop, current_phase_p),
             inherit.aes = FALSE,
             mapping = aes(xmin = datetime_start,
                           xmax = datetime_stop,
-                          ymin= -110,
-                          ymax= -125), fill = "blue", alpha=0.3) +
+                          ymin= -40,
+                          ymax= -50), fill = "blue", alpha=0.3) +
   geom_line(size=1.0, binwidth = 1, colour = "black") +
   #geom_line(data = subset, aes(x = datetime, y = direction_x*100), size = 1.0, alpha = 0.5, colour = "purple") +
   #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
