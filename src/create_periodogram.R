@@ -28,7 +28,7 @@ data <- filter(data, ID == "15805" |
                  ID == "17525_2")
 
 # Channel eels
-data <- filter(data, ID != "15805" ,
+data <- dplyr::filter(data, ID != "15805" ,
                ID != "15981" ,
                ID != "17492_2" ,
                ID != "17499" ,
