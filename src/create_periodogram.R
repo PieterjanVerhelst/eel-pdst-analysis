@@ -7,6 +7,9 @@ library(TSA)
 library(zoo)  # To convert dataframe into time series
 library(timeSeries)
 library(imputeTS)  # For function 'na_remove()'
+library(pracma)
+library(lubridate)
+
 
 
 # 1. Read data ####
