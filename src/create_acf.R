@@ -10,7 +10,7 @@ library(lubridate)
 library(forecast)
 
 
-# 1. Create actogram based on depth data ####
+# 1. Create ACF based on depth data ####
 
 # Load data
 data <- read_csv("./data/interim/data_circadian_tidal_moon_sun_5min.csv",
