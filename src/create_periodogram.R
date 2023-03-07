@@ -92,10 +92,10 @@ data_summary$t_transverse <- (data_summary$mean_direction_x * sin(deg2rad(25))) 
 # Remove mean_rel_depth < 0
 # This is due to depths above sea surface
 plot(data_summary$mean_rel_depth)
-data_summary <- filter(data_summary, mean_rel_depth > 0)
+data_summary <- dplyr::filter(data_summary, mean_rel_depth > 0)
 
 # Remove mean_rel_depth values larger than 1
-data_summary <- filter(data_summary, mean_rel_depth < 1)
+data_summary <- dplyr::filter(data_summary, mean_rel_depth < 1)
 
 
 
