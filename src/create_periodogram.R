@@ -107,15 +107,17 @@ data_summary <- dplyr::filter(data_summary, mean_rel_depth < 1)
 #eel <- dplyr::filter(data, ID == "16031" ,
 #              datetime > "2019-01-31 00:00:00" ,
 #              datetime < "2019-02-13 00:00:00")
-eel <- dplyr::filter(data_summary, ID == "16031" ,
-              date_hour> "2019-01-31 00:00:00" ,
-              date_hour < "2019-02-13 00:00:00")
+#eel <- dplyr::filter(data_summary, ID == "16031" ,
+#              date_hour> "2019-01-31 00:00:00" ,
+#              date_hour < "2019-02-13 00:00:00")
 eel <- dplyr::filter(data_summary, ID == "16031")
 
 #eel <- dplyr::select(eel, datetime, rel_depth)
 eel <- dplyr::select(eel, date_hour, mean_rel_depth)
 eel <- na.omit(eel)
 eel$ID <- NULL
+eel$night_day <- NULL
+eel$current_phase_x <- NULL
 eel <- eel[!duplicated(eel$date_hour), ]
 class(eel)
 tseries <- read.zoo(eel)
