@@ -103,7 +103,7 @@ data_summary <- dplyr::filter(data_summary, mean_rel_depth < 1)
 #eel <- dplyr::filter(data_summary, ID == "16031" ,
 #              date_hour> "2019-01-31 00:00:00" ,
 #              date_hour < "2019-02-13 00:00:00")
-eel <- dplyr::filter(data_summary, ID == "17499_2")
+eel <- dplyr::filter(data_summary, ID == "17521")
 
 #eel <- dplyr::select(eel, datetime, rel_depth)
 eel <- dplyr::select(eel, date_hour, mean_rel_depth)
