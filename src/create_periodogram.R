@@ -103,7 +103,7 @@ data_summary <- dplyr::filter(data_summary, mean_rel_depth < 1)
 #eel <- dplyr::filter(data_summary, ID == "16031" ,
 #              date_hour> "2019-01-31 00:00:00" ,
 #              date_hour < "2019-02-13 00:00:00")
-eel <- dplyr::filter(data_summary, ID == "16031")
+eel <- dplyr::filter(data_summary, ID == "15789")
 
 #eel <- dplyr::select(eel, datetime, rel_depth)
 eel <- dplyr::select(eel, date_hour, mean_rel_depth)
@@ -154,11 +154,11 @@ ggplot(data=df_periodogram, aes(x=freq_hour, y=spec)) +
         panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   ylab("Spectrum") +
   xlab("Hour") +
-  xlim(0, 72) +
+  xlim(0, 48) +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  theme(axis.text = element_text(size = 22),
-        axis.title = element_text(size = 24)) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+  theme(axis.text = element_text(size = 26),
+        axis.title = element_text(size = 32)) +
   geom_vline(xintercept = 12, linetype="solid", 
              color = "green", size=1.5) +
   geom_vline(xintercept = 24, linetype="solid", 
