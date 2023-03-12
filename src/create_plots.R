@@ -36,7 +36,7 @@ data$current_phase_x <- factor(data$current_phase_x)
 data$current_phase_y <- factor(data$current_phase_y)
 
 # Select 1 eel
-subset <- filter(data, ID == "17648")
+subset <- filter(data, ID == "17525_2")
 subset <-
   subset %>%
   arrange(ID, datetime)
