@@ -103,7 +103,7 @@ data_summary <- dplyr::filter(data_summary, mean_rel_depth < 1)
 #eel <- dplyr::filter(data_summary, ID == "16031" ,
 #              date_hour> "2019-01-31 00:00:00" ,
 #              date_hour < "2019-02-13 00:00:00")
-eel <- dplyr::filter(data_summary, ID == "15789")
+eel <- dplyr::filter(data_summary, ID == "17648")
 
 #eel <- dplyr::select(eel, datetime, rel_depth)
 eel <- dplyr::select(eel, date_hour, mean_rel_depth)
@@ -152,7 +152,7 @@ df_periodogram_48 <- dplyr::filter(df_periodogram, freq_hour < 50)
 
 # Create plot
 ggplot(data=df_periodogram_48, aes(x=freq_hour, y=spec)) +
-  geom_line() +
+  geom_line(size = 1.2) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   ylab("Spectrum") +
@@ -161,12 +161,13 @@ ggplot(data=df_periodogram_48, aes(x=freq_hour, y=spec)) +
   #ylim(0, 1) +
   theme(axis.title.y = element_text(margin = margin(r = 10))) +
   theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
-  theme(axis.text = element_text(size = 26),
-        axis.title = element_text(size = 32)) +
+  theme(axis.text = element_text(size = 38),
+        axis.title = element_text(size = 42)) +
   geom_vline(xintercept = 12, linetype="solid", 
              color = "green", size=1.5) +
   geom_vline(xintercept = 24, linetype="solid", 
-             color = "blue", size=1.5)
+             color = "blue", size=1.5) +
+  scale_x_continuous(name="Hour", breaks=c(0,12, 24, 36, 48))
 
 
 
