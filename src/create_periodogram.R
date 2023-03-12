@@ -103,7 +103,7 @@ data_summary <- dplyr::filter(data_summary, mean_rel_depth < 1)
 #eel <- dplyr::filter(data_summary, ID == "16031" ,
 #              date_hour> "2019-01-31 00:00:00" ,
 #              date_hour < "2019-02-13 00:00:00")
-eel <- dplyr::filter(data_summary, ID == "17648")
+eel <- dplyr::filter(data_summary, ID == "15789")
 
 #eel <- dplyr::select(eel, datetime, rel_depth)
 eel <- dplyr::select(eel, date_hour, mean_rel_depth)
@@ -164,9 +164,9 @@ ggplot(data=df_periodogram_48, aes(x=freq_hour, y=spec)) +
   theme(axis.text = element_text(size = 38),
         axis.title = element_text(size = 42)) +
   geom_vline(xintercept = 12, linetype="solid", 
-             color = "green", size=1.5) +
+             color = "darkgreen", size=1.5) +
   geom_vline(xintercept = 24, linetype="solid", 
-             color = "blue", size=1.5) +
+             color = "darkblue", size=1.5) +
   scale_x_continuous(name="Hour", breaks=c(0,12, 24, 36, 48))
 
 
