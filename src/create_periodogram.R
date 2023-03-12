@@ -234,6 +234,7 @@ dummy <- cbind(dummy, tidal)
 dummy <- cbind(dummy, circa_tidal)
 dummy <- as.data.frame(dummy)
 
+# Select either circadian, tidal or circa_tidal
 dummy_sel <- select(dummy, circadian)
 
 # Create time series
@@ -258,12 +259,15 @@ df_periodogram <- df_periodogram %>%
 #df_periodogram$freq_hour <-24/df_periodogram$freq
 df_periodogram$freq_hour <-2395.2*df_periodogram$freq # For circadian
 df_periodogram$freq_hour <-570.2857*df_periodogram$freq # For tidal
-df_periodogram$freq_hour <-2*(570.2857)*df_periodogram$freq # For tidal
+df_periodogram$freq_hour <-2*(570.2857)*df_periodogram$freq # For circatidal
 
+
+# Only plot first 48 hours
+df_periodogram_48 <- dplyr::filter(df_periodogram, freq_hour < 50)
 
 # Create plot
-ggplot(data=df_periodogram, aes(x=freq_hour, y=spec)) +
-  geom_line() +
+ggplot(data=df_periodogram_48, aes(x=freq_hour, y=spec)) +
+  geom_line(size = 1.2) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
         panel.background = element_blank(), axis.line = element_line(colour = "black")) +
   ylab("Spectrum") +
@@ -276,7 +280,8 @@ ggplot(data=df_periodogram, aes(x=freq_hour, y=spec)) +
   geom_vline(xintercept = 12, linetype="solid", 
              color = "darkgreen", size=1.5) +
   geom_vline(xintercept = 24, linetype="solid", 
-             color = "blue", size=1.5)
+             color = "darkblue", size=1.5) +
+  scale_x_continuous(name="Hour", breaks=c(0,12, 24, 36, 48))
 
 
 
