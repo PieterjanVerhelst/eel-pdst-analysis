@@ -46,7 +46,7 @@ data <- filter(data, ID != "15805" ,
                ID != "17525_2")
 
 # Select 1 eel
-data <- filter(data, ID == "15700")
+data <- filter(data, ID == "17525_2")
 
 
 # Arrange data set according to ID and datetime
@@ -107,7 +107,7 @@ plot(AutoCorrelation,
      #xaxp = c(0, 576, 4)
 title(ylab="ACF value", line=4, cex.lab=3)
 title(xlab="Hour", line=5, cex.lab=3)
-axis(side = 1, cex.axis = 3, tick = FALSE, pos = -0.2, at = c(0, 144, 288, 432, 576))
+axis(side = 1, cex.axis = 3, tick = FALSE, pos = -0.10, at = c(0, 144, 288, 432, 576))
 #mtext(side=1, text="Hour", line=0.5)
 abline(v = 144, col = "darkgreen", lwd = 5.0)
 abline(v = 288, col = "darkblue", lwd = 5.0)
