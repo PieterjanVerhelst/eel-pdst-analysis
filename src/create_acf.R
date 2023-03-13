@@ -94,10 +94,21 @@ acf
   
   
 # Create plot for publication  
-AutoCorrelation <- forecast::Acf(data$corrected_depth, type = c("correlation"), lag.max = 576, plot = TRUE)
+AutoCorrelation <- forecast::Acf(data$corrected_depth, type = c("correlation"), lag.max = 576, plot = TRUE)  # lag.max = 576 equals 48 hours
 
-par(mar = c(5, 6.5, 1, 1))  # (bottom margin, left margin, top margin, right margin
-plot(AutoCorrelation, xlab = "Hour", ylab = "ACF value", main = "", cex.axis = 3, cex.lab=4, xaxp = c(0, 576, 4))
+par(mar = c(6, 6.5, 1, 1))  # (bottom margin, left margin, top margin, right margin
+plot(AutoCorrelation, 
+     xlab = "", 
+     ylab = "", 
+     main = "", 
+     cex.axis = 3, 
+     cex.lab=4,
+     xaxt = "n") 
+     #xaxp = c(0, 576, 4)
+title(ylab="ACF value", line=4, cex.lab=3)
+title(xlab="Hour", line=5, cex.lab=3)
+axis(side = 1, cex.axis = 3, tick = FALSE, pos = -0.2, at = c(0, 144, 288, 432, 576))
+#mtext(side=1, text="Hour", line=0.5)
 abline(v = 144, col = "darkgreen", lwd = 5.0)
 abline(v = 288, col = "darkblue", lwd = 5.0)
 
