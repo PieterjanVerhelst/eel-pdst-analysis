@@ -207,23 +207,34 @@ data_summary$current_phase_p <- recode_factor(data_summary$current_phase_p, "fav
 
 # Set order of levels for current phase, so the favourable current is in the model output
 data_summary$current_phase_p <- factor(data_summary$current_phase_p, levels = c("east northeast", "west southwest"))
+data_summary$current_phase_y <- factor(data_summary$current_phase_y, levels = c("southward", "northward"))
 
 
-
-glm_model5 <- lme(mean_rel_depth ~  night_day + current_phase_p + 
+glm_model_channel <- lme(mean_rel_depth ~  night_day + current_phase_p + 
                     night_day:current_phase_p,
                     random = ~1|ID/Date,
                     correlation = corAR1(form = ~ 1|ID/Date),
                     data = data_summary, na.action = na.omit)
 
+
+glm_model_nordic <- lme(mean_rel_depth ~  night_day + current_phase_y + 
+                           night_day:current_phase_y,
+                         random = ~1|ID/Date,
+                         correlation = corAR1(form = ~ 1|ID/Date),
+                         data = data_summary, na.action = na.omit)
+
+
 # Stepwise backward selection
-glm_model5 <- lme(mean_rel_depth ~  night_day + current_phase_y +
+glm_model_channel <- lme(mean_rel_depth ~  night_day + current_phase_p +
                    
-                    night_day:current_phase_y,
+                    night_day:current_phase_p,
                   random = ~1|ID/Date,
                   correlation = corAR1(form = ~ 1|ID/Date),
                   data = data_summary, na.action = na.omit)
 
+
+
+glm_model5 <- glm_model_channel
 summary(glm_model5)
 
 
@@ -248,6 +259,9 @@ newdata <- expand.grid(night_day = c("night", "day"), current_phase_x = c("eastw
 newdata$pred_sqrt <- predict(glm_model5, newdata = newdata, level = 0)
 
 newdata <- expand.grid(night_day = c("night", "day"), current_phase_p = c("west southwest", "east northeast"))
+newdata$pred_sqrt <- predict(glm_model5, newdata = newdata, level = 0)
+
+newdata <- expand.grid(night_day = c("night", "day"), current_phase_y = c("northward", "southward"))
 newdata$pred_sqrt <- predict(glm_model5, newdata = newdata, level = 0)
 
 #confidence bounds
@@ -279,11 +293,19 @@ conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
          ucl = ci_h,
          combi = interaction(night_day, current_phase_x, current_phase_y))
 
+# For Channel eels
 conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
   mutate(predictie = pred,
          lcl = ci_l,
          ucl = ci_h,
          combi = interaction(night_day, current_phase_p))
+
+# For Nordic eels
+conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
+  mutate(predictie = pred,
+         lcl = ci_l,
+         ucl = ci_h,
+         combi = interaction(night_day, current_phase_y))
 
 # Confidence intervals in case response variable was squared
 #conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
