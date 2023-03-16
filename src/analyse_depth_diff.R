@@ -52,7 +52,7 @@ aggregate(data$hourly_depth_change, list(data$night_day), sd)
 aggregate(data$hourly_depth_change, list(data$night_day), median)
 aggregate(data$hourly_depth_change, list(data$night_day), min)
 aggregate(data$hourly_depth_change, list(data$night_day), max)
-aggregate(data$hourly_depth_change, list(data$night_day, data$ID), median) # per eel
+aggregate(data$hourly_depth_change, list(data$night_day, data$ID), mean) # per eel
 
 # Create plot
 boxplot <- ggplot(data, aes(x=night_day, y=hourly_depth_change)) + 
