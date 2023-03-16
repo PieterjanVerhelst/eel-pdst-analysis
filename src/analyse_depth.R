@@ -23,6 +23,7 @@ data$datetime <- ymd_hms(data$datetime)
 data$night_day <- factor(data$night_day)
 data$current_phase_x <- factor(data$current_phase_x)
 data$current_phase_y <- factor(data$current_phase_y)
+data$current_phase_p <- factor(data$current_phase_p)
 
 # Remove DVM data from eel A17535
 data <- data[!(data$ID == "17535" & data$datetime >= '2020-01-11 00:00:00'),]
@@ -103,7 +104,7 @@ boxplot
 #data$date_hour <- floor(data$datetime/3600)
 data$date_hour <- lubridate::floor_date(data$datetime, "hour")  
 data_summary <- data %>%
-  group_by(ID, date_hour, night_day, current_phase_x, current_phase_y) %>%
+  group_by(ID, date_hour, night_day, current_phase_p, current_phase_y) %>%
   summarise(mean_depth = mean(corrected_depth),
             mean_rel_depth = mean(rel_depth),
             mean_seabed = mean(dist_from_seabed),
@@ -114,12 +115,6 @@ data_summary <- data %>%
             mean_direction_x = mean(direction_x),
             mean_direction_y = mean(direction_y))
   
-
-
-
-# Calculate the p parallel and t transverse with 25 degrees of in the direction of the English Channel
-data_summary$p_parallel <- (data_summary$mean_direction_x * cos(deg2rad(25))) + (data_summary$mean_direction_y * sin(deg2rad(25))) 
-data_summary$t_transverse <- (data_summary$mean_direction_x * sin(deg2rad(25))) + (data_summary$mean_direction_y * cos(deg2rad(25))) 
 
 
 
@@ -202,9 +197,15 @@ glm_model4 <- MASS::glmmPQL(sqrt(mean_seabed) ~  night_day + current_phase_x + c
 
 # Since the Gaussian model is chosen, we can also work with lme() from the nlme package
 # Info by Pieter Verschelde (INBO): vierkantwortel zorgt voor een betere benadering van een normale distributie, maar het is zeker nog geen normale distributie, niettemin lijkt een gamma distributie geen betere benadering. Omdat de distributie niet perfect normaal is moet wel opgelet worden met interpreteren van p-waarden die dicht bij 00.05 zijn zoals bv de 0.022 van de interactie, eigenlijk is dit geen sterk effect en kan het gewoon significant zijn door de fout in responsdistributie
-glm_model5 <- lme(mean_rel_depth ~  night_day + current_phase_x + current_phase_y +
-                    night_day:current_phase_x +
-                    night_day:current_phase_y,
+
+# For Channel eels: test on current_phase_p
+# For Nordic eels: test on current_phase_y
+
+# Set order of levels for current phase, so the favourable current is in the model output
+data_summary$current_phase_p <- factor(data_summary$current_phase_p, levels = c("non-favourable", "favourable"))
+
+glm_model5 <- lme(mean_rel_depth ~  night_day + current_phase_p + 
+                    night_day:current_phase_p,
                     random = ~1|ID/Date,
                     correlation = corAR1(form = ~ 1|ID/Date),
                     data = data_summary, na.action = na.omit)
