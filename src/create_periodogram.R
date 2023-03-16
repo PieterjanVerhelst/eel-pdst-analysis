@@ -103,7 +103,7 @@ data_summary <- dplyr::filter(data_summary, mean_rel_depth < 1)
 #eel <- dplyr::filter(data_summary, ID == "16031" ,
 #              date_hour> "2019-01-31 00:00:00" ,
 #              date_hour < "2019-02-13 00:00:00")
-eel <- dplyr::filter(data_summary, ID == "17525_2")
+eel <- dplyr::filter(data_summary, ID == "17521")
 
 #eel <- dplyr::select(eel, datetime, rel_depth)
 eel <- dplyr::select(eel, date_hour, mean_rel_depth)
@@ -145,6 +145,11 @@ df_periodogram <- df_periodogram %>%
 
 # Turn frequency into hourly period
 df_periodogram$freq_hour <- 1/df_periodogram$freq
+
+# In case the above doesn't work, try the following
+#df_periodogram$freq <- df_periodogram$freq *3600
+#df_periodogram$spec <- df_periodogram$spec /3600
+#df_periodogram$freq_hour <- 1/df_periodogram$freq
 
 # Only plot first 48 hours
 df_periodogram_48 <- dplyr::filter(df_periodogram, freq_hour < 50)
