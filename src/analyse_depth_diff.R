@@ -164,6 +164,17 @@ glm_model_channel <- lme(hourly_depth_change ~  night_day + current_phase_p +
                   data = data, na.action = na.omit)
 
 
+glm_model_nordic <- lme(hourly_depth_change ~  night_day + current_phase_y +
+                           night_day:current_phase_y,
+                         random = ~1|ID/Date,
+                         correlation = corAR1(form = ~ 1|ID/Date),
+                         data = data, na.action = na.omit)
+
+# Stepwise backward selection
+glm_model_nordic <- lme(hourly_depth_change ~  night_day,
+                        random = ~1|ID/Date,
+                        correlation = corAR1(form = ~ 1|ID/Date),
+                        data = data, na.action = na.omit)
 
 glm_model5 <- glm_model_channel
 summary(glm_model5)
