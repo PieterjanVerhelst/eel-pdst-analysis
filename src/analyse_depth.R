@@ -201,8 +201,14 @@ glm_model4 <- MASS::glmmPQL(sqrt(mean_seabed) ~  night_day + current_phase_x + c
 # For Channel eels: test on current_phase_p
 # For Nordic eels: test on current_phase_y
 
+# Change name of factor levels for current_phase_p
+data_summary$current_phase_p <- recode_factor(data_summary$current_phase_p, "favourable" = "west southwest", 
+                                              "non-favourable" = "east northeast")
+
 # Set order of levels for current phase, so the favourable current is in the model output
-data_summary$current_phase_p <- factor(data_summary$current_phase_p, levels = c("non-favourable", "favourable"))
+data_summary$current_phase_p <- factor(data_summary$current_phase_p, levels = c("east northeast", "west southwest"))
+
+
 
 glm_model5 <- lme(mean_rel_depth ~  night_day + current_phase_p + 
                     night_day:current_phase_p,
@@ -241,6 +247,8 @@ summary(res.aov)
 newdata <- expand.grid(night_day = c("night", "day"), current_phase_x = c("eastward", "westward"), current_phase_y = c("northward", "southward"))
 newdata$pred_sqrt <- predict(glm_model5, newdata = newdata, level = 0)
 
+newdata <- expand.grid(night_day = c("night", "day"), current_phase_p = c("west southwest", "east northeast"))
+newdata$pred_sqrt <- predict(glm_model5, newdata = newdata, level = 0)
 
 #confidence bounds
 #code gehaald van https://rdrr.io/github/bsurial/bernr/src/R/bolker_ci.R (is een klassieke methode die veel gebruikt worden. Referentie kan Zuur et al. zijn
@@ -271,6 +279,12 @@ conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
          ucl = ci_h,
          combi = interaction(night_day, current_phase_x, current_phase_y))
 
+conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
+  mutate(predictie = pred,
+         lcl = ci_l,
+         ucl = ci_h,
+         combi = interaction(night_day, current_phase_p))
+
 # Confidence intervals in case response variable was squared
 #conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
 #  mutate(predictie = pred^2,
@@ -282,8 +296,8 @@ conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
 ggplot(conf_bounds, aes(x = combi, y = predictie, ymin = lcl, ymax = ucl)) +
   xlab("Scenario") + ylab("Relative depth") +
   geom_point() + geom_errorbar() + theme_bw() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  theme(axis.text = element_text(size = 16),
-        axis.title = element_text(size = 18))
+  theme(axis.text = element_text(size = 22),
+        axis.title = element_text(size = 24))
 
 #alternatief die alles voor je doet (dit is wel nog in de vierkantwortelschaal)
 effects <- ggeffects::ggpredict(glm_model5)
