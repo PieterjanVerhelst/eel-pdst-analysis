@@ -106,7 +106,7 @@ hourly_depth_change <- data_min_max %>%
 data_min_max_hour <- left_join(data_min_max, hourly_depth_change, by = c("ID", "date_hour"))
 
 # Keep relevant columns
-data_min_max_hour <- select(data_min_max_hour, ID, date_hour, night_day, direction_x, direction_y, speed, direction, current_phase_x, current_phase_y, hourly_depth_change)
+data_min_max_hour <- select(data_min_max_hour, ID, date_hour, night_day, direction_x, direction_y, speed, direction, current_phase_x, current_phase_y, current_phase_p, hourly_depth_change)
 
 # Remove doubles
 data_min_max_hour <- data_min_max_hour %>%
