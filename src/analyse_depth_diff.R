@@ -41,10 +41,10 @@ data <- data[!is.na(data$hourly_depth_change),]
 # Remove NA in circadian phase
 data <- data[!is.na(data$night_day),]
 
-# Remove NA in current_phase_x and current_phase_y
+# Remove NA in current_phase_x, current_phase_y and current_phase_p
 data <- data[!is.na(data$current_phase_x),]
-# Remove NA in circadian phase
 data <- data[!is.na(data$current_phase_y),]
+data <- data[!is.na(data$current_phase_p),]
 
 # Calculate summary
 aggregate(data$hourly_depth_change, list(data$night_day), mean)
