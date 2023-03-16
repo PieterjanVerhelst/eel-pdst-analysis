@@ -84,7 +84,7 @@ R Markdown files and forthcoming HTML files with code and output.
 	+ Generate `data_circadian_tidal_moon_sun_5min.csv` in `interim` folder
 14. classify_currents.R: classify currents based on surface current data, i.e. eastward, westward, northward and southward currents
 	+ Generate `data_current_phases.csv` in `interim` folder
-15. calc_depth_diff.R: calculate depth difference between minima and maxima
+15. calc_depth_diff.R: calculate vertical movement distance per hour
 	+ Generate `data_depth_diff.csv` in `interim` folder
 16. calc_hourly_migrations.R: calculate the number of vertical migrations per hour together with hourly summarised environmental data
 	+ Generate `data_hourly_migrations.csv` in `interim` folder

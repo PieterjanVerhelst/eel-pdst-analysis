@@ -145,16 +145,28 @@ glm_model4 <- MASS::glmmPQL(sqrt(depth_change) ~  night_day + current_phase_x + 
 #                  data = data, na.action = na.omit)
 
 
-glm_model5 <- lme(hourly_depth_change ~  night_day + current_phase_x + current_phase_y +
-                    night_day:current_phase_x +
-                    night_day:current_phase_y,
+# For Channel eels: test on current_phase_p
+# For Nordic eels: test on current_phase_y
+
+# Change name of factor levels for current_phase_p
+data$current_phase_p <- recode_factor(data$current_phase_p, "favourable" = "west southwest", 
+                                              "non-favourable" = "east northeast")
+
+# Set order of levels for current phase, so the favourable current is in the model output
+data$current_phase_p <- factor(data$current_phase_p, levels = c("east northeast", "west southwest"))
+data$current_phase_y <- factor(data$current_phase_y, levels = c("southward", "northward"))
+
+
+glm_model_channel <- lme(hourly_depth_change ~  night_day + current_phase_p +
+                    night_day:current_phase_p,
                   random = ~1|ID/Date,
                   correlation = corAR1(form = ~ 1|ID/Date),
                   data = data, na.action = na.omit)
 
 
-summary(glm_model5)
 
+glm_model5 <- glm_model_channel
+summary(glm_model5)
 
 
 # Check model
@@ -165,7 +177,7 @@ hist(resid(glm_model5, type = "n"))
 plot(fitted(glm_model5),resid(glm_model5, type = "n"))
 dev.off()
 
-coefplot2(glm_model4)
+coefplot2(glm_model5)
 
 
 # In case mean water temperature was added, check correlation with the factor covariables via one-way anova
@@ -176,6 +188,11 @@ summary(res.aov)
 newdata <- expand.grid(night_day = c("night", "day"), current_phase_x = c("eastward", "westward"), current_phase_y = c("northward", "southward"))
 newdata$pred_sqrt <- predict(glm_model5, newdata = newdata, level = 0)
 
+newdata <- expand.grid(night_day = c("night", "day"), current_phase_p = c("west southwest", "east northeast"))
+newdata$pred_sqrt <- predict(glm_model5, newdata = newdata, level = 0)
+
+newdata <- expand.grid(night_day = c("night", "day"), current_phase_y = c("northward", "southward"))
+newdata$pred_sqrt <- predict(glm_model5, newdata = newdata, level = 0)
 
 #confidence bounds
 #code gehaald van https://rdrr.io/github/bsurial/bernr/src/R/bolker_ci.R (is een klassieke methode die veel gebruikt worden. Referentie kan Zuur et al. zijn
@@ -206,6 +223,20 @@ conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
          ucl = ci_h,
          combi = interaction(night_day, current_phase_x, current_phase_y))
 
+# For Channel eels
+conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
+  mutate(predictie = pred,
+         lcl = ci_l,
+         ucl = ci_h,
+         combi = interaction(night_day, current_phase_p))
+
+# For Nordic eels
+conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
+  mutate(predictie = pred,
+         lcl = ci_l,
+         ucl = ci_h,
+         combi = interaction(night_day, current_phase_y))
+
 # Confidence intervals in case response variable was squared
 #conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
 #  mutate(predictie = pred^2,
@@ -215,8 +246,8 @@ conf_bounds <- bolker_ci(glm_model5, newdata, pred_int = FALSE) %>%
 
 # Plot confidence intervals
 ggplot(conf_bounds, aes(x = combi, y = predictie, ymin = lcl, ymax = ucl)) +
-  xlab("Scenario") + ylab("Depth difference (m)") +
+  xlab("Scenario") + ylab("Hourly vertical movement distance (m)") +
   geom_point() + geom_errorbar() + theme_bw() + theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  theme(axis.text = element_text(size = 16),
-        axis.title = element_text(size = 18))
+  theme(axis.text = element_text(size = 22),
+        axis.title = element_text(size = 24))
 
