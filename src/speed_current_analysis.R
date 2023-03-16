@@ -22,6 +22,7 @@ data$datetime <- ymd_hms(data$datetime)
 data$night_day <- factor(data$night_day)
 data$current_phase_x <- factor(data$current_phase_x)
 data$current_phase_y <- factor(data$current_phase_y)
+data$current_phase_p <- factor(data$current_phase_p)
 
 # Remove DVM data from eel A17535
 data <- data[!(data$ID == "17535" & data$datetime >= '2020-01-11 00:00:00'),]
@@ -43,6 +44,8 @@ data_west <- filter(data, current_phase_x == "westward")
 data_east <- filter(data, current_phase_x == "eastward")
 data_north <- filter(data, current_phase_y == "northward")
 data_south <- filter(data, current_phase_y == "southward")
+data_westsoutwest <- filter(data, current_phase_p == "favourable")
+data_eastnortheast <- filter(data, current_phase_p == "non-favourable")
 
 
 data_west_min_max <- data_west %>%
@@ -61,11 +64,21 @@ data_south_min_max <- data_south %>%
   group_by(ID, Date) %>%
   summarise(max_south = min(direction_y))
 
+data_southwest_min_max <- data_westsoutwest %>%
+  group_by(ID, Date) %>%
+  summarise(max_southwest = min(p_parallel))
+
+data_northeast_min_max <- data_eastnortheast %>%
+  group_by(ID, Date) %>%
+  summarise(max_northeast = max(p_parallel))
+
 
 # Merge datasets
 data_min_max <- left_join(data_west_min_max, data_east_min_max, by = c("ID", "Date"))
 data_min_max <- left_join(data_min_max, data_north_min_max, by = c("ID", "Date"))
 data_min_max <- left_join(data_min_max, data_south_min_max, by = c("ID", "Date"))
+data_min_max <- left_join(data_min_max, data_southwest_min_max, by = c("ID", "Date"))
+data_min_max <- left_join(data_min_max, data_northeast_min_max, by = c("ID", "Date"))
 
 
 # Check data range
@@ -73,23 +86,30 @@ summary(data_min_max$max_east)
 summary(data_min_max$max_west)
 summary(data_min_max$max_north)
 summary(data_min_max$max_south)
+summary(data_min_max$max_southwest)
+summary(data_min_max$max_northeast)
 
 
 # Turn negative values into positive
 data_min_max$max_west <- data_min_max$max_west * (-1)
 data_min_max$max_south <- data_min_max$max_south * (-1)
+data_min_max$max_southwest <- data_min_max$max_southwest * (-1)
+
 
 # Remove redundant datasets
 rm(data_west)
 rm(data_east)
 rm(data_north)
 rm(data_south)
+rm(data_westsoutwest)
+rm(data_east)
 
 rm(data_west_min_max)
 rm(data_east_min_max)
 rm(data_north_min_max)
 rm(data_south_min_max)
-
+rm(data_southwest_min_max)
+rm(data_northeast_min_max)
 
 
 # 10. Load trajectory dataset with coordinates ####
@@ -220,15 +240,13 @@ cor.test(data_min_max$max_north, data_min_max$max_south)
 
 
 # Run LMM for Channel eels
-glm_model1 <- lme(km_day ~  max_west +
-                    max_south,
+glm_model1 <- lme(km_day ~  max_southwest,
                   random = ~1|ID/Date,
                   correlation = corAR1(form = ~ 1|ID/Date),
                   data = data_channel, na.action = na.omit)
 
 # Run LMM for Nordic eels
-glm_model1 <- lme(log(km_day) ~  max_west +
-                    max_north,
+glm_model1 <- lme(log(km_day) ~ max_north,
                   random = ~1|ID/Date,
                   correlation = corAR1(form = ~ 1|ID/Date),
                   data = data_nordic, na.action = na.omit)
