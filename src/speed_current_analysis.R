@@ -233,6 +233,22 @@ data_channel <- filter(data_min_max, ID != "15805" ,
                ID != "17499" ,
                ID != "17525_2")
 
+# Summary of the eel's speed
+summary(data_nordic$km_day)
+sd(data_nordic$km_day)
+summary(data_channel$km_day)
+sd(data_channel$km_day, na.rm = T)
+
+summary_nordic <- data_nordic %>%
+  group_by(ID) %>%
+  summarise(mean = mean(km_day),
+          sd = sd(km_day))
+
+data_channel_no_na <- na.omit(data_channel)
+summary_channel <- data_channel_no_na %>%
+  group_by(ID) %>%
+  summarise(mean = mean(km_day),
+            sd = sd(km_day))
 
 # Check correlation
 cor.test(data_min_max$max_west, data_min_max$max_east)
