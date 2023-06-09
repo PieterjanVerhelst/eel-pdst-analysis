@@ -55,6 +55,11 @@ data_max_depth <- data %>%
 data <- left_join(data, data_max_depth, by = c("ID","Date"))
 data$rel_depth <- data$corrected_depth / data$max_depth
 
+mean(data_max_depth$max_depth)
+sd(data_max_depth$max_depth)
+min(data_max_depth$max_depth)
+max(data_max_depth$max_depth)
+
 # Calculate distance from seabed
 data$dist_from_seabed <- data$corrected_depth - data$max_depth
 
@@ -135,6 +140,17 @@ data_summary <- filter(data_summary, mean_rel_depth > 0)
 
 # Remove mean_rel_depth values larger than 1
 data_summary <- filter(data_summary, mean_rel_depth < 1)
+
+
+mean(data_summary$mean_depth)
+sd(data_summary$mean_depth)
+min(data_summary$mean_depth)
+max(data_summary$mean_depth)
+
+mean(data_summary$mean_rel_depth)
+sd(data_summary$mean_rel_depth)
+min(data_summary$mean_rel_depth)
+max(data_summary$mean_rel_depth)
 
 
 ## Check correlation
