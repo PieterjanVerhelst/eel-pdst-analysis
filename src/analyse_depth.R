@@ -14,6 +14,7 @@ library(nlme)    # For the corAR1() functionality
 library(coefplot2)
 library(ggeffects)
 library(pracma)  # For the 'deg2rad()' function
+library(car)
 
 
 # 1. Read data ####
@@ -267,6 +268,15 @@ coefplot2(glm_model5)
 # In case mean water temperature was added, check correlation with the factor covariables via one-way anova
 res.aov <- aov(mean_temp ~ Date, data = data_summary)
 summary(res.aov)
+
+# Check assumptions
+leveneTest(data_summary$mean_temp ~ data_summary$Date)
+par(mfrow=c(2,2))
+plot(res.aov)
+dev.off
+
+# Non-parametric test
+kruskal.test(data_summary$mean_temp ~ data_summary$Date)
 
 
 
