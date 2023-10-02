@@ -19,7 +19,7 @@ R Markdown files and forthcoming HTML files with code and output.
 
 * `/interim:`
 	+ `/daylogs:` The daylog-files contain daily summaries of temperature and pressure data (min, mean and max). 
-	+ `/sensorlogs:` The sensor-files contain the raw temperature and pressure data.
+	+ `/sensorlogs:` The sensor-files contain the raw temperature and pressure data. The data from Nieuwpoort (Belgium) are publically available at Zenodo: https://doi.org/10.5281/zenodo.8398240
 	+ `/geolocation_input_files:` 
 		+ `/input_tagID:` The 'tag_ID' corresponds to the actual tag ID of a tag. Each folder contains 4 input files for the geolocation model:
 			+ `tagID_LONG.csv`: linear interpolation of longitude between start and end date
