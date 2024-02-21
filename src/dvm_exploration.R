@@ -156,7 +156,6 @@ plot(data_dvm$datetime, data_dvm$corrected_depth)
 
 # Remove temperature NAs by replacing NA by previous non-NA value
 data_dvm <- data_dvm[-(1:4), ]
-
 #data_dvm <- data_dvm %>%
 #  mutate(temperature_interpolation = na.approx(temperature))
 data_dvm$temperature_no_na <- na.locf(data_dvm$temperature)
@@ -165,10 +164,12 @@ data_dvm$temperature_no_na <- na.locf(data_dvm$temperature)
 midnight <-  seq.POSIXt(from = lubridate::floor_date(data_dvm$datetime[1], "day"), to= data_dvm$datetime[nrow(data_dvm)], by = 86400)
 class(lubridate::floor_date(data_dvm$datetime[1], "day"))
 
+# Create plot
 ggplot(data_dvm, aes(x = datetime,
                      y = corrected_depth,
                      color = temperature_no_na)) +
   geom_line(size = 1.5) +
+  scale_color_gradient(low="blue", high="red") +
   geom_line(data = data_dvm[!is.na(data_dvm$temperature),], aes(x = datetime, y = temperature*50), size = 0.5, alpha = 0.5, colour = "red") +
   #scale_y_continuous(breaks = seq(-1000, 600, by = 250)) +
   scale_y_continuous(breaks = seq(-1000, 0, by = 250), 
