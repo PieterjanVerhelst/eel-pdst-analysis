@@ -168,7 +168,7 @@ class(lubridate::floor_date(data_dvm$datetime[1], "day"))
 ggplot(data_dvm, aes(x = datetime,
                      y = corrected_depth,
                      color = temperature_no_na)) +
-  geom_line(size = 1.5) +
+  geom_line(size = 1) +
   scale_color_gradient(low="blue", high="red") +
   geom_line(data = data_dvm[!is.na(data_dvm$temperature),], aes(x = datetime, y = temperature*50), size = 0.5, alpha = 0.5, colour = "red") +
   #scale_y_continuous(breaks = seq(-1000, 600, by = 250)) +
