@@ -154,16 +154,24 @@ plot(data_dvm$datetime, data_dvm$corrected_depth)
 
 # 7. Create temperature and depth plot for DVM data ####
 
+# Remove temperature NAs by replacing NA by previous non-NA value
+data_dvm <- data_dvm[-(1:4), ]
+
+#data_dvm <- data_dvm %>%
+#  mutate(temperature_interpolation = na.approx(temperature))
+data_dvm$temperature_no_na <- na.locf(data_dvm$temperature)
+
 # Create line every 24 hours
-gnu <-  seq.POSIXt(from = lubridate::floor_date(data_dvm$datetime[1], "day"), to= data_dvm$datetime[nrow(data_dvm)], by = 86400)
+midnight <-  seq.POSIXt(from = lubridate::floor_date(data_dvm$datetime[1], "day"), to= data_dvm$datetime[nrow(data_dvm)], by = 86400)
 class(lubridate::floor_date(data_dvm$datetime[1], "day"))
 
 ggplot(data_dvm, aes(x = datetime,
-                     y = corrected_depth)) +
-  geom_line(size = 0.5, colour = "black") +
+                     y = corrected_depth,
+                     color = temperature_no_na)) +
+  geom_line(size = 1.5) +
   geom_line(data = data_dvm[!is.na(data_dvm$temperature),], aes(x = datetime, y = temperature*50), size = 0.5, alpha = 0.5, colour = "red") +
   #scale_y_continuous(breaks = seq(-1000, 600, by = 250)) +
-  scale_y_continuous(breaks = seq(-1000, 600, by = 250), 
+  scale_y_continuous(breaks = seq(-1000, 0, by = 250), 
                      sec.axis = sec_axis(~./50, name = "Temperature (°C)", breaks = seq(-20, 20, by = 5))) +
   theme_minimal() +
   ylab("Depth (m)") +
@@ -177,4 +185,7 @@ ggplot(data_dvm, aes(x = datetime,
         panel.background = element_blank(), 
         axis.line = element_line(colour = "black")) +
   scale_x_datetime(date_breaks  ="1 day") +
-  geom_vline(xintercept=gnu, color = "darkgray", size = 0.2) 
+  geom_vline(xintercept=midnight, color = "darkgray", size = 0.2) 
+
+
+
