@@ -96,6 +96,7 @@ R Markdown files and forthcoming HTML files with code and output.
 22. analyse_depth.R: Analyse distance from seabed according to the circadian phases (day and night), current phases (eastward, westward, northward and southward currents)
 23. analyse_depth_diff.R: Analyse depth difference according to the circadian phases (day and night) and current phases (eastward, westward, northward and southward currents)
 24. speed_current_analysis.R: Analyse maximum daily migration speed relative to maximum daily current strengths
+25. dvm_exploration.R: Load and process PDST datasets from eels that migrated into the Atlantic Oceand and showed DVM behaviour.
 
 
 
