@@ -7,6 +7,8 @@
 library(tidyverse)
 library(lubridate)
 library(broom) # run regression per grouping variable (in 'Correct for depth drift')
+library(zoo)
+
 
 # 1. Load data ####
 eel_A16031 <- read_csv("./data/interim/sensorlogs/sensor_A16031_08-11-2019.csv")
@@ -168,7 +170,7 @@ class(lubridate::floor_date(data_dvm$datetime[1], "day"))
 ggplot(data_dvm, aes(x = datetime,
                      y = corrected_depth,
                      color = temperature_no_na)) +
-  geom_line(size = 1) +
+  geom_line(linewidt = 1) +
   scale_color_gradient(low="blue", high="red") +
   geom_line(data = data_dvm[!is.na(data_dvm$temperature),], aes(x = datetime, y = temperature*50), size = 0.5, alpha = 0.5, colour = "red") +
   #scale_y_continuous(breaks = seq(-1000, 600, by = 250)) +
