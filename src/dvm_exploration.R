@@ -26,7 +26,9 @@ eel_A17518_2$track_tag_id <- "A17518_2"
 eel_A17487 <- read_csv("./data/interim/sensorlogs/sensor_A17487_15-04-2021.csv")
 eel_A17648 <- read_csv("./data/interim/sensorlogs/sensor_A17648_25-06-2021.csv")
 
-
+eel_A17463 <- read_csv("./data/interim/sensorlogs/sensor_A17463_09-10-2020.csv") # Danish eel
+eel_A17471 <- read_csv("./data/interim/sensorlogs/sensor_A17471_08-10-2020.csv") # Danish eel
+eel_A17476 <- read_csv("./data/interim/sensorlogs/sensor_A17476_09-03-2021.csv") # Danish eel
 
 # Combine all datasets ####
 data <- do.call("rbind", list(eel_A16031,
@@ -39,7 +41,10 @@ data <- do.call("rbind", list(eel_A16031,
                              eel_A15700_2,
                              eel_A17518_2,
                              eel_A17487,
-                             eel_A17648
+                             eel_A17648,
+                             eel_A17463,
+                             eel_A17471,
+                             eel_A17476
 ))
 
 data <- data %>%
@@ -57,7 +62,10 @@ rm(eel_A16031,
    eel_A15700_2,
    eel_A17518_2,
    eel_A17487,
-   eel_A17648)
+   eel_A17648,
+   eel_A17463,
+   eel_A17471,
+   eel_A17476)
 
 
 # 2. Read in parameter file ####
