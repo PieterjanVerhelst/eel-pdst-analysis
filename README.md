@@ -53,6 +53,7 @@ R Markdown files and forthcoming HTML files with code and output.
 		+ `pressure_correction`: indicates if a pressure correction needs to be applied (0 =  no, 1 = yes)
 		+ `comment`: any comments
 	+ `migration_direction.csv`: file with the migration direction of the relevant eels for analysis
+	+ `dvm_start_end.csv`: file with the considered start and end date-time for the DVM patterns
 
 * `/output:` This folder contains visual outputs from specific scripts.
 
