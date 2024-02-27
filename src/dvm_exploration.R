@@ -18,11 +18,11 @@ eel_A17510 <- read_csv("./data/interim/sensorlogs/sensor_A17510_22-06-2020.csv")
 eel_A15789 <- read_csv("./data/interim/sensorlogs/sensor_A15789_22-06-2020.csv")
 eel_A17535 <- read_csv("./data/interim/sensorlogs/sensor_A17535_09-09-2020.csv")
 #eel_A15730_2 <- read_csv("./data/interim/sensorlogs/sensor_A15730_09-03-2021.csv")  # Only 1 day with DVM
-eel_A15730_2$track_tag_id <- "A15730_2"
+#eel_A15730_2$track_tag_id <- "A15730_2"
 eel_A15700_2 <- read_csv("./data/interim/sensorlogs/sensor_A15700_09-03-2021.csv")
 eel_A15700_2$track_tag_id <- "A15700_2"
 #eel_A17518_2 <- read_csv("./data/interim/sensorlogs/sensor_A17518_11-03-2021.csv")  # Only 1 day with DVM
-eel_A17518_2$track_tag_id <- "A17518_2"
+#eel_A17518_2$track_tag_id <- "A17518_2"
 #eel_A17487 <- read_csv("./data/interim/sensorlogs/sensor_A17487_15-04-2021.csv")  # Only 1 day with DVM
 eel_A17648 <- read_csv("./data/interim/sensorlogs/sensor_A17648_25-06-2021.csv")
 
