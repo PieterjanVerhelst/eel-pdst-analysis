@@ -156,18 +156,39 @@ data <- data %>%
   dplyr::select(ID, datetime, numericdate, corrected_depth, temperature) 
 
 
-# 6. Filter for DVM data ####
-data_dvm <- filter(data, datetime > "2019-12-01 00:00:00", datetime < "2019-12-08 00:00:00")
-#plot(data_dvm$datetime, data_dvm$corrected_depth)
+
+# 6. Subset data with DVM ####
+# Load start and end date-times for DVM
+start_end_dvm <- read_csv("./data/external/dvm_start_end.csv")
+start_end_dvm$start_dvm <-  dmy_hm(start_end_dvm$start_dvm)
+start_end_dvm$end_dvm <-  dmy_hm(start_end_dvm$end_dvm)
+start_end_dvm$dvm_period <- start_end_dvm$end_dvm - start_end_dvm$start_dvm
+
+# Join start and end dvm to dataset
+data <- left_join(data, start_end_dvm, by = "ID")
+
+# Select DVM data
+data_dvm <- data %>%
+  group_by(ID) %>%
+  filter(datetime >= start_dvm, datetime <= end_dvm)
+
+# Remove temperature NAs by replacing NA by previous non-NA value
+data_dvm <- data_dvm %>%
+  group_by(ID) %>%
+  mutate(temperature_no_na = na.locf(temperature))
 
 
 # 7. Create temperature and depth plot for DVM data ####
 
+# Filter for DVM data
+#data_dvm <- filter(data, datetime > "2019-12-01 00:00:00", datetime < "2019-12-08 00:00:00")
+#plot(data_dvm$datetime, data_dvm$corrected_depth)
+
 # Remove temperature NAs by replacing NA by previous non-NA value
-data_dvm <- data_dvm[-(1:4), ]
+#data_dvm <- data_dvm[-(1:4), ]
 #data_dvm <- data_dvm %>%
 #  mutate(temperature_interpolation = na.approx(temperature))
-data_dvm$temperature_no_na <- na.locf(data_dvm$temperature)
+#data_dvm$temperature_no_na <- na.locf(data_dvm$temperature)
 
 # Create line every 24 hours
 midnight <-  seq.POSIXt(from = lubridate::floor_date(data_dvm$datetime[1], "day"), to= data_dvm$datetime[nrow(data_dvm)], by = 86400)
@@ -176,7 +197,7 @@ class(lubridate::floor_date(data_dvm$datetime[1], "day"))
 # Create plot
 ggplot(data_dvm, aes(x = datetime,
                      y = corrected_depth,
-                     color = temperature_no_na)) +
+                     color = temperature)) +
   geom_line(linewidth = 1) +
   scale_color_gradient(low="blue", high="red") +
   geom_line(data = data_dvm[!is.na(data_dvm$temperature),], aes(x = datetime, y = temperature*50), linewidth = 0.5, alpha = 0.5, colour = "red") +
@@ -197,13 +218,5 @@ ggplot(data_dvm, aes(x = datetime,
   scale_x_datetime(date_breaks  ="1 day") +
   geom_vline(xintercept=midnight, color = "darkgray", linewidth = 0.2) 
 
-
-
-# 8. Subset data with DVM ####
-# Load start and end date-times for DVM
-start_end_dvm <- read_csv("./data/external/dvm_start_end.csv")
-start_end_dvm$start_dvm <-  dmy_hm(start_end_dvm$start_dvm)
-start_end_dvm$end_dvm <-  dmy_hm(start_end_dvm$end_dvm)
-start_end_dvm$dvm_period <- start_end_dvm$end_dvm - start_end_dvm$start_dvm
 
 
