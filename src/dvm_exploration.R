@@ -158,7 +158,7 @@ data <- data %>%
 
 # 6. Filter for DVM data ####
 data_dvm <- filter(data, datetime > "2021-01-02 00:00:00", datetime < "2021-01-14  10:00:00")
-plot(data_dvm$datetime, data_dvm$corrected_depth)
+#plot(data_dvm$datetime, data_dvm$corrected_depth)
 
 
 
@@ -180,7 +180,7 @@ ggplot(data_dvm, aes(x = datetime,
                      color = temperature_no_na)) +
   geom_line(linewidth = 1) +
   scale_color_gradient(low="blue", high="red") +
-  geom_line(data = data_dvm[!is.na(data_dvm$temperature),], aes(x = datetime, y = temperature*50), size = 0.5, alpha = 0.5, colour = "red") +
+  geom_line(data = data_dvm[!is.na(data_dvm$temperature),], aes(x = datetime, y = temperature*50), linewidth = 0.5, alpha = 0.5, colour = "red") +
   #scale_y_continuous(breaks = seq(-1000, 600, by = 250)) +
   scale_y_continuous(breaks = seq(-1000, 0, by = 250), 
                      sec.axis = sec_axis(~./50, name = "Temperature (°C)", breaks = seq(-20, 20, by = 5))) +
@@ -198,5 +198,31 @@ ggplot(data_dvm, aes(x = datetime,
   scale_x_datetime(date_breaks  ="1 day") +
   geom_vline(xintercept=midnight, color = "darkgray", size = 0.2) 
 
+
+# Subsample at 15 min to check how data would look like through PSAT-Argos
+data_dvm_15min <- data_dvm[seq(1, nrow(data_dvm), 450), ]  
+
+ggplot(data_dvm_15min, aes(x = datetime,
+                           y = corrected_depth,
+                           color = temperature_no_na)) +
+  geom_line(linewidth = 1) +
+  scale_color_gradient(low="blue", high="red") +
+  #geom_line(data = data_dvm[!is.na(data_dvm$temperature),], aes(x = datetime, y = temperature*50), size = 0.5, alpha = 0.5, colour = "red") +
+  scale_y_continuous(breaks = seq(-1000, 600, by = 250)) +
+  #scale_y_continuous(breaks = seq(-1000, 0, by = 250), 
+  #                   sec.axis = sec_axis(~./50, name = "Temperature (°C)", breaks = seq(-20, 20, by = 5))) +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) +
+  scale_x_datetime(date_breaks  ="1 day") +
+  geom_vline(xintercept=midnight, color = "darkgray", size = 0.2) 
 
 
