@@ -23,7 +23,7 @@ eel_A15700_2 <- read_csv("./data/interim/sensorlogs/sensor_A15700_09-03-2021.csv
 eel_A15700_2$track_tag_id <- "A15700_2"
 #eel_A17518_2 <- read_csv("./data/interim/sensorlogs/sensor_A17518_11-03-2021.csv")  # Only 1 day with DVM
 eel_A17518_2$track_tag_id <- "A17518_2"
-eel_A17487 <- read_csv("./data/interim/sensorlogs/sensor_A17487_15-04-2021.csv")
+#eel_A17487 <- read_csv("./data/interim/sensorlogs/sensor_A17487_15-04-2021.csv")  # Only 1 day with DVM
 eel_A17648 <- read_csv("./data/interim/sensorlogs/sensor_A17648_25-06-2021.csv")
 
 eel_A17463 <- read_csv("./data/interim/sensorlogs/sensor_A17463_09-10-2020.csv") # Danish eel
@@ -40,7 +40,7 @@ data <- do.call("rbind", list(eel_A16031,
                              #eel_A15730_2,
                              eel_A15700_2,
                              #eel_A17518_2,
-                             eel_A17487,
+                             #eel_A17487,
                              eel_A17648,
                              eel_A17463,
                              eel_A17471,
@@ -61,7 +61,7 @@ rm(eel_A16031,
    #eel_A15730_2,
    eel_A15700_2,
    #eel_A17518_2,
-   eel_A17487,
+   #eel_A17487,
    eel_A17648,
    eel_A17463,
    eel_A17471,
@@ -157,7 +157,7 @@ data <- data %>%
 
 
 # 6. Filter for DVM data ####
-data_dvm <- filter(data, datetime > "2021-01-01 00:00:00", datetime < "2021-01-14 05:25:00")
+data_dvm <- filter(data, datetime > "2021-01-19 00:00:00", datetime < "2021-01-21 05:25:00")
 #plot(data_dvm$datetime, data_dvm$corrected_depth)
 
 
@@ -197,5 +197,13 @@ ggplot(data_dvm, aes(x = datetime,
   scale_x_datetime(date_breaks  ="1 day") +
   geom_vline(xintercept=midnight, color = "darkgray", size = 0.2) 
 
+
+
+# 8. Subset data with DVM ####
+# Load start and end date-times for DVM
+start_end_dvm <- read_csv("./data/external/dvm_start_end.csv")
+start_end_dvm$start_dvm <-  dmy_hm(start_end_dvm$start_dvm)
+start_end_dvm$end_dvm <-  dmy_hm(start_end_dvm$end_dvm)
+start_end_dvm$dvm_period <- start_end_dvm$end_dvm - start_end_dvm$start_dvm
 
 
