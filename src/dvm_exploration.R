@@ -157,7 +157,7 @@ data <- data %>%
 
 
 # 6. Filter for DVM data ####
-data_dvm <- filter(data, datetime > "2021-01-19 00:00:00", datetime < "2021-01-21 05:25:00")
+data_dvm <- filter(data, datetime > "2019-12-01 00:00:00", datetime < "2019-12-08 00:00:00")
 #plot(data_dvm$datetime, data_dvm$corrected_depth)
 
 
@@ -195,7 +195,7 @@ ggplot(data_dvm, aes(x = datetime,
         panel.background = element_blank(), 
         axis.line = element_line(colour = "black")) +
   scale_x_datetime(date_breaks  ="1 day") +
-  geom_vline(xintercept=midnight, color = "darkgray", size = 0.2) 
+  geom_vline(xintercept=midnight, color = "darkgray", linewidth = 0.2) 
 
 
 
