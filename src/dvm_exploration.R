@@ -12,16 +12,16 @@ library(zoo)
 
 # 1. Load data ####
 eel_A16031 <- read_csv("./data/interim/sensorlogs/sensor_A16031_08-11-2019.csv")
-eel_A17492 <- read_csv("./data/interim/sensorlogs/sensor_A17492_05-05-2020.csv")
+#eel_A17492 <- read_csv("./data/interim/sensorlogs/sensor_A17492_05-05-2020.csv")  # Only 1 day with DVM
 eel_A17537 <- read_csv("./data/interim/sensorlogs/sensor_A17537_05-05-2020.csv")
 eel_A17510 <- read_csv("./data/interim/sensorlogs/sensor_A17510_22-06-2020.csv")
 eel_A15789 <- read_csv("./data/interim/sensorlogs/sensor_A15789_22-06-2020.csv")
 eel_A17535 <- read_csv("./data/interim/sensorlogs/sensor_A17535_09-09-2020.csv")
-eel_A15730_2 <- read_csv("./data/interim/sensorlogs/sensor_A15730_09-03-2021.csv")
+#eel_A15730_2 <- read_csv("./data/interim/sensorlogs/sensor_A15730_09-03-2021.csv")  # Only 1 day with DVM
 eel_A15730_2$track_tag_id <- "A15730_2"
 eel_A15700_2 <- read_csv("./data/interim/sensorlogs/sensor_A15700_09-03-2021.csv")
 eel_A15700_2$track_tag_id <- "A15700_2"
-eel_A17518_2 <- read_csv("./data/interim/sensorlogs/sensor_A17518_11-03-2021.csv")
+#eel_A17518_2 <- read_csv("./data/interim/sensorlogs/sensor_A17518_11-03-2021.csv")  # Only 1 day with DVM
 eel_A17518_2$track_tag_id <- "A17518_2"
 eel_A17487 <- read_csv("./data/interim/sensorlogs/sensor_A17487_15-04-2021.csv")
 eel_A17648 <- read_csv("./data/interim/sensorlogs/sensor_A17648_25-06-2021.csv")
@@ -32,14 +32,14 @@ eel_A17476 <- read_csv("./data/interim/sensorlogs/sensor_A17476_09-03-2021.csv")
 
 # Combine all datasets ####
 data <- do.call("rbind", list(eel_A16031,
-                             eel_A17492,
+                             #eel_A17492,
                              eel_A17537,
                              eel_A17510,
                              eel_A15789,
                              eel_A17535,
-                             eel_A15730_2,
+                             #eel_A15730_2,
                              eel_A15700_2,
-                             eel_A17518_2,
+                             #eel_A17518_2,
                              eel_A17487,
                              eel_A17648,
                              eel_A17463,
@@ -53,14 +53,14 @@ data$ID <- factor(data$ID)
 
 # Remove seperate files
 rm(eel_A16031,
-   eel_A17492,
+   #eel_A17492,
    eel_A17537,
    eel_A17510,
    eel_A15789,
    eel_A17535,
-   eel_A15730_2,
+   #eel_A15730_2,
    eel_A15700_2,
-   eel_A17518_2,
+   #eel_A17518_2,
    eel_A17487,
    eel_A17648,
    eel_A17463,
@@ -157,9 +157,8 @@ data <- data %>%
 
 
 # 6. Filter for DVM data ####
-data_dvm <- filter(data, datetime > "2021-01-02 00:00:00", datetime < "2021-01-14  10:00:00")
+data_dvm <- filter(data, datetime > "2021-01-01 00:00:00", datetime < "2021-01-14 05:25:00")
 #plot(data_dvm$datetime, data_dvm$corrected_depth)
-
 
 
 # 7. Create temperature and depth plot for DVM data ####
@@ -198,31 +197,5 @@ ggplot(data_dvm, aes(x = datetime,
   scale_x_datetime(date_breaks  ="1 day") +
   geom_vline(xintercept=midnight, color = "darkgray", size = 0.2) 
 
-
-# Subsample at 15 min to check how data would look like through PSAT-Argos
-data_dvm_15min <- data_dvm[seq(1, nrow(data_dvm), 450), ]  
-
-ggplot(data_dvm_15min, aes(x = datetime,
-                           y = corrected_depth,
-                           color = temperature_no_na)) +
-  geom_line(linewidth = 1) +
-  scale_color_gradient(low="blue", high="red") +
-  #geom_line(data = data_dvm[!is.na(data_dvm$temperature),], aes(x = datetime, y = temperature*50), size = 0.5, alpha = 0.5, colour = "red") +
-  scale_y_continuous(breaks = seq(-1000, 600, by = 250)) +
-  #scale_y_continuous(breaks = seq(-1000, 0, by = 250), 
-  #                   sec.axis = sec_axis(~./50, name = "Temperature (°C)", breaks = seq(-20, 20, by = 5))) +
-  theme_minimal() +
-  ylab("Depth (m)") +
-  xlab("Date") +
-  theme(axis.title.y = element_text(margin = margin(r = 10))) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  theme(axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14),
-        panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(),
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black")) +
-  scale_x_datetime(date_breaks  ="1 day") +
-  geom_vline(xintercept=midnight, color = "darkgray", size = 0.2) 
 
 
