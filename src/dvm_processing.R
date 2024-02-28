@@ -186,7 +186,7 @@ data_dvm$ID <- factor(data_dvm$ID)
 
 
 # 8. Load trajectory dataset with coordinates ####
-tr_data <- read_csv("./data/external/trajectory_data/eel_trajectories.csv")
+tr_data <- read_csv("./data/external/trajectory_data/eel_trajectories_dvm.csv")
 
 # Select columns
 tr_data <- dplyr::select(tr_data, ID, Date, MPL.Avg.Lat, MPL.Avg.Lon, Med.Lat, Med.Lon)
@@ -224,99 +224,31 @@ tr_data <- rbind(tr_data, duplicates)
 
 
 # Select relevant eels
-tr_data <- filter(tr_data, ID == "15805" |
-                    ID == "15730" |
-                    ID == "15757" |
-                    ID == "15700" |
-                    ID == "15714" |
-                    ID == "16031" |
-                    ID == "15706" |
-                    ID == "15981" |
-                    ID == "15777" |
-                    ID == "17443" |
-                    ID == "17499" |
-                    ID == "17513" |
-                    ID == "17534" |
-                    ID == "17526" |
-                    ID == "17522" |
-                    ID == "174922" |
-                    ID == "17508" |
-                    ID == "17536" |
-                    ID == "17538" |
-                    ID == "17537" |
-                    ID == "17510" |
-                    ID == "15789" |
-                    ID == "17521" |
-                    ID == "17535" |
-                    ID == "17653" |
-                    ID == "157302" |
-                    ID == "157002" |
-                    ID == "17646" |
-                    ID == "17642" |
-                    ID == "17658" |
-                    ID == "175252" |
-                    ID == "174922021" |
-                    ID == "175182" |
-                    ID == "17638" |
-                    ID == "17634" |
-                    ID == "17547" |
-                    ID == "17635" |
-                    ID == "17487" |
-                    ID == "174992" |
-                    ID == "17663" |
-                    ID == "175132" |
-                    ID == "17648" )
+tr_data <- filter(tr_data,
+                  ID == "16031" |
+                  ID == "17537" |
+                  ID == "17510" |
+                  ID == "15789" |
+                  ID == "17535" |
+                  ID == "157002" |
+                  ID == "17648" |
+                  ID == "17463" |
+                  ID == "17471" |
+                  ID == "17476" )
 tr_data$ID <- factor(tr_data$ID) # rerun 'factor()' so the number of levels is set accurately
 
 # Change IDs of some eels/PDSTs
 tr_data$ID <- plyr::revalue(tr_data$ID, 
-                            c("175132"="17513_2", 
-                              "157002"="15700_2",
-                              "174922"="17492",
-                              "157302"="15730_2",
-                              "175252"="17525_2",
-                              "174922021"="17492_2",
-                              "174992"="17499_2",
-                              "175182"="17518_2"))
+                            c("157002"="15700_2"))
 
 
-
-# 11. Merge datasets ####
-all <- left_join(x = all, y = tr_data, by=c("ID","Date"))
-all$geoloc_avg_lat <- as.numeric(all$geoloc_avg_lat)  # important to convert lat and lon to numeric for getSunlightTimes()
-all$geoloc_avg_lon <- as.numeric(all$geoloc_avg_lon)
-#plot(all$geoloc_avg_lon, all$geoloc_avg_lat)
+# 9. Merge datasets ####
+data_dvm <- left_join(x = data_dvm, y = tr_data, by=c("ID","Date"))
+data_dvm$geoloc_avg_lat <- as.numeric(data_dvm$geoloc_avg_lat)  # important to convert lat and lon to numeric for getSunlightTimes()
+data_dvm$geoloc_avg_lon <- as.numeric(data_dvm$geoloc_avg_lon)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 7. Create temperature and depth plot for DVM data ####
+# 10. Create temperature and depth plot for DVM data ####
 
 # Subset for specific eel
 data_dvm_subset <- filter(data_dvm, ID == "A17476", datetime > "2020-03-19 00:00:00", datetime < "2020-03-24 00:00:00")
@@ -360,7 +292,7 @@ ggplot(data_dvm_subset, aes(x = datetime,
   geom_vline(xintercept=midnight, color = "darkgray", linewidth = 0.2) 
 
 
-# 8. Write csv ####
+# 11. Write csv ####
 write.csv(data_dvm, "./data/interim/data_dvm.csv")
 
 
