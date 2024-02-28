@@ -181,7 +181,7 @@ data_dvm <- data_dvm %>%
 # 7. Create temperature and depth plot for DVM data ####
 
 # Subset for specific eel
-data_dvm_subset <- filter(data_dvm, ID == "A17476")
+data_dvm_subset <- filter(data_dvm, ID == "A17476", datetime > "2020-01-15 00:00:00", datetime < "2020-01-20 00:00:00")
 
 # Filter for DVM data
 #data_dvm <- filter(data, datetime > "2019-12-01 00:00:00", datetime < "2019-12-08 00:00:00")
@@ -203,10 +203,10 @@ ggplot(data_dvm_subset, aes(x = datetime,
                      color = temperature_no_na)) +
   geom_line(linewidth = 1) +
   scale_color_gradient(low="blue", high="red") +
-  geom_line(data = data_dvm_subset[!is.na(data_dvm_subset$temperature),], aes(x = datetime, y = temperature*50), linewidth = 0.5, alpha = 0.5, colour = "red") +
-  #scale_y_continuous(breaks = seq(-1000, 600, by = 250)) +
-  scale_y_continuous(breaks = seq(-1000, 0, by = 250), 
-                     sec.axis = sec_axis(~./50, name = "Temperature (°C)", breaks = seq(-20, 20, by = 5))) +
+ # geom_line(data = data_dvm_subset[!is.na(data_dvm_subset$temperature),], aes(x = datetime, y = temperature*50), linewidth = 0.5, alpha = 0.5, colour = "red") +
+  scale_y_continuous(breaks = seq(-1000, 10, by = 100)) +
+  #scale_y_continuous(breaks = seq(-1000, 0, by = 250), 
+  #                   sec.axis = sec_axis(~./50, name = "Temperature (°C)", breaks = seq(-20, 20, by = 5))) +
   theme_minimal() +
   ylab("Depth (m)") +
   xlab("Date") +
