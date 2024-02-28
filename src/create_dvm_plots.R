@@ -5,9 +5,9 @@
 
 # Setup
 library(tidyverse) # To do datascience
-library(tidylog)  # To get infos about dplyr functions
+#library(tidylog)  # To get infos about dplyr functions
 library(lubridate)
-library(pracma)  # For the 'deg2rad()' function
+#library(pracma)  # For the 'deg2rad()' function
 
 
 
@@ -15,25 +15,23 @@ library(pracma)  # For the 'deg2rad()' function
 # 1. Plot complete track ####
 
 # Import data
-data <- read_csv("./data/interim/data_current_phases.csv",
+data_dvm <- read_csv("./data/interim/data_dvm_circadian_moon_sun.csv",
                  na = "", 
-                 col_types = list(sunrise = col_datetime(),
-                                  previous_sunset = col_datetime(),
+                 col_types = list(datetime = col_datetime(),
                                   sunset = col_datetime(),
                                   sunrise = col_datetime(),
-                                  next_sunrise = col_datetime(),
-                                  next_sunmoment = col_datetime(),
+                                  #next_sunrise = col_datetime(),
+                                  #next_sunmoment = col_datetime(),
                                   direction_x = col_double(),
-                                  V = col_double(),
-                                  direction_y = col_double(),
-                                  direction = col_double()),          # set direction as numeric
+                                  moon_fraction = col_double(),
+                                  sun_altitude = col_double(),
+                                  sun_azimuth = col_double()),         
                  guess_max = 100000)
 
 
-data$...1 <- NULL
-data$ID <- factor(data$ID)
-data$current_phase_x <- factor(data$current_phase_x)
-data$current_phase_y <- factor(data$current_phase_y)
+data_dvm$...1 <- NULL
+data_dvm$ID <- factor(data_dvm$ID)
+
 
 # Select 1 eel
 subset <- filter(data, ID == "17525_2")
