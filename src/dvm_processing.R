@@ -1,4 +1,4 @@
-# Explore DVM pattern in eels 
+# Load and process PDST datasets from eels that showed DVM patterns
 # By Pieterjan Verhelst
 # pieterjan.verhelst@inbo.be
 
@@ -178,6 +178,144 @@ data_dvm <- data_dvm %>%
   mutate(temperature_no_na = na.locf(temperature))
 
 
+# 7. Create column 'Date' and remove ID prefix
+data_dvm$Date <- as.Date(data_dvm$datetime)
+data_dvm$ID <- gsub( "A0", "", as.character(data_dvm$ID))
+data_dvm$ID <- gsub( "A", "", as.character(data_dvm$ID))
+data_dvm$ID <- factor(data_dvm$ID)
+
+
+# 8. Load trajectory dataset with coordinates ####
+tr_data <- read_csv("./data/external/trajectory_data/eel_trajectories.csv")
+
+# Select columns
+tr_data <- dplyr::select(tr_data, ID, Date, MPL.Avg.Lat, MPL.Avg.Lon, Med.Lat, Med.Lon)
+tr_data <- rename(tr_data, 
+                  geoloc_avg_lat = MPL.Avg.Lat,
+                  geoloc_avg_lon = MPL.Avg.Lon,
+                  geoloc_med_lat = Med.Lat,
+                  geoloc_med_lon = Med.Lon)
+
+# Process columns
+tr_data$Date <- dmy(tr_data$Date)
+tr_data$ID <- factor(tr_data$ID)
+
+# Remove double dates per eel (ID)
+#tr_data <- tr_data[!duplicated(tr_data[c('ID','Date')]),]
+tr_data <- tr_data %>%     # Add ID number to duplicate dates
+  group_by(ID, Date) %>%
+  add_tally()
+
+duplicates <- filter(tr_data, n == 2)   # Filter duplicate dates
+duplicates <- duplicates %>%             # Add ID number to distinguish between first and second duplicate
+  mutate(number_id = row_number())
+duplicates <- filter(duplicates, number_id == 2)  # Filter second duplicates
+
+tr_data <- filter(tr_data, n != 2)   # Remove duplicate dates from tracking dataset
+
+# Bind 'duplicates' dataset with second duplicates to tracking dataset
+tr_data <- ungroup(tr_data)
+tr_data$n <- NULL
+duplicates <- ungroup(duplicates)
+duplicates$n <- NULL
+duplicates$number_id <- NULL
+
+tr_data <- rbind(tr_data, duplicates)
+
+
+# Select relevant eels
+tr_data <- filter(tr_data, ID == "15805" |
+                    ID == "15730" |
+                    ID == "15757" |
+                    ID == "15700" |
+                    ID == "15714" |
+                    ID == "16031" |
+                    ID == "15706" |
+                    ID == "15981" |
+                    ID == "15777" |
+                    ID == "17443" |
+                    ID == "17499" |
+                    ID == "17513" |
+                    ID == "17534" |
+                    ID == "17526" |
+                    ID == "17522" |
+                    ID == "174922" |
+                    ID == "17508" |
+                    ID == "17536" |
+                    ID == "17538" |
+                    ID == "17537" |
+                    ID == "17510" |
+                    ID == "15789" |
+                    ID == "17521" |
+                    ID == "17535" |
+                    ID == "17653" |
+                    ID == "157302" |
+                    ID == "157002" |
+                    ID == "17646" |
+                    ID == "17642" |
+                    ID == "17658" |
+                    ID == "175252" |
+                    ID == "174922021" |
+                    ID == "175182" |
+                    ID == "17638" |
+                    ID == "17634" |
+                    ID == "17547" |
+                    ID == "17635" |
+                    ID == "17487" |
+                    ID == "174992" |
+                    ID == "17663" |
+                    ID == "175132" |
+                    ID == "17648" )
+tr_data$ID <- factor(tr_data$ID) # rerun 'factor()' so the number of levels is set accurately
+
+# Change IDs of some eels/PDSTs
+tr_data$ID <- plyr::revalue(tr_data$ID, 
+                            c("175132"="17513_2", 
+                              "157002"="15700_2",
+                              "174922"="17492",
+                              "157302"="15730_2",
+                              "175252"="17525_2",
+                              "174922021"="17492_2",
+                              "174992"="17499_2",
+                              "175182"="17518_2"))
+
+
+
+# 11. Merge datasets ####
+all <- left_join(x = all, y = tr_data, by=c("ID","Date"))
+all$geoloc_avg_lat <- as.numeric(all$geoloc_avg_lat)  # important to convert lat and lon to numeric for getSunlightTimes()
+all$geoloc_avg_lon <- as.numeric(all$geoloc_avg_lon)
+#plot(all$geoloc_avg_lon, all$geoloc_avg_lat)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 7. Create temperature and depth plot for DVM data ####
 
 # Subset for specific eel
@@ -221,5 +359,8 @@ ggplot(data_dvm_subset, aes(x = datetime,
   scale_x_datetime(date_breaks  ="1 day") +
   geom_vline(xintercept=midnight, color = "darkgray", linewidth = 0.2) 
 
+
+# 8. Write csv ####
+write.csv(data_dvm, "./data/interim/data_dvm.csv")
 
 
