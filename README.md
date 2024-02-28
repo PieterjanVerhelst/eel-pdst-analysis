@@ -34,6 +34,7 @@ R Markdown files and forthcoming HTML files with code and output.
 	+ `data_depth_diff.csv`: batch processed file for which the depth difference is calculated between minima and maxima.
 	+ `data_hourly_migrations.csv`: batch processed file with the number of vertical migrations per hour together with hourly summarised environmental data
 	+ `data_dvm.csv`: data containing the DVM patterns of eels
+	+ `data_dvm_circadian_moon_sun.csv`: DVM data with circadian phases (i.e. day and night) and variables related to the moon and sun (i.e. illuminated moon fraction, sun altitude and sun azimuth).
 
 * `/external:`
 	+ `/geolocation_input_files`: input files for the geolocation model per eel with lat and lon of release and retrieval or pop-off location
@@ -100,6 +101,10 @@ R Markdown files and forthcoming HTML files with code and output.
 24. speed_current_analysis.R: Analyse maximum daily migration speed relative to maximum daily current strengths
 25. dvm_processing.R: Load and process PDST datasets from eels that showed DVM patterns
 	+ Generate `data_dvm.csv` in `interim` folder
+26. link_circadian_dvm.R: Link circadian phases to the DVM dataset
+27. link_moon_sun_dvm.R: Link illuminated moon fraction, sun altitude and sun azimuth data to the DVM dataset
+	+ Generate `data_dvm_circadian_moon_sun.csv` in `interim` folder
+28. create_dvm_plots.R: Create DVM plots for data exploration
 
 
 

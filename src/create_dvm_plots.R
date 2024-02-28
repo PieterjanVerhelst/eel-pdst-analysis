@@ -1,0 +1,387 @@
+# Create plots for DVM data exploration
+# By Pieterjan Verhelst and Damiano Oldoni
+# Pieterjan.Verhelst@UGent.be & damiano.oldoni@inbo.be
+
+
+# Setup
+library(tidyverse) # To do datascience
+library(tidylog)  # To get infos about dplyr functions
+library(lubridate)
+library(pracma)  # For the 'deg2rad()' function
+
+
+
+
+# 1. Plot complete track ####
+
+# Import data
+data <- read_csv("./data/interim/data_current_phases.csv",
+                 na = "", 
+                 col_types = list(sunrise = col_datetime(),
+                                  previous_sunset = col_datetime(),
+                                  sunset = col_datetime(),
+                                  sunrise = col_datetime(),
+                                  next_sunrise = col_datetime(),
+                                  next_sunmoment = col_datetime(),
+                                  direction_x = col_double(),
+                                  V = col_double(),
+                                  direction_y = col_double(),
+                                  direction = col_double()),          # set direction as numeric
+                 guess_max = 100000)
+
+
+data$...1 <- NULL
+data$ID <- factor(data$ID)
+data$current_phase_x <- factor(data$current_phase_x)
+data$current_phase_y <- factor(data$current_phase_y)
+
+# Select 1 eel
+subset <- filter(data, ID == "17525_2")
+subset <-
+  subset %>%
+  arrange(ID, datetime)
+
+
+# Create plot
+plot_complete_track <- ggplot(subset, aes(x = datetime,
+                                          y = corrected_depth)) +
+  geom_line(binaxis='x', size=1.0, binwidth = 1) +
+  #geom_line(data = subset, aes(x = datetime, y = pressure/2), size = 1.0, alpha = 0.5, colour = "purple") +
+  #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 20),
+        axis.title = element_text(size = 22)) +
+  scale_x_datetime(date_breaks  ="1 week")
+
+plot_complete_track
+
+
+
+
+
+# 2. Plot raw data ####
+
+# Import data
+data <- read_csv("./data/interim/data_current_phases.csv",
+                 na = "", 
+                 col_types = list(sunrise = col_datetime(),
+                                  previous_sunset = col_datetime(),
+                                  sunset = col_datetime(),
+                                  sunrise = col_datetime(),
+                                  next_sunrise = col_datetime(),
+                                  next_sunmoment = col_datetime(),
+                                  direction_x = col_double(),
+                                  V = col_double(),
+                                  direction_y = col_double(),
+                                  direction = col_double()),          # set direction as numeric
+                 guess_max = 100000)
+
+
+data$...1 <- NULL
+data$ID <- factor(data$ID)
+data$current_phase_x <- factor(data$current_phase_x)
+data$current_phase_y <- factor(data$current_phase_y)
+
+
+data <-
+  data %>%
+  arrange(ID, datetime)
+
+
+
+
+# Create subset of several days for plot
+subset <- filter(data,
+                 ID == "15789",
+                 datetime >= "2019-12-29 00:00:00", datetime <= "2019-12-31 01:00:00")
+
+# Create line every 24 hours
+gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
+class(lubridate::floor_date(subset$datetime[1], "day"))
+
+# Create plot
+fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
+                                          y = corrected_depth), size = 1.0, alpha = 0.5) +
+  geom_rect(data = subset %>% 
+              filter(night_day == "night") %>%
+              distinct(sunset, sunrise, night_day),
+            inherit.aes = FALSE,
+            mapping = aes(xmin = sunset,
+                          xmax = sunrise,
+                          ymin=-Inf,
+                          ymax=+Inf), fill = "grey", alpha=0.5) +
+  geom_line(size=1.0, binwidth = 1, colour = "black") +
+  geom_line(data = subset, aes(x = datetime, y = p_parallel*100), size = 1.0, alpha = 0.5, colour = "purple") +
+  #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
+  scale_y_continuous(sec.axis = sec_axis(~./100, name = "Eastward velocity (m/s)")) +
+  theme_minimal() +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  ="1 day") +
+  #geom_vline(xintercept=ymd_hms(release), colour="blue") + # Release date and time
+  geom_vline(xintercept=gnu, color = "red", size = 1) #+
+#geom_hline(yintercept=0, linetype="dashed", color = "blue", size = 1) +
+#geom_hline(yintercept=90, linetype="dashed", color = "green", size = 1) +
+#geom_hline(yintercept=-90, linetype="dashed", color = "green", size = 1)
+fig_circadian_tidal
+
+
+
+
+# Plot raw data with eastward current velocity as factor
+start_stop_p <- dplyr::select(subset, datetime, current_phase_p)
+start_stop_p$change <- if_else(start_stop_p$current_phase_p != lag(start_stop_p$current_phase_p, 1) ,
+                               1,
+                               0)
+
+start <- filter(start_stop_p, change == 1)
+
+stop <- start
+stop$datetime2 <- stop$datetime - (5*60)
+stop$current_phase_p <- if_else(stop$current_phase_p == "favourable",
+                                "non-favourable",
+                                "favourable")
+start$change <- NULL
+stop$change <- NULL
+
+start <- rename(start, datetime_start = datetime)
+stop <- rename(stop, datetime_stop = datetime2)
+
+start$id <- factor(c(1:8))
+stop$id <- factor(c(0:7))
+
+start_stop <- left_join(start, stop, by = 'id')
+
+start_stop <- rename(start_stop, current_phase_p = current_phase_p.x)
+start_stop$id <- NULL
+start_stop$current_phase_p.y <- NULL
+
+
+
+# Create plot
+fig_circadian_tidal <- ggplot(subset, aes(x = datetime,
+                                          y = corrected_depth), size = 1.0, alpha = 0.5) +
+  geom_rect(data = subset %>% 
+              filter(night_day == "night") %>%
+              distinct(sunset, sunrise, night_day),
+            inherit.aes = FALSE,
+            mapping = aes(xmin = sunset,
+                          xmax = sunrise,
+                          ymin=-Inf,
+                          ymax=+Inf), fill = "grey", alpha=0.6) +
+  geom_rect(data = start_stop %>% 
+              filter(current_phase_p == "favourable") %>%
+              distinct(datetime_start, datetime_stop, current_phase_p),
+            inherit.aes = FALSE,
+            mapping = aes(xmin = datetime_start,
+                          xmax = datetime_stop,
+                          ymin= -40,
+                          ymax= -47), fill = "blue", alpha=0.3) +
+  geom_line(size=1.0, binwidth = 1, colour = "black") +
+  #geom_line(data = subset, aes(x = datetime, y = direction_x*100), size = 1.0, alpha = 0.5, colour = "purple") +
+  #scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
+  #scale_y_continuous(sec.axis = sec_axis(~./100, name = "Eastward velocity (m/s)")) +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) +
+  ylab("Depth (m)") +
+  xlab("Date") +
+  ylim(-50, 0) +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 30),
+        axis.title = element_text(size = 32)) +
+  scale_x_datetime(date_breaks  ="1 day") +
+  #geom_vline(xintercept=ymd_hms(release), colour="blue") + # Release date and time
+  geom_vline(xintercept=gnu, color = "red", size = 1) #+
+#geom_hline(yintercept=0, linetype="dashed", color = "blue", size = 1) +
+#geom_hline(yintercept=90, linetype="dashed", color = "green", size = 1) +
+#geom_hline(yintercept=-90, linetype="dashed", color = "green", size = 1)
+fig_circadian_tidal
+
+
+
+
+
+
+# 3. Plot difference in depth between minima and maxima ####
+data_min_max <- read_csv("./data/interim/data_depth_diff.csv",
+                         col_types = list(sunrise = col_datetime(),
+                                          previous_sunset = col_datetime(),
+                                          next_sunrise = col_datetime(),
+                                          next_sunmoment = col_datetime(),
+                                          direction = col_double()))          # set direction as numeric
+
+# Create plot with day night #
+# Create subsets of several days
+subset <- filter(data_min_max,
+                 ID == "16031",
+                 datetime >= "2019-02-04 00:00:00", datetime <= "2019-02-08 00:00:00")
+
+# Create line every 24 hours
+gnu <-  seq.POSIXt(from = lubridate::floor_date(subset$datetime[1], "day"), to= subset$datetime[nrow(subset)], by = 86400)
+class(lubridate::floor_date(subset$datetime[1], "day"))
+
+# Create plot
+fig_depth_diff_circadian_tidal <- ggplot(data = subset, aes(x = datetime, y = depth_change), size = 1.0, alpha = 0.5, colour = "black") +
+  geom_rect(data = subset %>% 
+              filter(night_day == "night") %>%
+              distinct(sunset, sunrise, night_day),
+            inherit.aes = FALSE,
+            mapping = aes(xmin = sunset,
+                          xmax = sunrise,
+                          ymin=-Inf,
+                          ymax=+Inf), fill = "grey", alpha=0.5) +
+  geom_line(binaxis='x', size=1.0, binwidth = 1) +
+  geom_line(data = subset, aes(x = datetime, y = 100*U), size = 1.0, alpha = 0.5, colour = "purple") +
+  scale_y_continuous(breaks = seq(8.000, 12.000, by = 500)) +
+  scale_y_continuous(sec.axis = sec_axis(~./100, name = "Eastward velocity (m/s)")) +
+  theme_minimal() +
+  ylab("Depth difference (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  scale_x_datetime(date_breaks  ="1 day") +
+  #geom_vline(xintercept=ymd_hms(release), colour="blue") + # Release date and time
+  geom_vline(xintercept=gnu, color = "red", size = 1) #+
+#geom_hline(yintercept=0, linetype="dashed", color = "blue", size = 1) +
+#geom_hline(yintercept=45, linetype="dashed", color = "green", size = 1) +
+#geom_hline(yintercept=-45, linetype="dashed", color = "green", size = 1)
+fig_depth_diff_circadian_tidal
+
+
+# Create plot with depth change per binned current direction
+subset <- filter(data_min_max,
+                 ID == "16031")
+
+subset$degr_360 <- NA
+subset <- subset[!is.na(subset$direction),]
+
+for (i in 1:dim(subset)[1]){
+  if (subset$direction[i] < 0){
+    subset$degr_360[i] = subset$direction[i] + 360
+  } else{
+    subset$degr_360[i] = subset$direction[i]
+  }}
+
+subset$bins <- cut(subset$degr_360, breaks = 72)
+
+ggplot(subset, aes(x = bins, y = depth_change)) +
+  stat_summary(fun = "mean", geom = "bar") + 
+  theme(axis.text.x = element_text(angle = 90, size = 14, vjust = 0.5, hjust=1))
+
+
+
+
+# 4. Create scatter and boxplots following an eel's trajectory ####
+# Read data 
+data <- read.csv("./data/interim/data_current_phases.csv")
+data$ID <- factor(data$ID)
+data$datetime <- ymd_hms(data$datetime)
+data$night_day <- factor(data$night_day)
+data$current_phase_x <- factor(data$current_phase_x)
+data$current_phase_y <- factor(data$current_phase_y)
+
+# Filter eel A16031
+subset <- filter(data, ID == "16031")
+
+# Remove rows with NA in column with direction_x
+subset <- subset(subset, !is.na(direction_x))
+
+# create current speed class
+summary(subset$speed)
+
+subset$speed_class <- NA
+for (i in 1:dim(subset)[1]){
+  if (subset$speed[i] < 0.5){
+    subset$speed_class[i] = "1"
+  } else if (subset$speed[i] > 0.5 & subset$speed[i] < 1.0){
+    subset$speed_class[i] = "2"
+  } else if (subset$speed[i] > 1.0 & subset$speed[i] < 1.5){
+    subset$speed_class[i] = "3"
+  } else{
+    subset$speed_class[i] = "4"
+  }}
+
+class(subset$speed_class)
+subset$speed_class <- factor(subset$speed_class)
+summary(subset$speed_class)
+
+# Create plot with current speed classes
+ggplot(subset, aes(x=datetime, y=corrected_depth)) +
+  geom_point(aes(colour = factor(speed_class))) 
+
+# Create plot with current phase 'east-west' axis
+ggplot(subset, aes(x=datetime, y=corrected_depth)) +
+  geom_point(aes(colour = factor(current_phase_x))) 
+
+# Create plot with water temperature
+ggplot(subset, aes(x=datetime, y=corrected_depth)) +
+  geom_point(aes(colour = temperature)) 
+
+# Calculate daily average depths
+avg_depth <- subset %>%
+  group_by(ID, Date, current_phase_x) %>%
+  summarize(mean_depth = mean(corrected_depth))
+
+# Remove single NA of release moment
+avg_depth <- na.omit(avg_depth)
+subset <- na.omit(subset)
+
+# Create dotplot
+ggplot(avg_depth, aes(x=Date, y=mean_depth)) + 
+  geom_point(aes(colour = factor(current_phase_x))) +
+  theme_classic() +
+  ylab("Mean depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14))
+
+# Create boxplot with longitud and depth according to current phase 
+ggplot(subset, aes(x=Date, y=corrected_depth, fill = current_phase_x)) + 
+  geom_boxplot() +
+  #geom_line(data = subset, aes(x = Date, y = geoloc_avg_lon*20), linewidth = 1.0, alpha = 0.5, colour = "purple") +
+  geom_point(data = subset, aes(x = Date, y = geoloc_avg_lon*20), size = 5.0, alpha = 0.5, colour = "purple") +
+  scale_y_continuous(sec.axis = sec_axis(~./20, name = "Longitude")) +
+  theme_classic() +
+  ylab("Mean depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14))
+
+
+# Combine night_day & current_phase_x
+subset <- subset %>% 
+  unite(circ_current, night_day, current_phase_x, sep = "_", remove = FALSE)
+class(subset$circ_current)
+subset$circ_current <- factor(subset$circ_current)
+
+
+# Create boxplot with longitude and depth according to current phase and circadian phase
+ggplot(subset, aes(x=Date, y=corrected_depth, fill = circ_current)) + 
+  geom_boxplot(width = 0.7) +
+  geom_point(data = subset, aes(x = Date, y = geoloc_avg_lon*20), size = 5.0, alpha = 0.5, colour = "orange") +
+  scale_y_continuous(sec.axis = sec_axis(~./20, name = "Longitude")) +
+  theme_classic() +
+  ylab("Mean depth (m)") +
+  xlab("Date") +
+  theme(axis.title.y = element_text(margin = margin(r = 10))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  theme(axis.text = element_text(size = 12),
+        axis.title = element_text(size = 14)) +
+  theme(legend.position="bottom") #+
+#theme(legend.position="none")
