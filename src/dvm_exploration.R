@@ -181,7 +181,7 @@ data_dvm <- data_dvm %>%
 # 7. Create temperature and depth plot for DVM data ####
 
 # Subset for specific eel
-data_dvm_subset <- filter(data_dvm, ID == "A17476", datetime > "2020-01-15 00:00:00", datetime < "2020-01-20 00:00:00")
+data_dvm_subset <- filter(data_dvm, ID == "A17476", datetime > "2020-03-19 00:00:00", datetime < "2020-03-24 00:00:00")
 
 # Filter for DVM data
 #data_dvm <- filter(data, datetime > "2019-12-01 00:00:00", datetime < "2019-12-08 00:00:00")
