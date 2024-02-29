@@ -8,7 +8,7 @@ library(tidyverse) # To do datascience
 #library(tidylog)  # To get infos about dplyr functions
 library(lubridate)
 #library(pracma)  # For the 'deg2rad()' function
-
+library(zoo)
 
 
 
@@ -23,6 +23,7 @@ data_dvm <- read_csv("./data/interim/data_dvm_circadian_moon_sun.csv",
                                   #next_sunrise = col_datetime(),
                                   #next_sunmoment = col_datetime(),
                                   direction_x = col_double(),
+                                  temperature = col_double(),
                                   moon_fraction = col_double(),
                                   sun_altitude = col_double(),
                                   sun_azimuth = col_double()),         
@@ -43,6 +44,7 @@ data_dvm_subset <- data_dvm_subset[-(1:4), ]
 data_dvm_subset <- data_dvm_subset %>%
   group_by(ID) %>%
   mutate(temperature_no_na = na.locf(temperature))
+
 
 # Create line every 24 hours
 midnight <-  seq.POSIXt(from = lubridate::floor_date(data_dvm_subset$datetime[1], "day"), to= data_dvm_subset$datetime[nrow(data_dvm_subset)], by = 86400)
