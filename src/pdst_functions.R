@@ -28,8 +28,6 @@
 # 
 # End line "No Fast Data"
 
-
-library(iterators)
 library(stringr)
 library(readr)
 library(tidyr)
@@ -57,9 +55,7 @@ library(dplyr)
 pdst_get_data_blocks_info <- function(filename) {
   
   pdst_con <- file(filename, "r")
-  header_it <- ireadLines(pdst_con)
-  line <- nextElem(header_it)
-  track_tag_id <- str_extract(line, "(?<=Tag )[A-Z|0-9]*")
+  line <- readLines(pdst_con, n = 1)
   
   # metadata extraction (can be extended) ------ 
   cnt <- 1
@@ -82,12 +78,12 @@ pdst_get_data_blocks_info <- function(filename) {
         warning("File ", filename, " contains no daylog information!")
       }
     }
-    line <- nextElem(header_it)
+    line <- readLines(pdst_con, n = 1)
     cnt <- cnt + 1
   }
   
   # check for start and length of the Daylog data
-  daylog_header_line <- nextElem(header_it)
+  daylog_header_line <- readLines(pdst_con, n = 1)
   cnt <- cnt + 1
   daylog_skip <- cnt # startline for daylog
   # after header line, counting till next empty line to get daylog length
@@ -96,7 +92,7 @@ pdst_get_data_blocks_info <- function(filename) {
   while (line != "") {  # Data Block 1
     daylog_length <- daylog_length + 1
     cnt <- cnt + 1
-    line <- nextElem(header_it)
+    line <- readLines(pdst_con, n = 1)
   }
   daylog_length <- daylog_length - 1
   
@@ -118,11 +114,11 @@ pdst_get_data_blocks_info <- function(filename) {
   # check for start and length of the Data blocks
   # 1. pressure
   while (!startsWith(line, "Data points available")) {
-    line <- nextElem(header_it)
+    line <- readLines(pdst_con, n = 1)
     cnt <- cnt + 1
   }
   pressure_length <- as.integer(str_split(line, pattern = "=", simplify = TRUE)[2])
-  pressure_header_line <- nextElem(header_it)
+  pressure_header_line <- readLines(pdst_con, n = 1)
   pressure_header <- str_to_lower(str_split(pressure_header_line, 
                                             pattern = ",", simplify = TRUE))
   pressure_name <- pressure_header[2]
@@ -134,14 +130,14 @@ pdst_get_data_blocks_info <- function(filename) {
                    'pressure_name' = pressure_name)
   
   # 2. temperature
-  line <- nextElem(header_it) # move beyond Data Block 1
+  line <- readLines(pdst_con, n = 1) # move beyond Data Block 1
   cnt <- cnt + 1
   while (!startsWith(line, "Data points available")) {
-    line <- nextElem(header_it)
+    line <- readLines(pdst_con, n = 1)
     cnt <- cnt + 1
   }
   temp_length <- as.integer(str_split(line, pattern = "=", simplify = TRUE)[2])
-  temp_header_line <- nextElem(header_it)
+  temp_header_line <- readLines(pdst_con, n = 1)
   temp_header <- str_to_lower(str_split(temp_header_line, 
                                         pattern = ",", simplify = TRUE))
   temp_name <- temp_header[2]
