@@ -32,6 +32,7 @@ library(stringr)
 library(readr)
 library(tidyr)
 library(dplyr)
+library(rlang)
 
 #' Read metadata and info from pdst data file
 #' 
@@ -52,26 +53,63 @@ library(dplyr)
 #'       additional decimal column(s).
 #'     * xx_name for the sensor data, i.e. name of the variable
 #'     
-pdst_get_data_blocks_info <- function(filename) {
+pdst_get_data_blocks_info <- function(filename, version) {
   
   pdst_con <- file(filename, "r")
   line <- readLines(pdst_con, n = 1)
   
   # metadata extraction (can be extended) ------ 
   cnt <- 1
-  while (!startsWith(line, "Daylog data for last deployment")) {
+  
+  while (!str_starts(
+    string = line,
+    pattern = "Tag ID"
+      )
+    ) {
+    
     # extract metadata
-    if (startsWith(line, "No of sensors")) {
-      track_sensors_no <- as.integer(str_split(line, pattern = ",", 
-                                               simplify = TRUE)[2])
+    if (str_starts(line, "Firmware Version No,")) {
+      firm_version <- str_extract(line, "(?<=Firmware Version No,).*")
+    }
+    if (str_starts(line, "Firmware Build Level,")) {
+      build_level <- str_extract(line, "(?<=Firmware Build Level,).*")
+    }
+    line <- readLines(pdst_con, n = 1)
+    cnt <- cnt + 1
+    
+  }
+  
+  # define firmware version/build level
+  firmware_version <- str_c(firm_version, build_level, sep = ".")
+  if (firmware_version == "3.80") {
+    p <- "Daylog data for last deployment"
+  }
+  if (firmware_version == "2.70") {
+    p <- "The following data are the Daylog contents"
+  }
+  
+  while (!str_starts(
+    string = line,
+    pattern = p
+    )
+  ) {
+    if (str_starts(line, "Tag ID")) {
+      track_tag_id <- str_extract(line, "(?<=Tag ID,)[A-Z|0-9]*")
+    }
+    
+    if (str_starts(line, "No of sensors ,")) {
+      track_sensors_no <- as.integer(
+        str_extract(string = line,
+                    pattern = "(?<=No of sensors ,).*"
+        )
+      )
       print(paste("The data file", filename, "contains", 
-                  track_sensors_no, "sensor data series." ))
+                  track_sensors_no, "sensor data series."))
       if (track_sensors_no != 2) {
-        stop("Function only supports 2 sensors in data file: ",
-             "pressure and temperature")
+        stop("Function only supports 2 sensors in data file.")
       }
     }
-    if (startsWith(line, "Total Days Alive")) {
+    if (str_starts(line, "Total Days Alive")) {
       track_total_days <- as.integer(str_split(line, pattern = "=", 
                                                simplify = TRUE)[2])
       if (track_total_days == 0) {  # ! Total Days Alive can be zero as well
@@ -81,6 +119,7 @@ pdst_get_data_blocks_info <- function(filename) {
     line <- readLines(pdst_con, n = 1)
     cnt <- cnt + 1
   }
+  
   
   # check for start and length of the Daylog data
   daylog_header_line <- readLines(pdst_con, n = 1)
@@ -113,7 +152,7 @@ pdst_get_data_blocks_info <- function(filename) {
   
   # check for start and length of the Data blocks
   # 1. pressure
-  while (!startsWith(line, "Data points available")) {
+  while (!str_starts(line, "Data points available")) {
     line <- readLines(pdst_con, n = 1)
     cnt <- cnt + 1
   }
@@ -132,7 +171,7 @@ pdst_get_data_blocks_info <- function(filename) {
   # 2. temperature
   line <- readLines(pdst_con, n = 1) # move beyond Data Block 1
   cnt <- cnt + 1
-  while (!startsWith(line, "Data points available")) {
+  while (!str_starts(line, "Data points available")) {
     line <- readLines(pdst_con, n = 1)
     cnt <- cnt + 1
   }
@@ -193,15 +232,10 @@ pdst_read_daylog <- function(filename, daylog_skip, daylog_length,
 #' @examples
 pdst_read_sensor <- function(filename, line_skip, line_length, 
                              variable = "temperature") {
-  col_names <- c("datetime", "variable", "decimal")
+  col_names <- c("datetime", {{variable}})
   data_sensor <- read_csv(filename, skip = line_skip, 
                           col_names = col_names, 
                           n_max = line_length, col_types = cols())
-  data_sensor <- data_sensor %>%
-    mutate(value = parse_number(paste(.$variable, 
-                                      .$decimal, sep = "."))) %>%
-    select(datetime, value)
-  colnames(data_sensor) <- c("datetime", variable)
   return(data_sensor)
 }
 
