@@ -282,3 +282,32 @@ pdst_read_file <- function(filename) {
               "daylog" = daylog_data, 
               "sensor" = sensor_data))
 }
+
+#' Clean pdst sensor raw file
+#'
+#' This function removes a pattern from all rows of a pdst sensor raw file.
+#'
+#' It has been noticed that some files have a suspect repeated pattern on
+#' several rows, e.g. `",,,,,,,"`.
+#' @param filename char Filename of a pdst raw data file
+#' @param pattern char regular expresssion with pattern to remove. Default: 5 or
+#'   more commas.
+#' @return a csv file with the removed pattern. The original filename is
+#'   modified by adding the suffix `_cleaned` before the extension, e.g. `a.csv`
+#'   becomes `a_cleand.csv`.
+clean_file <- function(filename, pattern = ",{5,}") {
+  
+  lines <- readLines(filename)
+
+  # Apply regex to remove the pattern from each line
+  cleaned_lines <- str_remove_all(string = lines, pattern = pattern)
+  
+  # Define the suffix
+  suffix <- "_cleaned"
+  
+  # Write the modified lines back to a new file
+  # Use str_replace to add suffix before the dot
+  new_filename <- str_replace(filename, "\\.csv$", paste0(suffix, ".csv"))
+  
+  writeLines(cleaned_lines, new_filename)
+}

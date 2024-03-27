@@ -14,6 +14,17 @@ source("./src/pdst_functions.R")
 main_data_dir <- "./data/raw"
 data_files <- list.files(main_data_dir, full.names = TRUE)
 
+# Function to check if a filename has a corresponding cleaned version
+has_cleaned_version <- function(filename) {
+  cleaned_filename <- paste0(str_replace(filename, "\\.csv$", "_cleaned.csv"))
+  str_detect(data_files, cleaned_filename)
+}
+
+# Iterate through the vector and remove filenames without cleaned versions
+data_files <- data_files[!(!str_detect(data_files, "_cleaned.csv") & 
+                           has_cleaned_version(data_files))]
+
+
 # create interim dictionary if not already there
 interim_data_dir <- file.path("data", "interim")
 if (!dir.exists(interim_data_dir)) {
