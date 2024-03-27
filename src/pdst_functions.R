@@ -247,8 +247,7 @@ pdst_read_sensor <- function(filename, line_skip, line_length,
 #' next load and combine the sensor data
 #' 
 #' @param filename char Filename of a pdst raw data file
-#' 
-#' 
+#' @return list with tag ID, daylog data and sensor data
 pdst_read_file <- function(filename) {
   data_info <- pdst_get_data_blocks_info(filename)
   
