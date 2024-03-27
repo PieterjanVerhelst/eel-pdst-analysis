@@ -2,6 +2,7 @@
 # pdst sensor read functionalities
 # 
 # Van Hoey S. 2019
+# Oldoni D. 2024
 # Lifewatch INBO
 # 
 
