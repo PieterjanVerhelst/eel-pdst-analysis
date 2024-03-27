@@ -16,7 +16,7 @@ data_files <- list.files(main_data_dir, full.names = TRUE)
 
 # Function to check if a filename has a corresponding cleaned version
 has_cleaned_version <- function(filename) {
-  cleaned_filename <- paste0(str_replace(filename, "\\.csv$", "_cleaned.csv"))
+  cleaned_filename <- paste0(str_replace(filename, "\\.(?i)csv$", "_cleaned.csv"))
   str_detect(data_files, cleaned_filename)
 }
 
