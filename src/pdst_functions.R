@@ -82,7 +82,7 @@ pdst_get_data_blocks_info <- function(filename, version) {
   
   # define firmware version/build level
   firmware_version <- str_c(firm_version, build_level, sep = ".")
-  if (firmware_version == "3.80") {
+  if (firmware_version %in% c("3.80", "3.40")) {
     p <- "Daylog data for last deployment"
   }
   if (firmware_version == "2.70") {
